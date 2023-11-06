@@ -9,7 +9,33 @@ import matplotlib.animation as animation
 from matplotlib.widgets import Slider
 from cycler import cycler
 class Simulation:
+    """
+    A class for visualizing and controlling a physics simulation.
+
+    This class allows you to create a 3D visualization of a physics simulation using
+    Matplotlib and provides controls for adjusting the simulation parameters and viewing
+    options. It includes features such as zoom, grid visibility, shadows, acceleration and
+    velocity vectors, body models, and labeling options.
+
+    Args:
+        name (str): The name of the simulation.
+        engine (PhysEngine|NoneType): The physics engine to simulate the physics of the system.
+        focus_body (Body|NoneType): The body to focus on during the simulation.
+        focus_range (int, float): The range for focusing on the body.
+        autoscale (bool): Enable or disable autoscaling.
+        show_grid (bool): Show or hide the grid in the visualization.
+        show_shadows (bool): Show or hide shadows.
+        show_acceleration (bool): Show or hide acceleration vectors.
+        show_velocity (bool): Show or hide velocity vectors.
+        vector_size (int, float): The size of velocity and acceleration vectors.
+        labelling_type (str): The type of labeling, either 'legend' or 'label'.
+        body_model (str): The model for representing bodies, such as 'dots', 'wireframe', or 'surface'.
+        guistyle (str): The GUI style, either 'default' or 'dark'.
+
+    Methods:
+        start(frames, interval, duration, fps): Start the simulation animation.
     
+    """
     def __init__(self,
                 name: str = 'Nbody Simulation',
                 engine: PhysEngine|NoneType = None,

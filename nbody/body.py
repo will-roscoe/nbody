@@ -1,9 +1,44 @@
+from astroquery.jplhorizons import Horizons
+from datetime import datetime, timedelta
+import astropy.units as u
+import re
+
 from core import HistoricVariable, HistoricVector, Vector
 import errors as e
 
 
 #START of Body Class
 class Body:
+    """
+    A class representing a physical body with mass, position, velocity, and acceleration.
+
+    This class allows you to define a physical body with attributes such as mass, position,
+    velocity, and acceleration. It provides methods to update and evaluate the body's
+    state over time.
+
+    Args:
+        mass (float, int): The mass of the body (in kilograms).
+        init_pos (list, tuple): The initial position of the body (in meters).
+        init_vel (list, tuple, optional): The initial velocity of the body (in meters per second).
+        radius (float, int, optional): The radius of the body (in meters).
+        identity (str, optional): A descriptive label for the body. Default is auto-generated.
+
+    Attributes:
+        mass (HistoricVariable): A historic variable for the mass of the body (in kilograms).
+        pos (HistoricVector): A historic vector for the position of the body (in meters).
+        vel (HistoricVector): A historic vector for the velocity of the body (in meters per second).
+        acc (HistoricVector): A historic vector for the acceleration of the body (in meters per second squared).
+        identity (str): A label for the body.
+
+    Methods:
+        evaluate(dt: int | float = 1) -> None: Evaluate the body's state over a time interval (dt).
+        update(dt: int | float = 1, vel_change: list | tuple = None, acc_change: list | tuple = None) -> None: Update the body's state based on changes in velocity and acceleration.
+
+        Other dUnder Methods:
+        __str__() -> str: Return a string representation of the Body.
+        __repr__() -> str: Return a detailed string representation of the Body.
+
+    """
     def __init__(self,
                 mass: float | int,
                 init_pos: list | tuple,
@@ -99,3 +134,32 @@ v={self.vel.c()}), a={self.acc.c()})'
         else:
             e.raise_evaluation_error((self.pos, self.vel))
 #END of Body Class
+
+
+
+def make_horizons_object(searchquery, observer='0', time='2023-11-03'):
+    _later_time = (datetime.strptime(time, '%Y-%m-%d') + timedelta(days=2)).strftime('%Y-%m-%d')
+    _object = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors(get_raw_response=True)
+    _object_tab = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors()
+    _m = re.search(r"\s+?Mass\s+?([\S]+).*?=\s+?([\S]+?)\s+?", _object)
+    _r = re.search(r'\s+?radius\s+?([\S]+).*?=\s+?([\S]+?)\s+?', _object)
+    _n = re.search(r"Target body name: (.+?) \((\d+)\)", _object)
+    if _m:  
+        _mbase, _mexp_s = _m.groups()[1], _m.groups()[0]
+        mass = float(_mbase.split('+-')[0]) * 10**(float(_mexp_s.split('x10^')[1]))
+    else: 
+        raise LookupError('could not find Mass in output')
+    if _r:
+        _rad =_r.groups()[1]
+        radius = float(_rad.split('+-')[0])*1000
+    else:
+        raise LookupError('could not find radius (Vol. mean Radius) in output')
+    if _n:    
+        name = f'{_n.groups()[0]} ({_n.groups()[1]})'
+    else:
+        print('could not find name for object, reverting to placeholder name.')
+        name = None
+    x, y, z = [_object_tab[pos].quantity[0].to_value(u.m) for pos in ('x', 'y', 'z')]
+    vx, vy, vz = [_object_tab[pos].quantity[0].to_value(u.m/u.s) for pos in ('vx', 'vy', 'vz')]
+   
+    return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=radius, identity=name)

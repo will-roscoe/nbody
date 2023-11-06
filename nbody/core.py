@@ -1,4 +1,6 @@
 import math
+
+
 import errors as e
 
 
@@ -11,11 +13,42 @@ def _vcomp(obj):
 
 NoneType = type(None)
 
-
-
-
 #START of HistoricVariable Class
 class HistoricVariable:
+    """
+    A class for managing historical numeric data with identity and units.
+
+    This class allows you to store and manipulate historical numeric data, providing
+    methods for accessing, updating, and performing mathematical operations on the data.
+
+    Args:
+        init_var (float, int, list, tuple): The initial value or list of values for the historic data.
+        identity (str, optional): A descriptive label for the historic variable. Default is 'HistoricVariable'.
+        units (str, optional): The units of the historic data. Default is None.
+
+    Attributes:
+        hist (list): A list containing the historical data.
+        identity (str): A label for the historic variable.
+        units (str): The units of the historic data.
+
+    Methods:
+        c() -> float | int: Get the current value of the historic data.
+        next(next_val: int | float | list | tuple) -> None: Add the next value(s) to the historical data.
+        __len__() -> int: Get the length of the historical data.
+        __contains__(item: int | float) -> bool: Check if an item is present in the historical data.
+        __str__() -> str: Return a string representation of the HistoricVariable.
+        __repr__() -> str: Return a detailed string representation of the HistoricVariable.
+        __getitem__(ind: int | str) -> int | float | list | tuple: Get specific elements from the historical data.
+        __add__(other: int | float) -> int | float: Add the historic data to another value.
+        __sub__(other: int | float) -> int | float: Subtract another value from the historic data.
+        __mul__(other: int | float) -> int | float: Multiply the historic data by another value.
+        __truediv__(other: int | float) -> int | float: Divide the historic data by another value.
+        __floordiv__(other: int | float) -> int | float: Floor division of the historic data by another value.
+        __iadd__(other: int | float): In-place addition of the historic data with another value.
+        __isub__(other: int | float): In-place subtraction of the historic data with another value.
+        __imul__(other: int | float): In-place multiplication of the historic data with another value.
+        __itruediv__(other: int | float): In-place division of the historic data with another value.
+    """
     def __init__(self, init_var, identity:str='HistoricVariable', units:str=None) -> None:
         if isinstance(init_var, (float, int)):
             self.hist = [init_var]
@@ -116,8 +149,41 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
             e.raise_type_error('other', (int, float), other)
 #END OF HistoricVariable Class
 
-#START of HistoricVector Class
+#START of Vector Class
 class Vector:
+    """
+    A class for representing three-dimensional vectors and performing vector operations.
+
+    This class allows you to work with three-dimensional vectors, including operations
+    for calculating vector magnitudes, unit vectors, and vector cross products.
+
+    Args:
+        li (tuple, list, optional): A tuple or list containing three components (X, Y, Z).
+        x (float, int, list, optional): The X component of the vector.
+        y (float, int, list, optional): The Y component of the vector.
+        z (float, int, list, optional): The Z component of the vector.
+
+    Attributes:
+        X (float, int): The X component of the vector.
+        Y (float, int): The Y component of the vector.
+        Z (float, int): The Z component of the vector.
+
+    Methods:
+        c(usage: int = None) -> tuple | float | int: Get one or all components of the vector.
+        magnitude() -> float | int: Calculate the magnitude of the vector.
+        unit() -> tuple: Get the unit vector of the current vector.
+        cross(other: tuple | list | object) -> tuple: Calculate the cross product of two vectors.
+
+        Other dUnder Methods:
+        __getitem__(ind: int | str) -> int | float | list | tuple: Get specific elements from the vector.
+        __str__() -> str: Return a string representation of the Vector.
+        __repr__() -> str: Return a detailed string representation of the Vector.
+        __len__() -> int: Get the length of the Vector.
+        __add__(other: list | tuple | object) -> list | tuple: Add another vector or components to the vector.
+        __sub__(other: list | tuple | object) -> list | tuple: Subtract another vector or components from the vector.
+        __mul__(other: list | tuple | float | int | object) -> list | tuple | float | int: Multiply the vector by another vector, scalar, or components.
+        __truediv__(other: int | float) -> list | tuple: Divide the vector by a scalar.
+    """
     def __init__(self, li : tuple | list = None,
                 x: float | int | list = None,
                 y: float | int | list = None,
@@ -206,9 +272,55 @@ class Vector:
             return Vector(li=[val/temp for val in self['current']])
         else:
             e.raise_type_error('other', (float, int, object), other)
+#END of Vector Class
 
+
+
+#START of HistoricVector Class
 class HistoricVector:
-    #init
+    """
+    A class for managing historical three-dimensional vectors with identity and units.
+
+    This class allows you to store and manipulate historical three-dimensional vectors
+    composed of X, Y, and Z components. It provides methods for accessing individual
+    components, performing vector operations, and managing historical data.
+
+    Args:
+        x (float, int, list, optional): The X component of the vector.
+        y (float, int, list, optional): The Y component of the vector.
+        z (float, int, list, optional): The Z component of the vector.
+        li (tuple, list, optional): A tuple or list containing all three components (X, Y, Z).
+        identity (str, optional): A descriptive label for the vector. Default is 'HistoricVector'.
+        units_v (str, optional): The units of the vector components. Default is None.
+
+    Attributes:
+        X (HistoricVariable): A historic variable for the X component.
+        Y (HistoricVariable): A historic variable for the Y component.
+        Z (HistoricVariable): A historic variable for the Z component.
+        identity (str): A label for the vector.
+        units (str): The units of the vector components.
+
+    Methods:
+        x() -> float | int: Get the current X component of the vector.
+        y() -> float | int: Get the current Y component of the vector.
+        z() -> float | int: Get the current Z component of the vector.
+        c(usage: int = None) -> tuple | float | int: Get one or all components of the vector.
+        magnitude() -> float | int: Calculate the magnitude of the vector.
+        unit() -> tuple: Get the unit vector of the current vector.
+        cross(other: tuple | list | object) -> tuple: Calculate the cross product of two vectors.
+        next(next_vals: tuple | list) -> None: Add the next values to the historical components.
+
+        Other dUnder Methods:
+        __len__() -> int: Get the length of the vector.
+        __str__() -> str: Return a string representation of the HistoricVector.
+        __repr__() -> str: Return a detailed string representation of the HistoricVector.
+        __getitem__(ind: int | str) -> int | float | list | tuple: Get specific elements from the vector.
+        __add__(other: list | tuple | object) -> list | tuple: Add another vector or components to the vector.
+        __sub__(other: list | tuple | object) -> list | tuple: Subtract another vector or components from the vector.
+        __mul__(other: list | tuple | float | int | object) -> list | tuple | float | int: Multiply the vector by another vector, scalar, or components.
+        __truediv__(other: int | float) -> list | tuple: Divide the vector by a scalar.
+
+    """
     def __init__(self, x: float | int | list = None,
                  y: float | int | list = None,
                  z: float | int | list = None,

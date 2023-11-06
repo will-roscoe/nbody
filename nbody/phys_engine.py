@@ -12,6 +12,29 @@ import errors as e
 
 #START of PhysEngine class
 class PhysEngine:
+    """
+    A physics engine for simulating the dynamics of bodies in a physical environment.
+
+    This class represents a physics engine that can simulate the behavior of multiple
+    bodies with their interactions, gravity, and collisions. It allows you to attach
+    bodies and create planes to simulate a physical environment.
+
+    Args:
+        dt (int, float): The time step for the simulation (in seconds).
+
+    Attributes:
+        bodies (list): A list of `Body` objects representing the physical bodies in the simulation.
+        dt (int, float): The time step for the simulation (in seconds).
+        planes (list): A list of planes that can be used for collision detection.
+
+    Methods:
+        attach_bodies(new_bodies): Attach new bodies to the simulation.
+        create_plane(const_axis='z', const_val=0): Create a plane for collision detection.
+        check_collision(body): Check for collisions between a body and other bodies or planes.
+        find_gravity(): Calculate the gravitational forces between bodies.
+        evaluate(): Perform the physics simulation for the current time step.
+
+    """
     def __init__(self, dt: int | float = 1):
         self.bodies = []
         if isinstance(dt, (int, float)):

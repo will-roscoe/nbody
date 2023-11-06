@@ -23,7 +23,7 @@ The goal of this project is to efficiently simulate the gravitational and kineti
 >
 >`math`, `cycler`, `matplotlib`,
 >
->`lhorizon` - neccesary for getting object data from JPL Horizons System.
+>`astroquery`, `re`, `datetime`, `astropy` - neccesary for getting object data from JPL Horizons System.
 >
 >### Recommended Packages:
 > `warnings` and `scipy` - these modules have alternative methods if they can't be found.
