@@ -7,6 +7,7 @@ import astropy.units as u
 import re
 from decimal import Decimal
 
+from tqdm import tqdm
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -37,7 +38,9 @@ def _vcomp(obj):
         return obj.c()
     else:
         return obj
+    
 
+Numeric = (int, float, type(Decimal('3.45')))
 NoneType = type(None)
 
 #START of HistoricVariable Class
@@ -77,12 +80,12 @@ class HistoricVariable:
         __itruediv__(other: int | float): In-place division of the historic data with another value.
     """
     def __init__(self, init_var, identity:str='HistoricVariable', units:str=None) -> None:
-        if isinstance(init_var, (float, int)):
+        if isinstance(init_var, Numeric):
             self.hist = [init_var]
         elif isinstance(init_var, list):
             self.hist = init_var
         else: 
-            e.raise_type_error('init_var', (int, float, list, tuple), init_var)
+            e.raise_type_error('init_var', (*Numeric, list, tuple), init_var)
         if isinstance(identity, str):
             self.identity = identity
         else: 
@@ -114,16 +117,16 @@ class HistoricVariable:
             TypeError: If next_val is not of the expected type.
             ListTypeError: If an element in next_val is not of the expected type.
         """
-        if isinstance(next_val, (int, float)):
+        if isinstance(next_val, Numeric):
             self.hist.append(next_val)
         elif isinstance(next_val, (list, tuple)):
             for val in next_val:
-                if isinstance(val, (float, int)):
+                if isinstance(val, Numeric):
                     self.hist.append(val)
                 else: 
-                    e.raise_list_type_error('next_val', (int, float), val)
+                    e.raise_list_type_error('next_val', Numeric, val)
         else: 
-            e.raise_type_error('next_val', (int, float, list, tuple), next_val)
+            e.raise_type_error('next_val', (*Numeric, list, tuple), next_val)
 
     # dUnder Methods
     def __len__(self) -> int:
@@ -193,43 +196,70 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
         else:
             e.raise_type_error('ind', (str, int), ind)
     def __add__(self, other: int | float ) -> int | float:
-        return self.c() + _vcomp(other)
+        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            return Decimal(self.c()) + Decimal(_vcomp(other))
+        else:
+            return self.c() + _vcomp(other)
     def __sub__(self, other: int | float) -> int | float:
-        return self.c() - _vcomp(other)
+        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            return Decimal(self.c()) - Decimal(_vcomp(other))
+        else:
+            return self.c() - _vcomp(other)
     def __mul__(self, other: int | float) -> int | float:
-        return self.c() * _vcomp(other)
+        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            return Decimal(self.c()) * Decimal(_vcomp(other))
+        else:
+            return self.c() * _vcomp(other)
     def __truediv__(self, other: int | float) -> int | float:
-        return self.c() / _vcomp(other)
+        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            return Decimal(self.c()) / Decimal(_vcomp(other))
+        else:
+            return self.c() / _vcomp(other)
     def __floordiv__(self, other: int | float) -> int | float:
-        return self.c() // _vcomp(other)
+        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            return Decimal(self.c()) // Decimal(_vcomp(other))
+        else:
+            return self.c() // _vcomp(other)
     def __iadd__(self, other: int | float):
         temp = _vcomp(other)
-        if isinstance(temp, (int, float)):
+        if isinstance(temp, (int, float)) and isinstance(self.c(), (int, float)):
             self.next(self.c() + temp)
             return self
+        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            self.next(Decimal(self.c()) + Decimal(_vcomp(other)))   
+            return self
         else:
-            e.raise_type_error('other', (int, float), other)
+            e.raise_type_error('other', Numeric, other)
     def __isub__(self, other: int | float):
         temp = _vcomp(other)
-        if isinstance(temp, (int, float)):
+        if isinstance(temp, (int, float)) and isinstance(self.c(), (int, float)):
             self.next(self.c() - temp)
             return self
+        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            self.next(Decimal(self.c()) - Decimal(_vcomp(other)))   
+            return self
         else:
-            e.raise_type_error('other', (int, float), other)
+            e.raise_type_error('other', Numeric, other)
     def __imul__(self, other: int | float):
         temp = _vcomp(other)
-        if isinstance(temp, (int, float)):
+        if isinstance(temp, (int, float)) and isinstance(self.c(), (int, float)):
             self.next(self.c() * temp)
             return self
-        else:
-            e.raise_type_error('other', (int, float), other)
-    def __itruediv__(self, other: int | float):
-        temp = _vcomp(other)
-        if isinstance(temp, (int, float)):
-            self.next(self.c() / temp)
+        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            self.next(Decimal(self.c()) * Decimal(_vcomp(other)))   
             return self
         else:
-            e.raise_type_error('other', (int, float), other)
+            e.raise_type_error('other', Numeric, other)
+    def __itruediv__(self, other: int | float):
+        temp = _vcomp(other)
+        if isinstance(temp, Numeric):
+            self.next(self.c() / temp)
+            return self
+        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+            self.next(Decimal(self.c()) / Decimal(_vcomp(other)))   
+            return self
+        else:
+            e.raise_type_error('other', Numeric, other)
 #END OF HistoricVariable Class
 
 #START of Vector Class
@@ -273,10 +303,13 @@ class Vector:
                 z: float | int | list = None) -> None:
         if (isinstance(li, (tuple, list)) and len(li) == 3):
             self.X, self.Y, self.Z = li
-        elif all(isinstance(var, (int, float)) for var in (x, y, z)):
+        elif all(isinstance(var, Numeric) for var in (x, y, z)):
             self.X, self.Y, self.Z = x, y, z
+        elif isinstance(li, (Vector, HistoricVector)):
+            (self.X, self.Y, self.Z) = li.c()
         else:
-            e.raise_list_type_error('l,x,y,z', (tuple, list, int, float), (li,x,y,z))
+            print(type(li))
+            e.raise_list_type_error('l,x,y,z', (tuple, list,*Numeric), (li,x,y,z))
 
     def c(self, usage:int =None) -> tuple:
         """
@@ -309,7 +342,13 @@ class Vector:
         Returns:
             float | int: The magnitude of the vector.
         """
-        return math.sqrt(sum([n**2 for n in self.c()]))
+        #try:
+            #return math.sqrt(sum([n**2 for n in self.c()]))
+        #except TypeError:
+        if isinstance(self.c(0), type(Decimal('3.45'))):
+            return Decimal(math.sqrt(sum([n**2 for n in self.c()])))
+        else:
+            return math.sqrt(sum([n**2 for n in self.c()]))
     def unit(self) -> object:
         """
         Get the unit vector in the same direction as the current vector.
@@ -320,7 +359,10 @@ class Vector:
         if float(self.magnitude()) == 0.:
             return Vector(li=(0,0,0))
         else:
-            return Vector(li=list(n/self.magnitude() for n in self.c()))
+            if isinstance(self.c(0), type(Decimal('3.45'))):
+                return Vector(li=list(Decimal(n)/Decimal(self.magnitude()) for n in self.c()))
+            else:
+                return Vector(li=list(n/self.magnitude() for n in self.c()))
     def cross(self, other: tuple | list | object) -> object:
         """
         Calculate the cross product of the vector with another vector or iterable.
@@ -393,29 +435,42 @@ class Vector:
     def __add__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3:
-            return Vector(li=[val + temp[i] for i, val in enumerate(self['current'])])
+            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+                return Vector(li=[Decimal(val) + Decimal(temp[i]) for i, val in enumerate(self['current'])])
+            else:
+                return Vector(li=[val + temp[i] for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other or temp', temp)
     def __sub__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3:
-            return Vector(li=[val - temp[i] for i, val in enumerate(self['current'])])
+            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+                return Vector(li=[Decimal(val) - Decimal(temp[i]) for i, val in enumerate(self['current'])])
+            else:
+                return Vector(li=[val - temp[i] for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other or temp', temp)
     def __mul__(self, other: list | tuple | float | int | object) -> list | tuple | float | int:
         temp = _vcomp(other)
-        if isinstance(temp, (float, int)):
+        if isinstance(temp, (int, float)) and isinstance(self.c(0), (int, float)):
             return Vector(li=[val * temp for val in self['current']])
+        if isinstance(temp, type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+            return Vector(li=[(Decimal(val)*Decimal(temp)) for val in self['current']])
         elif len(temp) == 3:
-            return sum(([val * temp[i] for i, val in enumerate(self['current'])]))
+            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+                return sum(([Decimal(val) * Decimal(temp[i]) for i, val in enumerate(self['current'])]))
+            else:
+                return sum(([val * temp[i] for i, val in enumerate(self['current'])]))
         else:
             e.raise_component_error('other or temp', temp)
     def __truediv__(self, other: int | float) -> list | tuple:
         temp = _vcomp(other)
-        if isinstance(temp, (float, int)):
+        if isinstance(temp, (int, float)) and isinstance(self.c(0), (int, float)):
             return Vector(li=[val/temp for val in self['current']])
+        if isinstance(temp, type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+            return Vector(li=[(Decimal(val)/Decimal(temp)) for val in self['current']])
         else:
-            e.raise_type_error('other', (float, int, object), other)
+            e.raise_type_error('other', (*Numeric, object), other)
 #END of Vector Class
 
 
@@ -489,14 +544,14 @@ class HistoricVector:
             self.X = HistoricVariable(li[0], f'{self.identity}_x', self.units)
             self.Y = HistoricVariable(li[1], f'{self.identity}_y', self.units)
             self.Z = HistoricVariable(li[2], f'{self.identity}_z', self.units)
-        elif (isinstance(x, (int, float)) and
-              isinstance(y, (int, float)) and
-              isinstance(z, (int, float))):
+        elif (isinstance(x, Numeric) and
+              isinstance(y, Numeric) and
+              isinstance(z, Numeric)):
             self.X = HistoricVariable(x, f'{self.identity}_x', self.units)
             self.Y = HistoricVariable(y, f'{self.identity}_y', self.units)
             self.Z = HistoricVariable(z, f'{self.identity}_z', self.units)
         else:
-            e.raise_type_error('l,x,y,z', (tuple, list, float, int), (li,x,y,z))
+            e.raise_type_error('l,x,y,z', (tuple, list,*Numeric), (li,x,y,z))
 
     def x(self) -> float | int:
         """
@@ -554,7 +609,7 @@ class HistoricVector:
         Returns:
             float | int: The magnitude of the historic vector.
         """
-        return math.sqrt(sum([n**2 for n in self.c()]))
+        return Decimal(math.sqrt(sum([n**2 for n in self.c()])))
     def unit(self) -> tuple:
         """
         Get the unit vector in the same direction as the historic vector.
@@ -565,7 +620,7 @@ class HistoricVector:
         if float(self.magnitude()) == 0.:
             return (0,0,0)
         else: 
-            return list(n/self.magnitude() for n in self.c())
+            return list(Decimal(n)/self.magnitude() for n in self.c())
     def cross(self, other: tuple | list | object) -> tuple:
         """
         Calculate the cross product of the historic vector with another vector or iterable.
@@ -678,31 +733,44 @@ class HistoricVector:
     def __add__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3: 
-            return ([val + temp[i] for i, val in enumerate(self['current'])])
+            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+                return ([Decimal(val) + Decimal(temp[i]) for i, val in enumerate(self['current'])])
+            else:
+                return ([val + temp[i] for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other',other)
     def __sub__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3: 
-            return ([val - temp[i] for i, val in enumerate(self['current'])])
+            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+                return ([Decimal(val) - Decimal(temp[i]) for i, val in enumerate(self['current'])])
+            else:
+                return ([val - temp[i] for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other',other)
     def __mul__(self, other: list | tuple | float | int | object) -> list | tuple | float | int:
         temp = _vcomp(other)
-        if isinstance(temp, (float, int)): 
+        if isinstance(temp, (int,float)) and isinstance(self.x(), (int, float)): 
             return ([val * temp for val in self['current']])
+        if isinstance(temp, type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+            return ([(Decimal(val) * Decimal(temp)) for val in self['current']])
         elif len(temp) == 3: 
-            return sum(([val * temp[i] for i, val in enumerate(self['current'])]))
+            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+                return sum(([Decimal(val) * Decimal(temp[i]) for i, val in enumerate(self['current'])]))
+            else:
+                return sum(([val * temp[i] for i, val in enumerate(self['current'])]))
         elif isinstance(other, (list, tuple)): 
             e.raise_component_error('other',other)
         else:
             e.raise_type_error('other', (int, float, list, tuple), 'other')
     def __truediv__(self, other: int | float) -> list | tuple:
         temp = _vcomp(other)
-        if isinstance(temp, (float, int)):
+        if isinstance(temp, (int,float)) and isinstance(self.x(), (int, float)): 
             return ([val/temp for val in self['current']])
+        elif isinstance(temp, type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+            return ([(Decimal(val)/Decimal(temp)) for val in self['current']])
         else:
-            e.raise_type_error('other', (int, float), other)
+            e.raise_type_error('other', Numeric, other)
 #END of HistoricVector Class
 
 #START of Body Class
@@ -765,18 +833,18 @@ class Body:
                                  units_v='ms^-1')
         else:
             e.raise_type_error('init_vel', (list, tuple), init_vel)
-        if isinstance(mass, (float, int)):
+        if isinstance(mass, Numeric):
             self.mass = HistoricVariable(mass,
                                 identity=f'{self.identity}_mass',
                                 units='kg')
         else:
-            e.raise_type_error('mass', (int, float), mass)
-        if isinstance(radius, (float, int)):
+            e.raise_type_error('mass', Numeric, mass)
+        if isinstance(radius, Numeric):
             self.radius = HistoricVariable(radius,
                                 identity=f'{self.identity}_rad',
                                 units='m')
         else:
-            e.raise_type_error('radius', (int, float), radius)
+            e.raise_type_error('radius', Numeric, radius)
 
 
     def __str__(self) -> str:
@@ -900,6 +968,7 @@ def horizons_object(searchquery, observer='0', time='2023-11-03'):
     Raises:
         LookupError: If mass or radius information could not be found in the query output.
     """
+  
     _later_time = (datetime.strptime(time, '%Y-%m-%d') + timedelta(days=2)).strftime('%Y-%m-%d')
     _raw = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors(get_raw_response=True)
     _tab = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors()
@@ -924,17 +993,25 @@ def horizons_object(searchquery, observer='0', time='2023-11-03'):
     for x in rad:
         if any(char.isdigit() for char in x):
             _rad.append(x)
-    rad = float(_rad[0].split('+-')[0])
-    mass = float(mass[0].split('+-')[0])*10**(float(m_exp))
+    mass = Decimal(''.join(mass.split('+-')[0]))*Decimal(10**int(m_exp))
+    rad = Decimal(_rad[0].split('+-')[0])
     if r_unit == 'km':
         rad *= 1000
     if m_unit == 'g':
         mass /= 1000
-    x, y, z = [_tab[pos].quantity[0].to_value(u.m) for pos in ('x', 'y', 'z')]
-    vx, vy, vz = [_tab[pos].quantity[0].to_value(u.m/u.s) for pos in ('vx', 'vy', 'vz')]
-   
+    x, y, z = [Decimal(_tab[pos].quantity[0].to_value(u.m)) for pos in ('x', 'y', 'z')]
+    vx, vy, vz = [Decimal(_tab[pos].quantity[0].to_value(u.m/u.s)) for pos in ('vx', 'vy', 'vz')]
+
     return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
 
+def horizons_batch(search_queries, observer = '0',  time='2023-11-03'):
+    new_bodies = []
+    batch_prog = tqdm(total=len(search_queries), desc='Getting data from JPL Horizons')
+    for query in tqdm(search_queries):
+        if isinstance(query, str):
+            new_bodies.append(horizons_object(query, observer, time))
+            batch_prog.update(1)
+    batch_prog.close()
 #START of PhysEngine class
 class PhysEngine:
     """
@@ -962,7 +1039,7 @@ class PhysEngine:
     """
     def __init__(self, dt: int | float = 1):
         self.bodies = []
-        if isinstance(dt, (int, float)):
+        if isinstance(dt, (Numeric)):
             self.dt = dt
         self.planes = []
     def attach_bodies(self, new_bodies):
@@ -985,7 +1062,14 @@ class PhysEngine:
         else:
             e.raise_type_error('new_bodies', (list, tuple), new_bodies)
         print(f'{len(self.bodies)} bodies attached')
-
+    def make_relative_to(self, target_body):
+        for body in self.bodies:
+            body.pos.next(body.pos-target_body.pos)
+            body.vel.next(body.vel-target_body.vel)
+            body.identity = f'{body.identity} (Rel to {target_body.identity})'
+        print(f"Bodies' positions and velocities have been made relative to {target_body.identity}.")
+        target_body.identity = f'{target_body.identity}(Static)'
+        
     def create_plane(self, const_axis='z', const_val = 0):
         """
         Create a collision plane in the physics engine.
@@ -997,8 +1081,9 @@ class PhysEngine:
         Raises:
             ValueError: If const_axis is not 'x', 'y', or 'z', or if const_val is not an int or float.
         """
-        if const_axis in ('x', 'y', 'z') and isinstance(const_val, (int, float)):
+        if const_axis in ('x', 'y', 'z') and isinstance(const_val, Numeric):
             self.planes.append([const_axis, const_val])
+            print(f'constant plane {const_axis}={const_val} has been initialized.')
         else:
             e.raise_value_error('const_axis,const_val',((str),(int,float)),(const_axis,const_val))
     def check_collision(self,body):
@@ -1020,8 +1105,7 @@ class PhysEngine:
                 temp_dist = body.pos - bod.pos
                 if (Vector(temp_dist).magnitude() <= bod.radius.c() or
                 Vector(temp_dist).magnitude() <= body.radius.c()):
-                    del_v_bods=( Vector( Vector( body.vel - bod.vel ) /
-                    ( ( 1/ body.mass.c() ) + ( 1/ bod.mass.c() ))) * -2)
+                    del_v_bods=(Vector(Vector(body.vel - bod.vel)/((1/body.mass.c())+(1/bod.mass.c())))*-2)
                     break
         else:
             del_v_bods = Vector((0,0,0))
@@ -1050,8 +1134,13 @@ class PhysEngine:
                     temp_dist = bod1.pos - bod2.pos
                     dist_12 = Vector(temp_dist)
                     unit_12 = dist_12.unit()
-                    force_on_bod1_t = (-1*G * bod1.mass.c() * bod2.mass.c())
-                    force_on_bod1 = unit_12*(force_on_bod1_t/(dist_12.magnitude())**2)
+                    if isinstance(bod1.mass.c(), type(Decimal('3.45'))) or isinstance(bod2.mass.c(), type(Decimal('3.45'))):
+                        b1m, b2m = Decimal(bod1.mass.c()), Decimal(bod2.mass.c())
+                        force_on_bod1_t = (-1*Decimal(G) * bod1.mass.c() * bod2.mass.c())
+                        force_on_bod1 = unit_12*(force_on_bod1_t/Decimal(dist_12.magnitude())**2)
+                    else:
+                        force_on_bod1_t = (-1*G * bod1.mass.c() * bod2.mass.c())
+                        force_on_bod1 = unit_12*(force_on_bod1_t/(dist_12.magnitude())**2)
                     f1 = HistoricVector(li=(f1 + force_on_bod1))
                     bod1_data[2] = f1
         for bod_data in temp:
@@ -1065,9 +1154,12 @@ class PhysEngine:
         Note:
             This method calculates the motion of attached bodies based on gravitational forces and collisions.
         """
+        physev = tqdm(total=len(self.bodies), desc=' calculating motion for bodies')
         self.find_gravity()
         for body in self.bodies:
             body.update(self.dt, vel_change = self.check_collision(body))
+            physev.update(1)
+        physev.close()
 #END of PhysEngine class
 
 
@@ -1114,8 +1206,8 @@ class Simulation:
                 labelling_type: str = 'legend',
                 body_model: str = 'dots',
                 guistyle: str = 'default'):
-        _argspec = {engine:(PhysEngine,NoneType),focus_range:(int,float, NoneType),
-autoscale:bool,show_grid:bool,show_shadows:bool,show_acceleration:bool,show_velocity:bool,vector_size:(int,float),
+        _argspec = {engine:(PhysEngine),focus_range:(*Numeric, NoneType),
+autoscale:bool,show_grid:bool,show_shadows:bool,show_acceleration:bool,show_velocity:bool,vector_size:Numeric,
 labelling_type:str,body_model:str,guistyle:str}
         
             
@@ -1146,7 +1238,7 @@ labelling_type:str,body_model:str,guistyle:str}
         self.ax1 = self.fig.add_axes((0.05,0.25,0.05,0.5))
         self.fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
         self.zoom_slider = Slider(self.ax1, 'Zoom', 0.1, 10, valinit=1, orientation='vertical')
-        
+        self.frameskip = 1
         def _clearpanes():
             self.ax.xaxis.set_pane_color((0.,0.,0.,0.))
             self.ax.yaxis.set_pane_color((0.,0.,0.,0.))
@@ -1185,9 +1277,12 @@ labelling_type:str,body_model:str,guistyle:str}
         Note:
             This method evaluates the physics engine for the specified number of steps to set up the simulation.
         """
-        for _ in range(i):
+        framev = tqdm(total = i, desc='Evaluating frames')
+        for m in range(i):
+            framev.update(1)
             self.engine.evaluate()
-
+        framev.close()
+        tqdm.write('Calculations finished, Outputting Shortly ...')
     def _animate(self, i):
         """
         Animate the simulation by updating the visualization.
@@ -1198,6 +1293,12 @@ labelling_type:str,body_model:str,guistyle:str}
         Note:
             This method updates the visualization of the simulation for a given frame index.
         """
+        
+        
+        
+        total_frames = len(self.engine.bodies[0].pos.X.hist)
+        ind = int(i*self.frameskip)
+        
         self.ax.clear()
         self.ax.set_xlabel('x')
         self.ax.set_ylabel('y')
@@ -1208,49 +1309,51 @@ labelling_type:str,body_model:str,guistyle:str}
             #self.ax.set_aspect('equal', adjustable='box')
             self.ax.set_autoscale_on(False)
             if self.focus_body is not None:
+                limx, limy, limz = self.focus_body.pos.X[ind], self.focus_body.pos.Y[ind], self.focus_body.pos.Z[ind]
                 if self.focus_range is None:
                     self.focus_range = max((max(self.focus_body.pos - bod.pos) for bod in self.engine.bodies))
-                self.ax.set_xlim(xmin=(self.focus_body.pos.X[i]-self.focus_range),
-                                 xmax=(self.focus_body.pos.X[i]+self.focus_range))
-                self.ax.set_ylim(ymin=(self.focus_body.pos.Y[i]-self.focus_range),
-                                 ymax=(self.focus_body.pos.Y[i]+self.focus_range))
-                self.ax.set_zlim(zmin=(self.focus_body.pos.Z[i]-self.focus_range),
-                                 zmax=(self.focus_body.pos.Z[i]+self.focus_range))
+                if isinstance(self.focus_body.pos.X[ind], type(Decimal('3.45'))) or isinstance(self.focus_range, type(Decimal('3.45'))):
+                    self.focus_range = float(self.focus_range)
+                    limx, limy, limz = float(limx),float(limy), float(limz)
+                self.ax.set_xlim(xmin=(limx-self.focus_range),
+                                 xmax=(limx+self.focus_range))
+                self.ax.set_ylim(ymin=(limy-self.focus_range),
+                                 ymax=(limy+self.focus_range))
+                self.ax.set_zlim(zmin=(limz-self.focus_range),
+                                 zmax=(limz+self.focus_range))
         else:
             self.ax.set_autoscale_on(True)
             self.ax.set_autoscalez_on(True)
-        if self.show_velocity or self.show_acceleration:
-            _pos = [[b.pos.X[i] for b in self.engine.bodies],
-            [b.pos.Y[i] for b in self.engine.bodies],[b.pos.Z[i] for b in self.engine.bodies]]
-            if self.show_velocity:
-                _vel = [[b.vel.X[i] for b in self.engine.bodies],[b.vel.Y[i] for b in self.engine.bodies],
-                [b.vel.Z[i] for b in self.engine.bodies]]
-                self.ax.quiver(*_pos, *_vel, length=self.vector_size, color='red', clip_on=False)
-            if self.show_acceleration:
-                _acc = [[b.acc.X[i] for b in self.engine.bodies],
-                [b.acc.Y[i] for b in self.engine.bodies],[b.acc.Z[i] for b in self.engine.bodies]]
-                self.ax.quiver(*_pos, *_acc, length=self.vector_size, color='green', clip_on=False)
+       
         for b in self.engine.bodies:
-            self.ax.plot(b.pos.X.hist[0:i], b.pos.Y.hist[0:i], b.pos.Z.hist[0:i],
+            if self.show_velocity or self.show_acceleration:
+                _pos = [float(b.pos.X[ind]),float(b.pos.Y[ind]),float(b.pos.Z[ind])]
+                if self.show_velocity:
+                    _vel = [float(b.vel.X[ind]),float(b.vel.Y[ind]),float(b.vel.Z[ind])]
+                    self.ax.quiver(*_pos, *_vel, length=self.vector_size, color='red', clip_on=False)
+                if self.show_acceleration:
+                    _acc = [float(b.acc.X[ind]),float(b.acc.Y[ind]),float(b.acc.Z[ind])]
+                    self.ax.quiver(*_pos, *_acc, length=self.vector_size, color='green', clip_on=False)
+            self.ax.plot(list(float(m) for m in b.pos.X.hist[0:ind]), list(float(m) for m in b.pos.Y.hist[0:ind]), list(float(m) for m in b.pos.Z.hist[0:ind]),
                         label=f'{b.identity}', zorder=2.9, clip_on=False)
             if self.body_model == 'dots':
-                self.ax.scatter(b.pos.X[i], b.pos.Y[i], b.pos.Z[i],
+                self.ax.scatter(float(b.pos.X[ind]), float(b.pos.Y[ind]), float(b.pos.Z[ind]),
                                 marker='o', zorder=4, clip_on=False)
             if self.body_model == 'wireframe':
                 pass
             if self.body_model == 'surface':
                 pass
             if self.labelling_type == 'label':
-                self.ax.text(*b.pos[i], b.identity)
+                self.ax.text(*b.pos[ind], b.identity)
             if self.show_shadows:
-                self.ax.plot(b.pos.X.hist[0:i], b.pos.Y.hist[0:i],
-                    [(self.focus_body.pos.Z[i]-self.focus_range)]*len(b.pos.Z.hist[0:i]),
+                self.ax.plot(list(float(m) for m in b.pos.X.hist[0:ind]), list(float(m) for m in b.pos.Y.hist[0:ind]),
+                    [(self.focus_body.pos.Z[ind]-self.focus_range)]*len(b.pos.Z.hist[0:ind]),
                     color='black', zorder=2.9, clip_on=False)
         if self.labelling_type == 'legend':
             self.ax.legend()
 
 
-    def start(self, frames=None, interval=None, duration=None, fps=None):
+    def start(self, frames=None, interval=None, duration=None, fps=None, frameskip=1):
         """
         Start the animation of the simulation, and initialise output window.
 
@@ -1263,15 +1366,17 @@ labelling_type:str,body_model:str,guistyle:str}
         Note:
             This method starts the animation of the simulation based on the provided animation parameters.
         """
+        self.frameskip = frameskip
         if frames and interval:
-            f,i = frames,interval/1000
+            f,inv = frames,interval/1000
         elif duration and fps:
-            f,i = duration*fps, (1/fps)/1000 
+            f,inv = int(duration*fps), (1/fps)/1000 
         elif frames and fps:
-            f,i = frames, (1/fps)/1000
+            f,inv = frames, (1/fps)/1000
         elif duration and interval:
-            f,i = duration/interval, interval/1000
-        anim = animation.FuncAnimation(self.fig, func = self._animate, init_func = self._init(f), interval=i, frames=f) 
+            f,inv = int(duration/interval), interval/1000
+        print('Initializing Simulation Instance:')
+        anim = animation.FuncAnimation(self.fig, func = self._animate, init_func = self._init(f), interval=inv, frames=f) 
         plt.show()
 #END of Simulation Class       
 class SolarSystemMB(Simulation):
@@ -1284,11 +1389,11 @@ class SolarSystemMB(Simulation):
                      body_model: str = 'dots',
                      guistyle: str = 'default'):
             name = 'Major Bodies in Solar System'
-            engine = PhysEngine(dt= 3156000)
+            engine = PhysEngine(dt=10)
             bodies = list(horizons_object(obj_id) for obj_id in (
-                '10', '199', '299', '499', '599', '699', '799', '899'))
+                '10', '199', '299','399', '499', '599', '699', '799', '899'))
             engine.attach_bodies(bodies)
-            print(''.join(f'{bod.mass}, {bod.pos}, {bod.identity} \n\n ********' for bod in engine.bodies))
+            engine.make_relative_to(bodies[0])
             focus_body, focus_range, autoscale = bodies[0], None, False 
             super().__init__(name, engine, focus_body,
                              focus_range, autoscale, show_grid,

@@ -2,4 +2,4 @@ import core as nb
 
 solarsys = nb.SolarSystemMB()
 
-solarsys.start(duration=30, fps=90)
+solarsys.start(frames=50000, fps=30, frameskip=100)

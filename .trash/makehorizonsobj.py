@@ -2,7 +2,7 @@ from astroquery.jplhorizons import Horizons
 from datetime import datetime, timedelta
 import re
 import astropy.units as u
-
+from decimal import Decimal
 
 def horizons_object(searchquery, observer='0', time='2023-11-03'):
     """
@@ -51,18 +51,23 @@ def horizons_object(searchquery, observer='0', time='2023-11-03'):
     for x in rad:
         if any(char.isdigit() for char in x):
             _rad.append(x)
-    print(rad, mass, m_exp)
-    rad = float(_rad[0].split('+-')[0])
-    mass = float(mass[0].split('+-')[0])*10.**(float(m_exp))
-    print(rad, mass)
+    mass = Decimal(''.join(mass.split('+-')[0]))*Decimal(10**int(m_exp))
+    rad = Decimal(_rad[0].split('+-')[0])
     if r_unit == 'km':
         rad *= 1000
     if m_unit == 'g':
         mass /= 1000
-    print(rad, mass)
-    x, y, z = [_tab[pos].quantity[0].to_value(u.m) for pos in ('x', 'y', 'z')]
-    vx, vy, vz = [_tab[pos].quantity[0].to_value(u.m/u.s) for pos in ('vx', 'vy', 'vz')]
-   
-   
+    #x, y, z = [_tab[pos].quantity[0].to_value(u.m) for pos in ('x', 'y', 'z')]
+    #vx, vy, vz = [_tab[pos].quantity[0].to_value(u.m/u.s) for pos in ('vx', 'vy', 'vz')]
+    print([_tab[pos][0] for pos in ('x', 'y', 'z')])
+    print([_tab[pos][0] for pos in ('vx', 'vy', 'vz')])
+
+    print([_tab[pos].quantity[0].to_value(u.m) for pos in ('x', 'y', 'z')])
+    print([_tab[pos].quantity[0].to_value(u.m/u.s) for pos in ('vx', 'vy', 'vz')])
+
+    print([Decimal(_tab[pos].quantity[0].to_value(u.m)) for pos in ('x', 'y', 'z')])
+    print([Decimal(_tab[pos].quantity[0].to_value(u.m/u.s)) for pos in ('vx', 'vy', 'vz')])
+
+
 [horizons_object(x) for x in ('10', '199', '299', '499', '599', '699', '799', '899')]
 

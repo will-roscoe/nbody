@@ -21,7 +21,7 @@ The goal of this project is to efficiently simulate the gravitational and kineti
 
 >### Required Packages:
 >
->`math`, `cycler`, `matplotlib`,
+>`math`, `cycler`, `matplotlib` `decimal`,
 >
 >`astroquery`, `re`, `datetime`, `astropy` - neccesary for getting object data from JPL Horizons System.
 >
@@ -119,7 +119,7 @@ sim.start(self,
 ```
 you must pass two or more of the functions arguments, where `interval` is in seconds.
 
-# The `make_horizons_object()` Function
+# The `horizons_object()` Function
 
 I have implemented part of the `astroquery` module to easily make simulations of objects on the JPL Horizons System, using `GET`/`POST` URL encoded requests. I have restricted the inputs to standardise the output for use in this project, but you should be able to get any body listed on the JPL Horizons System fairly easily.
 
@@ -132,3 +132,7 @@ In the case that the `searchquery` returns multiple unique objects, a list of ob
 
 > ### Returns
 > * This function will return a `Body` instance with the attributes of the queried object. 
+
+# Working with `Decimal` Numbers
+
+I have attempted to implement the ability to use decimal numbers throughout my project, and the objects created through `horizons_object()` will use `Decimal` instead of `float`, as lots of the numbers for large objects get truncuated heavily when turning them into floats and multiplying them by 10^24 (for example). Please note that when using `Decimal` objects, the project code runs much slower than with `float` objects.
