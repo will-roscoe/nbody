@@ -118,3 +118,17 @@ sim.start(self,
             fps: int|float=None):
 ```
 you must pass two or more of the functions arguments, where `interval` is in seconds.
+
+# The `make_horizons_object()` Function
+
+I have implemented part of the `astroquery` module to easily make simulations of objects on the JPL Horizons System, using `GET`/`POST` URL encoded requests. I have restricted the inputs to standardise the output for use in this project, but you should be able to get any body listed on the JPL Horizons System fairly easily.
+
+> ### Parameters
+>  *  `searchquery` (`str`) - object ID or identifiable name of object, ie, `'Sun'`.
+>  *  `observer` (`str`) - observer position ID. see JPL Horizons Manual for more info, default is `'0'` (Sun/Solar System Barycentric Centre). It is best to make this the reference object of your system.
+> * `time` (`str`) - time to get data from. **Note: You should keep this the same for all objects in a system.** format is in MJY (YYYY-MM-DD).
+
+In the case that the `searchquery` returns multiple unique objects, a list of objects should be outputted where you should enter the ID of your chosen object into the function instead.
+
+> ### Returns
+> * This function will return a `Body` instance with the attributes of the queried object. 
