@@ -93,6 +93,19 @@ v={self.vel.c()}), a={self.acc.c()})'
 
 
     def evaluate(self, dt: int | float =1) -> None:
+        """
+        This method updates the position, velocity, and acceleration of a body over a small time interval `dt`.
+        It ensures that the lengths of position and velocity vectors are consistent and calculates the acceleration.
+
+        Args:
+            dt (int or float, optional): The time step for the evaluation (default is 1).
+
+        Returns:
+            None
+
+        Note:
+            This method modifies the internal state of the body object.
+        """
         while len(self.pos) - len(self.vel) != 0:
             len_check = len(self.pos) - len(self.vel)
             if len_check < 0:
@@ -108,6 +121,38 @@ v={self.vel.c()}), a={self.acc.c()})'
     def update(self, dt: int | float =1,
                 vel_change: list | tuple=None,
                 acc_change: list | tuple=None, ) -> None:
+        """
+        Update the position and velocity of a body over a small time interval.
+
+        This method updates the position and velocity of a body based on the time step `dt`, velocity changes (`vel_change`),
+        and acceleration changes (`acc_change`). It ensures that the lengths of position and velocity vectors are consistent.
+
+        Args:
+            dt (int or float, optional): The time step for the update (default is 1).
+            vel_change (list or tuple, optional): Velocity changes as a 3-element list or tuple (default is None).
+            acc_change (list or tuple, optional): Acceleration changes as a 3-element list or tuple (default is None).
+
+        Returns:
+            None
+
+        Raises:
+            ComponentError: If `vel_change` or `acc_change` does not have 3 elements.
+            TypeError: If `vel_change` or `acc_change` is not a list or tuple.
+            EvaluationError: If the length of the position and velocity vectors is inconsistent.
+
+        Note:
+            This method modifies the internal state of the body object.
+
+        Examples:
+            # Create a body object
+            body = Body()
+
+            # Update the body's position and velocity with a time step of 0.1 seconds and velocity change
+            body.update(0.1, vel_change=(1.0, 0.0, 0.0))
+
+            # Update the body's position and velocity with a time step of 0.1 seconds and acceleration change
+            body.update(0.1, acc_change=(0.0, -9.81, 0.0))
+        """
         if len(self.pos) - len(self.vel) != 0:
             self.evaluate(dt)
         if len(self.pos) - len(self.vel) == 0:
@@ -138,6 +183,25 @@ v={self.vel.c()}), a={self.acc.c()})'
 
 
 def make_horizons_object(searchquery, observer='0', time='2023-11-03'):
+    """
+    Create a Horizons object representing a celestial body using Horizons query data.
+
+    This function queries NASA's Horizons system for information about a celestial body and creates a
+    `Body` object with the retrieved data, including mass, initial position, initial velocity, radius,
+    and identity.
+
+    Args:
+        searchquery (str): The identifier or name of the celestial body to query.
+        observer (str, optional): The observer location (default is '0' for the solar system barycenter).
+        time (str, optional): The date for which to retrieve data in the 'YYYY-MM-DD' format (default is '2023-11-03').
+
+    Returns:
+        Body: A `Body` object representing the celestial body with mass, initial position, initial velocity,
+        radius, and identity information.
+
+    Raises:
+        LookupError: If mass or radius information could not be found in the query output.
+    """
     _later_time = (datetime.strptime(time, '%Y-%m-%d') + timedelta(days=2)).strftime('%Y-%m-%d')
     _object = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors(get_raw_response=True)
     _object_tab = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors()

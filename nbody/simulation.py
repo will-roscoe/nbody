@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Slider
 from cycler import cycler
+# START of Simulation Class
 class Simulation:
     """
     A class for visualizing and controlling a physics simulation.
@@ -112,10 +113,28 @@ labelling_type:str,body_model:str,guistyle:str}
 
 
     def _init(self, i):
+        """
+        Initialize the simulation by evaluating the physics engine for a specified number of steps.
+
+        Args:
+            i (int): The number of steps to initialize the simulation.
+
+        Note:
+            This method evaluates the physics engine for the specified number of steps to set up the simulation.
+        """
         for _ in range(i):
             self.engine.evaluate()
 
     def _animate(self, i):
+        """
+        Animate the simulation by updating the visualization.
+
+        Args:
+            i (int): The frame index for animation.
+
+        Note:
+            This method updates the visualization of the simulation for a given frame index.
+        """
         self.ax.clear()
         self.ax.set_xlabel('x')
         self.ax.set_ylabel('y')
@@ -166,14 +185,26 @@ labelling_type:str,body_model:str,guistyle:str}
 
 
     def start(self, frames=None, interval=None, duration=None, fps=None):
+        """
+        Start the animation of the simulation, and initialise output window.
+
+        Args:
+            frames (int, optional): The total number of frames for the animation.
+            interval (int, optional): The interval between frames in seconds.
+            duration (int, optional): The total duration of the animation in seconds.
+            fps (int, optional): The frames per second for the animation.
+
+        Note:
+            This method starts the animation of the simulation based on the provided animation parameters.
+        """
         if frames and interval:
-            f,i = frames,interval
+            f,i = frames,interval/1000
         elif duration and fps:
-            f,i = duration*fps, 1/fps 
+            f,i = duration*fps, (1/fps)/1000 
         elif frames and fps:
-            f,i = frames, 1/fps
+            f,i = frames, (1/fps)/1000
         elif duration and interval:
-            f,i = duration/interval, interval
+            f,i = duration/interval, interval/1000
         anim = animation.FuncAnimation(self.fig, func = self._animate, init_func = self._init(f), interval=i, frames=f) 
         plt.show()
-        
+#END of Simulation Class       
