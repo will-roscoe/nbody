@@ -987,7 +987,7 @@ def horizons_object(searchquery, observer='0', time='2023-11-03', num_type=float
     Raises:
         LookupError: If mass or radius information could not be found in the query output.
     """
-  
+    tqdm.write(f'Querying "{searchquery}" at JPL Horizons System')
     _later_time = (datetime.strptime(time, '%Y-%m-%d') + timedelta(days=2)).strftime('%Y-%m-%d')
     _raw = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors(get_raw_response=True)
     _tab = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors()
