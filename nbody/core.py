@@ -1,3 +1,4 @@
+from dataclasses import field
 import math
 
 
@@ -7,7 +8,7 @@ import astropy.units as u
 import re
 from decimal import Decimal
 
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -944,11 +945,29 @@ v={self.vel.c()}), a={self.acc.c()})'
                 self.pos.next(self.pos + Vector((self.vel*dt)))
         else:
             e.raise_evaluation_error((self.pos, self.vel))
+    def _reinitialise(self, init_pos=None, init_vel=None):
+        self.acc = HistoricVector(0,0,0,
+                             identity=f'{self.identity}_acc',
+                             units_v='ms^-2')
+        if init_pos != None:
+            if isinstance(init_pos, (list, tuple)):
+                self.pos = HistoricVector(li=init_pos,
+                                    identity=f'{self.identity}_pos',
+                                    units_v='m')
+            else:
+                e.raise_type_error('init_pos', (list, tuple), init_pos)
+        if init_vel != None:
+            if isinstance(init_vel, (list, tuple)):
+                self.vel = HistoricVector(li=init_vel,
+                                    identity=f'{self.identity}_vel',
+                                    units_v='ms^-1')
+            else:
+                e.raise_type_error('init_vel', (list, tuple), init_vel)
 #END of Body Class
 
 
 
-def horizons_object(searchquery, observer='0', time='2023-11-03'):
+def horizons_object(searchquery, observer='0', time='2023-11-03', num_type=float):
     """
     Create a Horizons object representing a celestial body using Horizons query data.
 
@@ -993,14 +1012,14 @@ def horizons_object(searchquery, observer='0', time='2023-11-03'):
     for x in rad:
         if any(char.isdigit() for char in x):
             _rad.append(x)
-    mass = Decimal(''.join(mass.split('+-')[0]))*Decimal(10**int(m_exp))
-    rad = Decimal(_rad[0].split('+-')[0])
+    mass = num_type(''.join(mass.split('+-')[0]))*num_type(10**int(m_exp))
+    rad = num_type(_rad[0].split('+-')[0])
     if r_unit == 'km':
         rad *= 1000
     if m_unit == 'g':
         mass /= 1000
-    x, y, z = [Decimal(_tab[pos].quantity[0].to_value(u.m)) for pos in ('x', 'y', 'z')]
-    vx, vy, vz = [Decimal(_tab[pos].quantity[0].to_value(u.m/u.s)) for pos in ('vx', 'vy', 'vz')]
+    x, y, z = [num_type(_tab[pos].quantity[0].to_value(u.m)) for pos in ('x', 'y', 'z')]
+    vx, vy, vz = [num_type(_tab[pos].quantity[0].to_value(u.m/u.s)) for pos in ('vx', 'vy', 'vz')]
 
     return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
 
@@ -1042,6 +1061,7 @@ class PhysEngine:
         if isinstance(dt, (Numeric)):
             self.dt = dt
         self.planes = []
+        self.fields = []
     def attach_bodies(self, new_bodies):
         """
         Attach a list of Body objects to the physics engine.
@@ -1061,15 +1081,21 @@ class PhysEngine:
                     e.raise_type_error(f'new_body at index {i}', type(Body), new_body)
         else:
             e.raise_type_error('new_bodies', (list, tuple), new_bodies)
-        print(f'{len(self.bodies)} bodies attached')
+        print(f'{len(self.bodies)} bodies attached.')
     def make_relative_to(self, target_body):
         for body in self.bodies:
-            body.pos.next(body.pos-target_body.pos)
-            body.vel.next(body.vel-target_body.vel)
-            body.identity = f'{body.identity} (Rel to {target_body.identity})'
+            if body != target_body:
+                body._reinitialise((body.pos-target_body.pos), (body.vel-target_body.vel))
+                body.identity = f'{body.identity}:Rel.{target_body.identity}'
+        target_body._reinitialise((0,0,0), (0,0,0))
         print(f"Bodies' positions and velocities have been made relative to {target_body.identity}.")
         target_body.identity = f'{target_body.identity}(Static)'
-        
+  
+    def orbit_around(self, main_body, other_bodies):
+            pass
+    def create_acceleration(self, accel_vector):
+        if len(accel_vector) == 3 and isinstance(accel_vector[0], Numeric):
+            self.fields.append(Vector(li=accel_vector)) 
     def create_plane(self, const_axis='z', const_val = 0):
         """
         Create a collision plane in the physics engine.
@@ -1086,7 +1112,7 @@ class PhysEngine:
             print(f'constant plane {const_axis}={const_val} has been initialized.')
         else:
             e.raise_value_error('const_axis,const_val',((str),(int,float)),(const_axis,const_val))
-    def check_collision(self,body):
+    def _check_collision(self,body):
         """
         Check for collisions between a body and other bodies or planes.
 
@@ -1116,9 +1142,9 @@ class PhysEngine:
                 break
         else:
             del_v_pls = Vector((0,0,0))
-        return (del_v_pls + del_v_bods).c()
+        return (del_v_pls + del_v_bods)
 
-    def find_gravity(self):
+    def _find_gravity(self):
         """
         Calculate and apply gravitational forces between bodies.
 
@@ -1154,12 +1180,12 @@ class PhysEngine:
         Note:
             This method calculates the motion of attached bodies based on gravitational forces and collisions.
         """
-        physev = tqdm(total=len(self.bodies), desc=' calculating motion for bodies')
-        self.find_gravity()
+        fieldvel = Vector(li=(0,0,0))
+        for f in self.fields:
+            fieldvel = fieldvel +f*self.dt
+        self._find_gravity()
         for body in self.bodies:
-            body.update(self.dt, vel_change = self.check_collision(body))
-            physev.update(1)
-        physev.close()
+            body.update(self.dt, (self._check_collision(body) + fieldvel).c())
 #END of PhysEngine class
 
 
@@ -1277,11 +1303,10 @@ labelling_type:str,body_model:str,guistyle:str}
         Note:
             This method evaluates the physics engine for the specified number of steps to set up the simulation.
         """
-        framev = tqdm(total = i, desc='Evaluating frames')
-        for m in range(i):
-            framev.update(1)
+
+        for _ in trange(i, desc='Evaluating motion for each frame', unit='frames'):
             self.engine.evaluate()
-        framev.close()
+        
         tqdm.write('Calculations finished, Outputting Shortly ...')
     def _animate(self, i):
         """
@@ -1296,8 +1321,10 @@ labelling_type:str,body_model:str,guistyle:str}
         
         
         
-        total_frames = len(self.engine.bodies[0].pos.X.hist)
+        maxim = len(self.engine.bodies[0].pos.X.hist)
         ind = int(i*self.frameskip)
+        while ind >= maxim:
+            ind =- 1 
         
         self.ax.clear()
         self.ax.set_xlabel('x')
@@ -1375,21 +1402,21 @@ labelling_type:str,body_model:str,guistyle:str}
             f,inv = frames, (1/fps)/1000
         elif duration and interval:
             f,inv = int(duration/interval), interval/1000
-        print('Initializing Simulation Instance:')
+        print('Starting Simulation Instance, Running Calculations:')
         anim = animation.FuncAnimation(self.fig, func = self._animate, init_func = self._init(f), interval=inv, frames=f) 
         plt.show()
 #END of Simulation Class       
 class SolarSystemMB(Simulation):
-        def __init__(self, show_grid: bool = True,
+        def __init__(self, dt=1000, show_grid: bool = True,
                      show_shadows: bool = False,
                      show_acceleration: bool = False,
                      show_velocity: bool = False,
                      vector_size: int | float = 1,
-                     labelling_type: str = 'legend',
+                     labelling_type: str = 'label',
                      body_model: str = 'dots',
-                     guistyle: str = 'default'):
+                     guistyle: str = 'dark'):
             name = 'Major Bodies in Solar System'
-            engine = PhysEngine(dt=10)
+            engine = PhysEngine(dt)
             bodies = list(horizons_object(obj_id) for obj_id in (
                 '10', '199', '299','399', '499', '599', '699', '799', '899'))
             engine.attach_bodies(bodies)
@@ -1399,3 +1426,4 @@ class SolarSystemMB(Simulation):
                              focus_range, autoscale, show_grid,
                              show_shadows, show_acceleration, show_velocity,
                              vector_size, labelling_type, body_model, guistyle)
+            print('Note: the suggested start() Parameters are frames=1000<->50000, fps=30, frameskip=100.')
