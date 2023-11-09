@@ -1,8 +1,5 @@
-from dataclasses import field
-from errno import ESTALE
-import math
-from turtle import color
 
+import math
 
 from astroquery.jplhorizons import Horizons
 from datetime import datetime, timedelta
@@ -996,7 +993,11 @@ v={self.vel.c()}), a={self.acc.c()})'
 #END of Body Class
 
 
-def horizons_query(searchquery, observer='0', time='2023-11-03', num_type=float, return_type='body'):
+def horizons_query(searchquery: str,
+                   observer: str = '0',
+                   time: str = '2023-11-03',
+                   num_type: type = float,
+                   return_type: str = 'body'):
     """
     Create a Horizons object representing a celestial body using Horizons query data.
 
@@ -1007,17 +1008,30 @@ def horizons_query(searchquery, observer='0', time='2023-11-03', num_type=float,
     Args:
         searchquery (str): The identifier or name of the celestial body to query.
         observer (str, optional): The observer location (default is '0' for the solar system barycenter).
-        time (str, optional): The date for which to retrieve data in the 'YYYY-MM-DD' format 
-        (default is '2023-11-03').
-
+        time (str, optional): The date for which to retrieve data in the 'YYYY-MM-DD' format
+                                (default is '2023-11-03').
+        num_type (type, optional): Numeric Type to format values from source as. (default is float)
+        return_type (str, optional): what format to return the object in. either 'print' to print output, 
+                                    'dict' to return dictionary containing values or 'body' to return a Body
+                                    instance. (default is 'body')
     Returns:
         Body: A `Body` object representing the celestial body with mass, initial position, initial velocity,
         radius, and identity information.
-
+    OR  dict: dictionary with keys ('identity', 'mass', 'radius', 'position', 'velocity'). last 2 are 3-tuples.
+    OR  print: prints a string representation of the dict above in a user readable form.
     Raises:
-        LookupError: If mass or radius information could not be found in the query output.
+        TypeError: If one or more args are incorrect type.
+        ValueError: if 'return_type' is not a valid option. make sure it is any of 'print', 'dict', 'body'.
+
     """
-    tqdm.write(f'Querying "{searchquery}" at JPL Horizons System')
+    _args = ((searchquery, str),(observer,str), (time, str), (num_type, type), (return_type,str))
+    for (inpt, typ) in _args:
+        if not isinstance(inpt, typ):
+            e.raise_type_error('input', typ, inpt)
+    if all([return_type.lower() != opt for opt in ('body', 'dict', 'print')]) :
+        e.raise_value_error('return_type', type, return_type)
+    
+    tqdm.write(f'Querying "{searchquery}" @JPL Horizons System')
     _later_time = (datetime.strptime(time, '%Y-%m-%d') + timedelta(days=2)).strftime('%Y-%m-%d')
     _raw = Horizons(id=searchquery, location=observer, epochs={'start': time,
                                                                'stop':_later_time,
@@ -1030,50 +1044,65 @@ def horizons_query(searchquery, observer='0', time='2023-11-03', num_type=float,
         name = f'{_n.groups()[0]} ({_n.groups()[1]})'
     else:
         tqdm.write(f'could not find name for object "{searchquery}", reverting to placeholder name.')
-        name = None
+        name = f'JPL_{searchquery}'
+    
     _raw =_raw.split('Ephemeris')[0]
+
     m_exp_unit = _raw.split('Mass')[1].split('^')[1].split('=')[0].strip(') ,~ (')
     m_exp = "".join(c for c in m_exp_unit if c.isdigit() or c == '.')
     m_unit = "".join(c for c in m_exp_unit.lower() if c == 'k' or c == 'g')
     mass = "".join(c for c in  _raw.split('Mass')[1].split('^')[1].split('=')[1].strip(') ,~ (').lower() if 
                    c.isdigit() or c == '.' or c=='+' or c=='-')
+    
     try:
         rad_string = _raw.lower().split('vol. mean radius')[1].split('=')[0:2]
     except IndexError:
-        rad_string = _raw.lower().split('radius')[1].split('=')[0:2]
-    r_unit = "".join(c for c in rad_string[0].lower() if c == 'k' or c == 'm')
-    rad = list(c for c in rad_string[1].split(' ') if c != '')
+        rad_string = _raw.lower().split('radius')[1].split('=')[0:2] 
+    
+    r_unit = "".join(c for c in rad_string[0].lower() if c == 'k' or c == 'm') 
+    
+    rad = list(c for c in rad_string[1].split(' ') if c != '') 
     _rad = []
     for x in rad:
-        if any(char.isdigit() for char in x):
+        if any(char.isdigit() for char in x): 
             _rad.append(x)
+    
     mass = num_type(''.join(mass.split('+-')[0]))*num_type(10**int(m_exp))
     rad = num_type(_rad[0].split('+-')[0])
+
     if r_unit == 'km':
         rad *= 1000
     if m_unit == 'g':
         mass /= 1000
+
     x, y, z = [num_type(_tab[pos].quantity[0].to_value(u.m)) for pos in ('x', 'y', 'z')]
     vx, vy, vz = [num_type(_tab[pos].quantity[0].to_value(u.m/u.s)) for pos in ('vx', 'vy', 'vz')]
-    if return_type == 'print':
+    
+
+    
+    if return_type.lower() == 'print':
         print(f'''Object: {name}\n***********\nMass: {mass} kg\nRadius: {rad} m\n
 ***********\nposition: ({x}, {y}, {z}) (m)\nvelocity: ({vx}, {vy}, {vz}) (ms^-1)\n
 ***********\nQuery Date: {time}''')
-    elif return_type == 'dict':
+    elif return_type.lower() == 'dict':
         return {'identity': name, 'mass': mass, 'radius': rad, 'position':(x,y,z), 'velocity':(vx,vy,vz)}
-    elif return_type == 'body':
+    elif return_type.lower() == 'body':
         return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
-    else:
-        e.raise_value_error('return_type', str, return_type)
 
-def horizons_batch(search_queries, observer = '0',  time='2023-11-03'):
+
+def horizons_batch(search_queries: tuple | list,
+                   observer: str = '0',
+                   time: str = '2023-11-03',
+                   num_type: type = float,
+                   return_type: str = 'body'):
     new_bodies = []
-    batch_prog = tqdm(total=len(search_queries), desc='Getting data from JPL Horizons')
-    for query in tqdm(search_queries):
+    for query in tqdm(search_queries, desc='Getting data from JPL Horizons', unit='queries'):
         if isinstance(query, str):
-            new_bodies.append(horizons_query(query, observer, time))
-            batch_prog.update(1)
-    batch_prog.close()
+            new_bodies.append(horizons_query(query, observer, time, num_type, return_type))
+        else:
+            raise e.raise_type_error('item in search_queries', str, query)
+    return new_bodies
+
 #START of PhysEngine class
 class PhysEngine:
     """
