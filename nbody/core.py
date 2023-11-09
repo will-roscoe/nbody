@@ -1,5 +1,7 @@
 from dataclasses import field
+from errno import ESTALE
 import math
+from turtle import color
 
 
 from astroquery.jplhorizons import Horizons
@@ -9,14 +11,14 @@ import re
 from decimal import Decimal
 
 from tqdm import tqdm, trange
-
+import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Slider
 from cycler import cycler
 
-import errors as e
+from . import errors as e
 
 try:
     from scipy.constants import G
@@ -39,10 +41,20 @@ def _vcomp(obj):
         return obj.c()
     else:
         return obj
-    
 
-Numeric = (int, float, type(Decimal('3.45')))
+
+def sphere(pos, radius, N=20):
+    (c, r) = (pos, radius)
+    u, v = np.mgrid[0:2*np.pi:N*1j, 0:np.pi:N*1j]
+    x = r*np.cos(u)*np.sin(v) + c[0]
+    y = r*np.sin(u)*np.sin(v) + c[1]
+    z = r*np.cos(v) + c[2]
+    return x,y,z
+
 NoneType = type(None)
+DecType= type(Decimal('3.45'))
+Numeric = (int, float, DecType)
+
 
 #START of HistoricVariable Class
 class HistoricVariable:
@@ -197,27 +209,27 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
         else:
             e.raise_type_error('ind', (str, int), ind)
     def __add__(self, other: int | float ) -> int | float:
-        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        if isinstance(_vcomp(other), DecType) or isinstance(self.c(),DecType):
             return Decimal(self.c()) + Decimal(_vcomp(other))
         else:
             return self.c() + _vcomp(other)
     def __sub__(self, other: int | float) -> int | float:
-        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        if isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             return Decimal(self.c()) - Decimal(_vcomp(other))
         else:
             return self.c() - _vcomp(other)
     def __mul__(self, other: int | float) -> int | float:
-        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        if isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             return Decimal(self.c()) * Decimal(_vcomp(other))
         else:
             return self.c() * _vcomp(other)
     def __truediv__(self, other: int | float) -> int | float:
-        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        if isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             return Decimal(self.c()) / Decimal(_vcomp(other))
         else:
             return self.c() / _vcomp(other)
     def __floordiv__(self, other: int | float) -> int | float:
-        if isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        if isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             return Decimal(self.c()) // Decimal(_vcomp(other))
         else:
             return self.c() // _vcomp(other)
@@ -226,7 +238,7 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
         if isinstance(temp, (int, float)) and isinstance(self.c(), (int, float)):
             self.next(self.c() + temp)
             return self
-        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        elif isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             self.next(Decimal(self.c()) + Decimal(_vcomp(other)))   
             return self
         else:
@@ -236,7 +248,7 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
         if isinstance(temp, (int, float)) and isinstance(self.c(), (int, float)):
             self.next(self.c() - temp)
             return self
-        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        elif isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             self.next(Decimal(self.c()) - Decimal(_vcomp(other)))   
             return self
         else:
@@ -246,7 +258,7 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
         if isinstance(temp, (int, float)) and isinstance(self.c(), (int, float)):
             self.next(self.c() * temp)
             return self
-        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        elif isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             self.next(Decimal(self.c()) * Decimal(_vcomp(other)))   
             return self
         else:
@@ -256,7 +268,7 @@ len={len(self)}, hist={self.hist}, id={self.identity})'
         if isinstance(temp, Numeric):
             self.next(self.c() / temp)
             return self
-        elif isinstance(_vcomp(other), type(Decimal('3.45'))) or isinstance(self.c(), type(Decimal('3.45'))):
+        elif isinstance(_vcomp(other), DecType) or isinstance(self.c(), DecType):
             self.next(Decimal(self.c()) / Decimal(_vcomp(other)))   
             return self
         else:
@@ -346,7 +358,7 @@ class Vector:
         #try:
             #return math.sqrt(sum([n**2 for n in self.c()]))
         #except TypeError:
-        if isinstance(self.c(0), type(Decimal('3.45'))):
+        if isinstance(self.c(0), DecType):
             return Decimal(math.sqrt(sum([n**2 for n in self.c()])))
         else:
             return math.sqrt(sum([n**2 for n in self.c()]))
@@ -360,7 +372,7 @@ class Vector:
         if float(self.magnitude()) == 0.:
             return Vector(li=(0,0,0))
         else:
-            if isinstance(self.c(0), type(Decimal('3.45'))):
+            if isinstance(self.c(0), DecType):
                 return Vector(li=list(Decimal(n)/Decimal(self.magnitude()) for n in self.c()))
             else:
                 return Vector(li=list(n/self.magnitude() for n in self.c()))
@@ -433,10 +445,12 @@ class Vector:
         return f'{self.c()}'
     def __len__(self):
         return 1
+    def __iter__(self):
+        return iter((self.X, self.Y, self.Z))
     def __add__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3:
-            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+            if isinstance(temp[0], DecType) or isinstance(self.c(0), DecType):
                 return Vector(li=[Decimal(val) + Decimal(temp[i]) for i, val in enumerate(self['current'])])
             else:
                 return Vector(li=[val + temp[i] for i, val in enumerate(self['current'])])
@@ -445,7 +459,7 @@ class Vector:
     def __sub__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3:
-            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+            if isinstance(temp[0], DecType) or isinstance(self.c(0), DecType):
                 return Vector(li=[Decimal(val) - Decimal(temp[i]) for i, val in enumerate(self['current'])])
             else:
                 return Vector(li=[val - temp[i] for i, val in enumerate(self['current'])])
@@ -455,10 +469,10 @@ class Vector:
         temp = _vcomp(other)
         if isinstance(temp, (int, float)) and isinstance(self.c(0), (int, float)):
             return Vector(li=[val * temp for val in self['current']])
-        if isinstance(temp, type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+        if isinstance(temp, DecType) or isinstance(self.c(0), DecType):
             return Vector(li=[(Decimal(val)*Decimal(temp)) for val in self['current']])
         elif len(temp) == 3:
-            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+            if isinstance(temp[0], DecType) or isinstance(self.c(0), DecType):
                 return sum(([Decimal(val) * Decimal(temp[i]) for i, val in enumerate(self['current'])]))
             else:
                 return sum(([val * temp[i] for i, val in enumerate(self['current'])]))
@@ -468,7 +482,7 @@ class Vector:
         temp = _vcomp(other)
         if isinstance(temp, (int, float)) and isinstance(self.c(0), (int, float)):
             return Vector(li=[val/temp for val in self['current']])
-        if isinstance(temp, type(Decimal('3.45'))) or isinstance(self.c(0), type(Decimal('3.45'))):
+        if isinstance(temp, DecType) or isinstance(self.c(0), DecType):
             return Vector(li=[(Decimal(val)/Decimal(temp)) for val in self['current']])
         else:
             e.raise_type_error('other', (*Numeric, object), other)
@@ -667,6 +681,8 @@ class HistoricVector:
             e.raise_type_error('next_vals', (list, tuple), next_vals)
 
     # dUnder Methods
+    def __iter__(self):
+        return iter((self.X.hist, self.Y.hist, self.Z.hist))
     def __len__(self):
         """
         Get the length of the historic vector.
@@ -734,7 +750,7 @@ class HistoricVector:
     def __add__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3: 
-            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+            if isinstance(temp[0], DecType) or isinstance(self.x(), DecType):
                 return ([Decimal(val) + Decimal(temp[i]) for i, val in enumerate(self['current'])])
             else:
                 return ([val + temp[i] for i, val in enumerate(self['current'])])
@@ -743,7 +759,7 @@ class HistoricVector:
     def __sub__(self, other: list | tuple | object) -> list | tuple:
         temp = _vcomp(other)
         if len(temp) == 3: 
-            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+            if isinstance(temp[0], DecType) or isinstance(self.x(), DecType):
                 return ([Decimal(val) - Decimal(temp[i]) for i, val in enumerate(self['current'])])
             else:
                 return ([val - temp[i] for i, val in enumerate(self['current'])])
@@ -753,10 +769,10 @@ class HistoricVector:
         temp = _vcomp(other)
         if isinstance(temp, (int,float)) and isinstance(self.x(), (int, float)): 
             return ([val * temp for val in self['current']])
-        if isinstance(temp, type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+        if isinstance(temp, DecType) or isinstance(self.x(), DecType):
             return ([(Decimal(val) * Decimal(temp)) for val in self['current']])
         elif len(temp) == 3: 
-            if isinstance(temp[0], type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+            if isinstance(temp[0], DecType) or isinstance(self.x(), DecType):
                 return sum(([Decimal(val) * Decimal(temp[i]) for i, val in enumerate(self['current'])]))
             else:
                 return sum(([val * temp[i] for i, val in enumerate(self['current'])]))
@@ -768,7 +784,7 @@ class HistoricVector:
         temp = _vcomp(other)
         if isinstance(temp, (int,float)) and isinstance(self.x(), (int, float)): 
             return ([val/temp for val in self['current']])
-        elif isinstance(temp, type(Decimal('3.45'))) or isinstance(self.x(), type(Decimal('3.45'))):
+        elif isinstance(temp, DecType) or isinstance(self.x(), DecType):
             return ([(Decimal(val)/Decimal(temp)) for val in self['current']])
         else:
             e.raise_type_error('other', Numeric, other)
@@ -811,6 +827,8 @@ class Body:
                 init_pos: list | tuple,
                 init_vel: list | tuple=(0,0,0),
                 radius: float | int = 0,
+                bounce: float | int = 0.999,
+                color: str= None,
                 identity:str = None) -> None:
         if isinstance(identity, str):
             self.identity = identity
@@ -846,7 +864,14 @@ class Body:
                                 units='m')
         else:
             e.raise_type_error('radius', Numeric, radius)
-
+        if isinstance(bounce, Numeric):
+            self.bounce = bounce
+        else:
+            e.raise_type_error('bounce', Numeric, bounce)
+        if isinstance(color, (NoneType, str)):
+            self.color = color
+        else:
+            e.raise_type_error('color',(NoneType, str), color)
 
     def __str__(self) -> str:
         return f'Body("{self.identity}",\n\
@@ -861,8 +886,9 @@ v={self.vel.c()}), a={self.acc.c()})'
 
     def evaluate(self, dt: int | float =1) -> None:
         """
-        This method updates the position, velocity, and acceleration of a body over a small time interval `dt`.
-        It ensures that the lengths of position and velocity vectors are consistent and calculates the acceleration.
+        This method updates the position, velocity, and acceleration of a body over
+        a small time interval `dt`. It ensures that the lengths of position and
+        velocity vectors are consistent and calculates the acceleration.
 
         Args:
             dt (int or float, optional): The time step for the evaluation (default is 1).
@@ -887,17 +913,21 @@ v={self.vel.c()}), a={self.acc.c()})'
 
     def update(self, dt: int | float =1,
                 vel_change: list | tuple=None,
-                acc_change: list | tuple=None, ) -> None:
+                acc_change: list | tuple=None,
+                vel_next: list | tuple=None,
+                acc_next: list | tuple=None, ) -> None:
         """
         Update the position and velocity of a body over a small time interval.
 
-        This method updates the position and velocity of a body based on the time step `dt`, velocity changes (`vel_change`),
-        and acceleration changes (`acc_change`). It ensures that the lengths of position and velocity vectors are consistent.
+        This method updates the position and velocity of a body based on the time step `dt`, 
+        velocity changes (`vel_change`), and acceleration changes (`acc_change`). It ensures 
+        that the lengths of position and velocity vectors are consistent.
 
         Args:
             dt (int or float, optional): The time step for the update (default is 1).
-            vel_change (list or tuple, optional): Velocity changes as a 3-element list or tuple (default is None).
-            acc_change (list or tuple, optional): Acceleration changes as a 3-element list or tuple (default is None).
+            vel_change (list or tuple, optional): Velocity changes as a 3-element list or tuple 
+            (default is None).acc_change (list or tuple, optional): Acceleration changes as
+            a 3-element list or tuple (default is None).
 
         Returns:
             None
@@ -920,31 +950,31 @@ v={self.vel.c()}), a={self.acc.c()})'
             # Update the body's position and velocity with a time step of 0.1 seconds and acceleration change
             body.update(0.1, acc_change=(0.0, -9.81, 0.0))
         """
-        if len(self.pos) - len(self.vel) != 0:
-            self.evaluate(dt)
-        if len(self.pos) - len(self.vel) == 0:
-            if acc_change is not None:
-                if isinstance(acc_change, (list, tuple)):
-                    if len(acc_change) == 3:
-                        self.vel.next(self.vel + Vector((self.acc + acc_change))*dt)
-                    else:
-                        e.raise_component_error('acc_change', acc_change)
-                else:
-                    e.raise_type_error('acc_change', (list, tuple), acc_change)
-            else:
-                self.vel.next(self.vel + Vector((self.acc*dt)))
-            if vel_change is not None:
-                if isinstance(vel_change, (list, tuple)):
-                    if len(vel_change) == 3:
-                        self.pos.next(self.pos + Vector((self.vel + vel_change))*dt)
-                    else:
-                        raise e.raise_component_error('vel_change', vel_change)
-                else:
-                    e.raise_type_error('vel_change', (list, tuple), vel_change)
-            else:
-                self.pos.next(self.pos + Vector((self.vel*dt)))
+        if vel_next:
+            vel = vel_next
         else:
-            e.raise_evaluation_error((self.pos, self.vel))
+            vel = self.vel.c()
+        if acc_next:
+            acc = acc_next
+        else:
+            acc = self.acc.c()
+            
+        if acc_change is not None:
+            if isinstance(acc_change, (list, tuple)):
+                if len(acc_change) == 3:
+                    self.vel.next((Vector((acc_change))*dt + vel).c())
+                    self.acc.next(acc_change)
+        else:
+            self.vel.next((Vector((self.acc*dt))+vel).c())
+            self.acc.next((0,0,0))
+        if vel_change is not None:
+            if isinstance(vel_change, (list, tuple)):
+                if len(vel_change) == 3:
+                    self.pos.next(self.pos + (Vector(vel) + vel_change)*dt)
+        else:
+            self.pos.next(self.pos + Vector(vel)*dt)
+        #self.evaluate(dt)
+    
     def _reinitialise(self, init_pos=None, init_vel=None):
         self.acc = HistoricVector(0,0,0,
                              identity=f'{self.identity}_acc',
@@ -966,8 +996,7 @@ v={self.vel.c()}), a={self.acc.c()})'
 #END of Body Class
 
 
-
-def horizons_object(searchquery, observer='0', time='2023-11-03', num_type=float):
+def horizons_query(searchquery, observer='0', time='2023-11-03', num_type=float, return_type='body'):
     """
     Create a Horizons object representing a celestial body using Horizons query data.
 
@@ -978,7 +1007,8 @@ def horizons_object(searchquery, observer='0', time='2023-11-03', num_type=float
     Args:
         searchquery (str): The identifier or name of the celestial body to query.
         observer (str, optional): The observer location (default is '0' for the solar system barycenter).
-        time (str, optional): The date for which to retrieve data in the 'YYYY-MM-DD' format (default is '2023-11-03').
+        time (str, optional): The date for which to retrieve data in the 'YYYY-MM-DD' format 
+        (default is '2023-11-03').
 
     Returns:
         Body: A `Body` object representing the celestial body with mass, initial position, initial velocity,
@@ -989,19 +1019,24 @@ def horizons_object(searchquery, observer='0', time='2023-11-03', num_type=float
     """
     tqdm.write(f'Querying "{searchquery}" at JPL Horizons System')
     _later_time = (datetime.strptime(time, '%Y-%m-%d') + timedelta(days=2)).strftime('%Y-%m-%d')
-    _raw = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors(get_raw_response=True)
-    _tab = Horizons(id=searchquery, location=observer, epochs={'start': time, 'stop':_later_time,'step':'3d'}).vectors()
+    _raw = Horizons(id=searchquery, location=observer, epochs={'start': time,
+                                                               'stop':_later_time,
+                                                               'step':'3d'}).vectors(get_raw_response=True)
+    _tab = Horizons(id=searchquery, location=observer, epochs={'start': time,
+                                                               'stop':_later_time,
+                                                               'step':'3d'}).vectors()
     _n = re.search(r"Target body name: (.+?) \((\d+)\)", _raw)
     if _n:    
         name = f'{_n.groups()[0]} ({_n.groups()[1]})'
     else:
-        print('could not find name for object, reverting to placeholder name.')
+        tqdm.write(f'could not find name for object "{searchquery}", reverting to placeholder name.')
         name = None
     _raw =_raw.split('Ephemeris')[0]
     m_exp_unit = _raw.split('Mass')[1].split('^')[1].split('=')[0].strip(') ,~ (')
     m_exp = "".join(c for c in m_exp_unit if c.isdigit() or c == '.')
     m_unit = "".join(c for c in m_exp_unit.lower() if c == 'k' or c == 'g')
-    mass = "".join(c for c in  _raw.split('Mass')[1].split('^')[1].split('=')[1].strip(') ,~ (').lower() if c.isdigit() or c == '.' or c=='+' or c=='-')
+    mass = "".join(c for c in  _raw.split('Mass')[1].split('^')[1].split('=')[1].strip(') ,~ (').lower() if 
+                   c.isdigit() or c == '.' or c=='+' or c=='-')
     try:
         rad_string = _raw.lower().split('vol. mean radius')[1].split('=')[0:2]
     except IndexError:
@@ -1020,15 +1055,23 @@ def horizons_object(searchquery, observer='0', time='2023-11-03', num_type=float
         mass /= 1000
     x, y, z = [num_type(_tab[pos].quantity[0].to_value(u.m)) for pos in ('x', 'y', 'z')]
     vx, vy, vz = [num_type(_tab[pos].quantity[0].to_value(u.m/u.s)) for pos in ('vx', 'vy', 'vz')]
-
-    return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
+    if return_type == 'print':
+        print(f'''Object: {name}\n***********\nMass: {mass} kg\nRadius: {rad} m\n
+***********\nposition: ({x}, {y}, {z}) (m)\nvelocity: ({vx}, {vy}, {vz}) (ms^-1)\n
+***********\nQuery Date: {time}''')
+    elif return_type == 'dict':
+        return {'identity': name, 'mass': mass, 'radius': rad, 'position':(x,y,z), 'velocity':(vx,vy,vz)}
+    elif return_type == 'body':
+        return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
+    else:
+        e.raise_value_error('return_type', str, return_type)
 
 def horizons_batch(search_queries, observer = '0',  time='2023-11-03'):
     new_bodies = []
     batch_prog = tqdm(total=len(search_queries), desc='Getting data from JPL Horizons')
     for query in tqdm(search_queries):
         if isinstance(query, str):
-            new_bodies.append(horizons_object(query, observer, time))
+            new_bodies.append(horizons_query(query, observer, time))
             batch_prog.update(1)
     batch_prog.close()
 #START of PhysEngine class
@@ -1056,12 +1099,13 @@ class PhysEngine:
         evaluate(): Perform the physics simulation for the current time step.
 
     """
-    def __init__(self, dt: int | float = 1):
+    def __init__(self, dt: int | float = 1, checking_range:int=3):
         self.bodies = []
         if isinstance(dt, (Numeric)):
             self.dt = dt
         self.planes = []
         self.fields = []
+        self._rangechk = checking_range
     def attach_bodies(self, new_bodies):
         """
         Attach a list of Body objects to the physics engine.
@@ -1081,21 +1125,21 @@ class PhysEngine:
                     e.raise_type_error(f'new_body at index {i}', type(Body), new_body)
         else:
             e.raise_type_error('new_bodies', (list, tuple), new_bodies)
-        print(f'{len(self.bodies)} bodies attached.')
+        tqdm.write(f'{len(self.bodies)} bodies attached.')
     def make_relative_to(self, target_body):
         for body in self.bodies:
             if body != target_body:
                 body._reinitialise((body.pos-target_body.pos), (body.vel-target_body.vel))
                 body.identity = f'{body.identity}:Rel.{target_body.identity}'
         target_body._reinitialise((0,0,0), (0,0,0))
-        print(f"Bodies' positions and velocities have been made relative to {target_body.identity}.")
+        tqdm.write(f"Bodies' positions and velocities have been made relative to {target_body.identity}.")
         target_body.identity = f'{target_body.identity}(Static)'
   
     def orbit_around(self, main_body, other_bodies):
             pass
     def create_acceleration(self, accel_vector):
         if len(accel_vector) == 3 and isinstance(accel_vector[0], Numeric):
-            self.fields.append(Vector(li=accel_vector)) 
+            self.fields+= [Vector(li=accel_vector)] 
     def create_plane(self, const_axis='z', const_val = 0):
         """
         Create a collision plane in the physics engine.
@@ -1109,10 +1153,10 @@ class PhysEngine:
         """
         if const_axis in ('x', 'y', 'z') and isinstance(const_val, Numeric):
             self.planes.append([const_axis, const_val])
-            print(f'constant plane {const_axis}={const_val} has been initialized.')
+            tqdm.write(f'constant plane {const_axis}={const_val} has been initialized.')
         else:
             e.raise_value_error('const_axis,const_val',((str),(int,float)),(const_axis,const_val))
-    def _check_collision(self,body):
+    def _check_collision(self, body, co_restitution=0):
         """
         Check for collisions between a body and other bodies or planes.
 
@@ -1125,53 +1169,63 @@ class PhysEngine:
         Note:
             This method calculates and handles collisions with other bodies and collision planes.
         """
-        unitcomps = {'x':Vector((1,0,0)), 'y':Vector((0,1,0)), 'z':Vector((0,0,1))}
+        returned_coll = False
+        range_chk = 3
         for bod in self.bodies:
             if body != bod: 
-                temp_dist = body.pos - bod.pos
-                if (Vector(temp_dist).magnitude() <= bod.radius.c() or
-                Vector(temp_dist).magnitude() <= body.radius.c()):
-                    del_v_bods=(Vector(Vector(body.vel - bod.vel)/((1/body.mass.c())+(1/bod.mass.c())))*-2)
-                    break
-        else:
-            del_v_bods = Vector((0,0,0))
+                body_dists = list(((Vector(bod.pos.c()) + Vector(bod.vel.c())*m*self.dt) - 
+                                (Vector(body.pos.c()) + Vector(body.vel.c())*m*self.dt)).magnitude() 
+                                for m in range(1))
+                if any([(body_dists[i] < (bod.radius.c() + body.radius.c())) for i in range(1)]):
+                    returned_coll = True
+                    n = Vector(bod.pos-body.pos)/body_dists[0]
+                    meff = 1/((1/bod.mass.c())+(1/body.mass.c()))
+                    vimp = n*(body.vel - bod.vel)
+                    imp = vimp*(1+co_restitution)*meff
+                    dv = n*(-imp/body.mass.c())
+                    return (dv+body.vel), False
+        
+        unitcomps = {'x':Vector((1,0,0)), 'y':Vector((0,1,0)), 'z':Vector((0,0,1))}
         for [pl_ax, pl_val] in self.planes:
-            pl_norm = unitcomps[pl_ax]
-            if body.pos[pl_ax] + pl_val <= body.radius:
-                del_v_pls = body.vel + pl_norm*(-2*(body.vel*pl_norm))
-                break
-        else:
-            del_v_pls = Vector((0,0,0))
-        return (del_v_pls + del_v_bods)
+            body_est_dists =  list(abs((Vector(body.pos.c()) +
+            Vector(body.vel.c())*m*self.dt)[pl_ax] - pl_val) for m in range(self._rangechk))
+            body_cur_dist = abs(body.pos[pl_ax] - pl_val)
+            if any([(body_est_dists[i] < body.radius.c()) for i in range(self._rangechk)]) or\
+                body_cur_dist < body.radius.c():
+                if  body_cur_dist/body.radius.c() <= 1.01 and body_est_dists[-1]/body.radius.c() <= 1.01:
+                    on_plane = True
+                else:
+                    on_plane = False
+                pl_norm = unitcomps[pl_ax]
+                returned_coll = True
+                return (pl_norm*(-2*(body.vel*pl_norm)) + body.vel)*co_restitution, on_plane
 
-    def _find_gravity(self):
+        if not returned_coll:
+            return Vector(body.vel.c()), False
+    
+
+    def _find_gravity(self, body):
         """
         Calculate and apply gravitational forces between bodies.
 
         Note:
             This method calculates gravitational forces and updates the acceleration of each body.
         """
-        temp = [[i, bod, HistoricVector(0,0,0)] for i, bod in enumerate(self.bodies)]
-        for bod1_data in temp: 
-            ind1, bod1, f1 = bod1_data[0], bod1_data[1], bod1_data[2]
-            for bod2_data in temp: 
-                ind2, bod2= bod2_data[0], bod2_data[1]
-                if ind1 != ind2:
-                    temp_dist = bod1.pos - bod2.pos
-                    dist_12 = Vector(temp_dist)
-                    unit_12 = dist_12.unit()
-                    if isinstance(bod1.mass.c(), type(Decimal('3.45'))) or isinstance(bod2.mass.c(), type(Decimal('3.45'))):
-                        b1m, b2m = Decimal(bod1.mass.c()), Decimal(bod2.mass.c())
-                        force_on_bod1_t = (-1*Decimal(G) * bod1.mass.c() * bod2.mass.c())
-                        force_on_bod1 = unit_12*(force_on_bod1_t/Decimal(dist_12.magnitude())**2)
-                    else:
-                        force_on_bod1_t = (-1*G * bod1.mass.c() * bod2.mass.c())
-                        force_on_bod1 = unit_12*(force_on_bod1_t/(dist_12.magnitude())**2)
-                    f1 = HistoricVector(li=(f1 + force_on_bod1))
-                    bod1_data[2] = f1
-        for bod_data in temp:
-            bod, f = bod_data[1], bod_data[2]
-            bod.acc.next(f/bod.mass.c())
+        bod1_data = [body, HistoricVector(0,0,0)]
+        for bod2 in self.bodies: 
+            if bod2 != body:
+                temp_dist = body.pos - bod2.pos
+                dist_12 = Vector(temp_dist)
+                unit_12 = dist_12.unit()
+                if isinstance(body.mass.c(), DecType) or isinstance(bod2.mass.c(), DecType):
+                    b1m, b2m = Decimal(body.mass.c()), Decimal(bod2.mass.c())
+                    force_on_bod1_t = (-1*Decimal(G) * b1m * b2m)
+                    force_on_bod1 = unit_12*(force_on_bod1_t/Decimal(dist_12.magnitude())**2)
+                else:
+                    force_on_bod1_t = (-1*G * body.mass.c() * bod2.mass.c())
+                    force_on_bod1 = unit_12*(force_on_bod1_t/(dist_12.magnitude())**2)
+                bod1_data[1] = HistoricVector(li=(bod1_data[1] + force_on_bod1))
+        return bod1_data[1]/body.mass.c()
 
     def evaluate(self):
         """
@@ -1180,12 +1234,18 @@ class PhysEngine:
         Note:
             This method calculates the motion of attached bodies based on gravitational forces and collisions.
         """
-        fieldvel = Vector(li=(0,0,0))
-        for f in self.fields:
-            fieldvel = fieldvel +f*self.dt
-        self._find_gravity()
-        for body in self.bodies:
-            body.update(self.dt, (self._check_collision(body) + fieldvel).c())
+        _temp = [[0,0,0] for _ in self.bodies]
+        for i, body in enumerate(self.bodies):
+            _temp[i][0:2] = self._check_collision(body, body.bounce)
+        for i, body in enumerate(self.bodies):
+            _temp[i][2] = self._find_gravity(body)
+        for i, body in enumerate(self.bodies):
+            col_vel, on_plane, acc_g = _temp[i]
+            if not on_plane:
+                fieldvel = list(sum(f.c(i) for f in self.fields) for i in range(3))
+            else:
+                fieldvel = (0,0,0)
+            body.update(self.dt, vel_next=(col_vel+fieldvel).c(), acc_change=acc_g)
 #END of PhysEngine class
 
 
@@ -1233,8 +1293,8 @@ class Simulation:
                 body_model: str = 'dots',
                 guistyle: str = 'default'):
         _argspec = {engine:(PhysEngine),focus_range:(*Numeric, NoneType),
-autoscale:bool,show_grid:bool,show_shadows:bool,show_acceleration:bool,show_velocity:bool,vector_size:Numeric,
-labelling_type:str,body_model:str,guistyle:str}
+autoscale:bool,show_grid:bool,show_shadows:bool,show_acceleration:bool,show_velocity:bool,
+vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
         
             
         for i,(arg,typ) in enumerate(_argspec.items()):
@@ -1242,7 +1302,7 @@ labelling_type:str,body_model:str,guistyle:str}
                 e.raise_type_error(f'Simulation arg({i})', typ, arg)
                 break
         else:
-            self.engine = engine
+            self._engine = engine
             self.focus_range = focus_range
             self.autoscale = autoscale
             self.show_grid = show_grid
@@ -1261,6 +1321,7 @@ labelling_type:str,body_model:str,guistyle:str}
         
         self.fig = plt.figure(name, figsize=(16,9))
         self.ax = self.fig.add_subplot(projection = '3d')
+        self.ax.computed_zorder = False
         self.ax1 = self.fig.add_axes((0.05,0.25,0.05,0.5))
         self.fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
         self.zoom_slider = Slider(self.ax1, 'Zoom', 0.1, 10, valinit=1, orientation='vertical')
@@ -1305,9 +1366,8 @@ labelling_type:str,body_model:str,guistyle:str}
         """
 
         for _ in trange(i, desc='Evaluating motion for each frame', unit='frames'):
-            self.engine.evaluate()
-        
-        tqdm.write('Calculations finished, Outputting Shortly ...')
+            self._engine.evaluate()
+        tqdm.write('Calculations finished, Starting interactive window...')
     def _animate(self, i):
         """
         Animate the simulation by updating the visualization.
@@ -1321,61 +1381,77 @@ labelling_type:str,body_model:str,guistyle:str}
         
         
         
-        maxim = len(self.engine.bodies[0].pos.X.hist)
+        maxim = len(self._engine.bodies[0].pos.X.hist)
         ind = int(i*self.frameskip)
         while ind >= maxim:
             ind =- 1 
-        
         self.ax.clear()
-        self.ax.set_xlabel('x')
-        self.ax.set_ylabel('y')
-        self.ax.set_zlabel('z')
+        self.ax.set(xlabel = 'x', ylabel = 'y', zlabel = 'z')
         self.ax.set_box_aspect(None, zoom = self.zoom_slider.val)
         if not self.autoscale:
-            #self.ax.set_box_aspect(None, zoom = self.zoom_slider.val)
-            #self.ax.set_aspect('equal', adjustable='box')
+            self.ax.set_box_aspect((1,1,1), zoom = self.zoom_slider.val)
             self.ax.set_autoscale_on(False)
             if self.focus_body is not None:
-                limx, limy, limz = self.focus_body.pos.X[ind], self.focus_body.pos.Y[ind], self.focus_body.pos.Z[ind]
+                (limx, limy, limz) = (float(m) for m in self.focus_body.pos[ind])
                 if self.focus_range is None:
-                    self.focus_range = max((max(self.focus_body.pos - bod.pos) for bod in self.engine.bodies))
-                if isinstance(self.focus_body.pos.X[ind], type(Decimal('3.45'))) or isinstance(self.focus_range, type(Decimal('3.45'))):
+                    self.focus_range = max((max(self.focus_body.pos - bod.pos) for bod in self._engine.bodies))
+                if isinstance(self.focus_body.pos.X[ind], DecType) or isinstance(self.focus_range, DecType):
                     self.focus_range = float(self.focus_range)
                     limx, limy, limz = float(limx),float(limy), float(limz)
-                self.ax.set_xlim(xmin=(limx-self.focus_range),
-                                 xmax=(limx+self.focus_range))
-                self.ax.set_ylim(ymin=(limy-self.focus_range),
-                                 ymax=(limy+self.focus_range))
-                self.ax.set_zlim(zmin=(limz-self.focus_range),
-                                 zmax=(limz+self.focus_range))
+            else:
+                limx, limy, limz = 0,0,0
+                if self.focus_range is None:
+                    self.focus_range = max(max(*bod.pos[ind]) for bod in self._engine.bodies)
+            
+           
+            self.ax.set_xlim(xmin=(limx-self.focus_range),
+                                xmax=(limx+self.focus_range))
+            self.ax.set_ylim(ymin=(limy-self.focus_range),
+                                ymax=(limy+self.focus_range))
+            self.ax.set_zlim(zmin=(limz-self.focus_range),
+                                zmax=(limz+self.focus_range))
         else:
             self.ax.set_autoscale_on(True)
             self.ax.set_autoscalez_on(True)
-       
-        for b in self.engine.bodies:
+        for plane in self._engine.planes:
+            xl, yl, zl, = self.ax.get_xlim(), self.ax.get_ylim(), self.ax.get_zlim()
+            pl_const = np.array([[plane[1], plane[1]], [plane[1], plane[1]]])
+            points = {'x':(pl_const,np.array([[yl[0],yl[1]],[yl[0],yl[1]]]),
+                           np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
+                      'y':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),pl_const,
+                           np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
+                      'z':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),
+                           np.array([[yl[0],yl[0]],[yl[1],yl[1]]]),pl_const)}
+            self.ax.plot_surface(*points[plane[0]], zorder=1,color=('xkcd:azure', 0.5), clip_on=False)
+        for b in self._engine.bodies:
+            _poshist = list(list(float(m) for m in _b.hist[0:ind]) for _b in (b.pos.X, b.pos.Y, b.pos.Z))
             if self.show_velocity or self.show_acceleration:
-                _pos = [float(b.pos.X[ind]),float(b.pos.Y[ind]),float(b.pos.Z[ind])]
+                _pos = [float(m) for m in b.pos[ind]]
                 if self.show_velocity:
-                    _vel = [float(b.vel.X[ind]),float(b.vel.Y[ind]),float(b.vel.Z[ind])]
-                    self.ax.quiver(*_pos, *_vel, length=self.vector_size, color='red', clip_on=False)
+                    _vel = [float(m) for m in b.vel[ind]]
+                    self.ax.quiver(*_pos, *_vel, length=self.vector_size, color='red',
+                                   clip_on=False, zorder=8)
                 if self.show_acceleration:
-                    _acc = [float(b.acc.X[ind]),float(b.acc.Y[ind]),float(b.acc.Z[ind])]
-                    self.ax.quiver(*_pos, *_acc, length=self.vector_size, color='green', clip_on=False)
-            self.ax.plot(list(float(m) for m in b.pos.X.hist[0:ind]), list(float(m) for m in b.pos.Y.hist[0:ind]), list(float(m) for m in b.pos.Z.hist[0:ind]),
-                        label=f'{b.identity}', zorder=2.9, clip_on=False)
+                    _acc = [float(m) for m in b.acc[ind]]
+                    self.ax.quiver(*_pos, *_acc, length=self.vector_size, color='green',
+                                   clip_on=False, zorder=8)
+            self.ax.plot(*_poshist, label=f'{b.identity}', color=b.color,
+                         zorder=7, clip_on=False)
             if self.body_model == 'dots':
-                self.ax.scatter(float(b.pos.X[ind]), float(b.pos.Y[ind]), float(b.pos.Z[ind]),
-                                marker='o', zorder=4, clip_on=False)
+                self.ax.scatter(*list(float(m) for m in b.pos[ind]),
+                                marker='o', zorder=4, clip_on=False, color=b.color)
             if self.body_model == 'wireframe':
-                pass
+                self.ax.plot_wireframe(*sphere(b.pos[ind], b.radius.c()), clip_on=False,
+                                       zorder=2, color=b.color)
             if self.body_model == 'surface':
-                pass
+                self.ax.plot_surface(*sphere(b.pos[ind], b.radius.c()), clip_on=False,
+                                     zorder=2, color=b.color)
             if self.labelling_type == 'label':
-                self.ax.text(*b.pos[ind], b.identity)
+                self.ax.text(*b.pos[ind], b.identity, zorder=10)
             if self.show_shadows:
-                self.ax.plot(list(float(m) for m in b.pos.X.hist[0:ind]), list(float(m) for m in b.pos.Y.hist[0:ind]),
-                    [(self.focus_body.pos.Z[ind]-self.focus_range)]*len(b.pos.Z.hist[0:ind]),
-                    color='black', zorder=2.9, clip_on=False)
+                self.ax.plot(*_poshist[0:2],[(self.focus_body.pos.Z[ind]-self.focus_range)]*
+                             len(b.pos.Z.hist[0:ind]),
+                    color='black', zorder=1.5, clip_on=False)
         if self.labelling_type == 'legend':
             self.ax.legend()
 
@@ -1393,6 +1469,7 @@ labelling_type:str,body_model:str,guistyle:str}
         Note:
             This method starts the animation of the simulation based on the provided animation parameters.
         """
+        
         self.frameskip = frameskip
         if frames and interval:
             f,inv = frames,interval/1000
@@ -1403,7 +1480,8 @@ labelling_type:str,body_model:str,guistyle:str}
         elif duration and interval:
             f,inv = int(duration/interval), interval/1000
         print('Starting Simulation Instance, Running Calculations:')
-        anim = animation.FuncAnimation(self.fig, func = self._animate, init_func = self._init(f), interval=inv, frames=f) 
+        anim = animation.FuncAnimation(self.fig, func = self._animate,
+                                       init_func = self._init(f), interval=inv, frames=f) 
         plt.show()
 #END of Simulation Class       
 class SolarSystemMB(Simulation):
@@ -1417,7 +1495,7 @@ class SolarSystemMB(Simulation):
                      guistyle: str = 'dark'):
             name = 'Major Bodies in Solar System'
             engine = PhysEngine(dt)
-            bodies = list(horizons_object(obj_id) for obj_id in (
+            bodies = list(horizons_query(obj_id) for obj_id in (
                 '10', '199', '299','399', '499', '599', '699', '799', '899'))
             engine.attach_bodies(bodies)
             engine.make_relative_to(bodies[0])
