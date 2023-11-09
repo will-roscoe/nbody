@@ -1,10 +1,9 @@
 
+from doctest import BLANKLINE_MARKER
 import random
 import nbody.core as nb
 def run_balls_in_box():
-    balls = (nb.Body(3,(-1,0,1),(0.4,0,0.01), 0.1, identity='1', color='r'),
-            nb.Body(3,(0,1,1),(0,-0.5,-0.01), 0.1, identity='2', color='b'),
-            nb.Body(3,(1,0,1),(-0.3,0,0.01), 0.1, identity='3', color = 'g'),
+    balls = (
             nb.Body(3,(0,-1,1),(0,0.6,-0.01), 0.1, identity='4', color='yellow'),
             nb.Body(3,(0,1,0),(0.2,-0.5,-0.5), 0.1, identity='5', color='magenta'),
             nb.Body(3,(1,0,0),(-0.2,0.1,0.1), 0.1, identity='6', color = 'orange'),
@@ -24,5 +23,4 @@ def run_balls_in_box():
                         focus_range=1.2, vector_size=200)
     sim.start(frames=3000, fps=30, frameskip=2)
 
-solarsys = nb.SolarSystemMB()
-solarsys.start(100000, fps=30, frameskip=1000)
+run_balls_in_box()
