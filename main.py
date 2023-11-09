@@ -1,6 +1,4 @@
 
-from doctest import BLANKLINE_MARKER
-import random
 import nbody.core as nb
 def run_balls_in_box():
     balls = (
