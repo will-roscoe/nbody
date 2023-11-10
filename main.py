@@ -19,6 +19,8 @@ def run_balls_in_box():
     sim = nb.Simulation('bouncing balls', phys, labelling_type='legend',
                         body_model='surface', autoscale=False, show_acceleration=True,
                         focus_range=1.2, vector_size=200)
-    sim.start(frames=3000, fps=30, frameskip=2)
+    sim.start(eval_length=3000, fps=30, frameskip=2)
 
+#sys = nb.SolarSystemMB()
+#sys.start()
 run_balls_in_box()

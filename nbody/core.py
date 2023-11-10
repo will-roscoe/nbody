@@ -1276,8 +1276,26 @@ class PhysEngine:
                 fieldvel = (0,0,0)
             body.update(self.dt, vel_next=(col_vel+fieldvel).c(), acc_change=acc_g)
 #END of PhysEngine class
+from multiprocessing import Pool
+class PhysEngineMP(PhysEngine):
+    def __init__(self, dt: int | float = 1, checking_range: int = 3):
+        super().__init__(dt, checking_range)
+
+    def _process_body(self,body: Body):
+        return [body, *self._check_collision(body), self._find_gravity(body)]
 
 
+    def evaluate(self):
+        if __name__ == '__main__':
+            with Pool as workers:
+                _temp = workers.map(self._process_body, self.bodies)
+        for _entry in _temp:
+            body ,col_vel, on_plane, acc_g = _entry
+            if not on_plane:
+                fieldvel = list(sum(f.c(i) for f in self.fields) for i in range(3))
+            else:
+                fieldvel = (0,0,0)
+            body.update(self.dt, vel_next=(col_vel+fieldvel).c(), acc_change=acc_g)
 # START of Simulation Class
 class Simulation:
     """
@@ -1354,7 +1372,8 @@ vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
         self.ax1 = self.fig.add_axes((0.05,0.25,0.05,0.5))
         self.fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
         self.zoom_slider = Slider(self.ax1, 'Zoom', 0.1, 10, valinit=1, orientation='vertical')
-        self.frameskip = 1
+        self._frameskip, self._plotskip = 1, 1
+
         def _clearpanes():
             self.ax.xaxis.set_pane_color((0.,0.,0.,0.))
             self.ax.yaxis.set_pane_color((0.,0.,0.,0.))
@@ -1411,7 +1430,8 @@ vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
         
         
         maxim = len(self._engine.bodies[0].pos.X.hist)
-        ind = int(i*self.frameskip)
+        ind = int(i*self._frameskip)
+        step = self._plotskip
         while ind >= maxim:
             ind =- 1 
         self.ax.clear()
@@ -1434,11 +1454,11 @@ vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
             
            
             self.ax.set_xlim(xmin=(limx-self.focus_range),
-                                xmax=(limx+self.focus_range))
+                             xmax=(limx+self.focus_range))
             self.ax.set_ylim(ymin=(limy-self.focus_range),
-                                ymax=(limy+self.focus_range))
+                             ymax=(limy+self.focus_range))
             self.ax.set_zlim(zmin=(limz-self.focus_range),
-                                zmax=(limz+self.focus_range))
+                             zmax=(limz+self.focus_range))
         else:
             self.ax.set_autoscale_on(True)
             self.ax.set_autoscalez_on(True)
@@ -1453,7 +1473,7 @@ vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
                            np.array([[yl[0],yl[0]],[yl[1],yl[1]]]),pl_const)}
             self.ax.plot_surface(*points[plane[0]], zorder=1,color=('xkcd:azure', 0.5), clip_on=False)
         for b in self._engine.bodies:
-            _poshist = list(list(float(m) for m in _b.hist[0:ind]) for _b in (b.pos.X, b.pos.Y, b.pos.Z))
+            _poshist = list(list(float(m) for m in _b.hist[0:ind:step]) for _b in (b.pos.X, b.pos.Y, b.pos.Z))
             if self.show_velocity or self.show_acceleration:
                 _pos = [float(m) for m in b.pos[ind]]
                 if self.show_velocity:
@@ -1479,13 +1499,13 @@ vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
                 self.ax.text(*b.pos[ind], b.identity, zorder=10)
             if self.show_shadows:
                 self.ax.plot(*_poshist[0:2],[(self.focus_body.pos.Z[ind]-self.focus_range)]*
-                             len(b.pos.Z.hist[0:ind]),
+                             len(_poshist[2]),
                     color='black', zorder=1.5, clip_on=False)
         if self.labelling_type == 'legend':
             self.ax.legend()
 
 
-    def start(self, frames=None, interval=None, duration=None, fps=None, frameskip=1):
+    def start(self, eval_length=None, fps=None, frameskip=1, plotskip=1):
         """
         Start the animation of the simulation, and initialise output window.
 
@@ -1498,16 +1518,9 @@ vector_size:Numeric,labelling_type:str,body_model:str,guistyle:str}
         Note:
             This method starts the animation of the simulation based on the provided animation parameters.
         """
-        
-        self.frameskip = frameskip
-        if frames and interval:
-            f,inv = frames,interval/1000
-        elif duration and fps:
-            f,inv = int(duration*fps), (1/fps)/1000 
-        elif frames and fps:
-            f,inv = frames, (1/fps)/1000
-        elif duration and interval:
-            f,inv = int(duration/interval), interval/1000
+        self._frameskip, self._plotskip = frameskip, plotskip
+        f,inv = eval_length, (1/fps)/1000
+
         print('Starting Simulation Instance, Running Calculations:')
         anim = animation.FuncAnimation(self.fig, func = self._animate,
                                        init_func = self._init(f), interval=inv, frames=f) 
@@ -1533,4 +1546,6 @@ class SolarSystemMB(Simulation):
                              focus_range, autoscale, show_grid,
                              show_shadows, show_acceleration, show_velocity,
                              vector_size, labelling_type, body_model, guistyle)
-            print('Note: the suggested start() Parameters are frames=1000<->50000, fps=30, frameskip=100.')
+            #print('Note: the suggested start() Parameters are frames=10000<->50000, fps=30, frameskip=100, plotskip=50.')
+        def start(self, eval_length=50000, fps=30, frameskip=1000, plotskip=500):
+            super().start(eval_length, fps, frameskip, plotskip)
