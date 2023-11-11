@@ -21,33 +21,39 @@ The goal of this project is to efficiently simulate the gravitational and kineti
 
 >### Required Packages:
 >
->`math`, `cycler`, `matplotlib` `decimal`,
+>`math`, `re`, `datetime`, `decimal`, `multiprocessing` (Built in)
 >
->`astroquery`, `re`, `datetime`, `astropy` - neccesary for getting object data from JPL Horizons System.
+>`tqdm`, `numpy`, `matplotlib`, `cycler`, `astroquery`, `astropy`
 >
->### Recommended Packages:
-> `warnings` and `scipy` - these modules have alternative methods if they can't be found.
-><br/><br/>
+> ---
+> `scipy` is recommended but optional.
+
 
 # Usage Guide 
 There are 3 main objects which a user would interact with while creating a simulation, these are:
 *  ### [**`Body`**](#body) : Representation of a physical object
 *  ### [**`PhysEngine`**](#physeng) : Representation of a system of `Body` objects and comuputes the physics.
 *  ### [**`Simulation`**](#simul) : Controls the output and the runtime of a `PhysEngine` object.
+----
+### About Objects and Types
+* There are also several other classes, `Variable`, `HistoricVariable`, `Vector` and `Hisoric Vector` which are classed as having types `VarType` and `VectorType` respectively.
 
+* `NoneType` is defined as the type of `None`
 
 <h2 style="text-align: left;", custom-id='body'>Creating <code>Body</code> Instances</h2>
 
-The `body` class is the representation of a physical body, like a planet or star or particle. To create a `body`, you must pass it some parameters:
+The `Body` class is the representation of a physical body, like a planet or star or particle. To create a `Body`, you must pass it some parameters:
 ```python
-new_body = Body(mass: float | int,
+new_body = Body(mass: Numeric,
                 init_pos: list | tuple,
                 init_vel: list | tuple=(0,0,0),
-                radius: float | int = 0,
-                identity:str = None) -> None:
+                radius: Numeric = 0,
+                bounce: Numeric = 0.999,
+                color: str= None,
+                identity:str = None):
 ```
 
- - `init_pos` and `init_vel` must be passed a **list or tuple** with 3 values representing the cartesian components x,y,z in **m** and **ms^-1**.
+ - `init_pos` and `init_vel` must be passed a **list or tuple or Vector Object** with 3 values representing the cartesian components x,y,z in **m** and **ms^-1**.
 
  - `mass` is required and should be passed as a **numeric**, representing the total mass of the body in **kg**.
 
@@ -62,7 +68,8 @@ A `PhysEngine` instance computes and evaluates the attibutes of a set of bodies,
 
 To create a `PhysEngine` you can pass it a time interval, `dt`, or leave it as default.
 ```python
-phys = PhysEngine(dt: int | float = 1):
+phys = PhysEngine(dt: int | float = 1, 
+                  checking_range = int = 3):
 ```
 You must then load the bodies using the function: 
 ```python
@@ -71,6 +78,14 @@ phys.attach_bodies(new_bodies:list | tuple) #you must pass the bodies in a list 
 >Optionally, you can create some infinite planes parallel to a plane by passing:
 >```python
 >phys.create_plane(self, const_axis='z', const_val = 0)
+>```
+>or induce a global accelerations by passing:
+>```python
+>phys.create_acceleration(accel_vector: tuple | list | VectorType)
+>```
+>or make bodies relative to a body by passing:
+>```python
+>phys.make_relative_to(target_body: Body)
 >```
 At this point, the `PhysEngine` instance is fully prepared to compute the trajectories of the bodies it was passed, which can be done using `phys.evaluate()` for as many steps as neccesary, however it works best to use the `Simulation` class to output the product to a graphical interface.
 
@@ -119,7 +134,7 @@ sim.start(self,
 ```
 you must pass two or more of the functions arguments, where `interval` is in seconds.
 
-# The `horizons_object()` Function
+# The `horizons_query()` Function
 
 I have implemented part of the `astroquery` module to easily make simulations of objects on the JPL Horizons System, using `GET`/`POST` URL encoded requests. I have restricted the inputs to standardise the output for use in this project, but you should be able to get any body listed on the JPL Horizons System fairly easily.
 
@@ -127,12 +142,31 @@ I have implemented part of the `astroquery` module to easily make simulations of
 >  *  `searchquery` (`str`) - object ID or identifiable name of object, ie, `'Sun'`.
 >  *  `observer` (`str`) - observer position ID. see JPL Horizons Manual for more info, default is `'0'` (Sun/Solar System Barycentric Centre). It is best to make this the reference object of your system.
 > * `time` (`str`) - time to get data from. **Note: You should keep this the same for all objects in a system.** format is in MJY (YYYY-MM-DD).
+> * `num_type` (`type`) - type of numerical to output information in, if needing high accuracy. Default is `float`.
+> * `return_type` (`str`) how to output the result, either as a `dict` (`'dict'`), `Body` (`'body'`) or printing the result (`'print'`).
 
 In the case that the `searchquery` returns multiple unique objects, a list of objects should be outputted where you should enter the ID of your chosen object into the function instead.
 
-> ### Returns
-> * This function will return a `Body` instance with the attributes of the queried object. 
+ ### Returns
+ * This function will return a `Body` instance with the attributes of the queried object by default.
 
-# Working with `Decimal` Numbers
+> ### `horizons_batch()`
+> `horizons_batch` is a function that makes it easy to iterate over multiple objects using the same constants and return an iterable containing the result. Has the exact same arguments as `horizons_query()` except the input queries should be an iterable of `str` objects.
 
-I have attempted to implement the ability to use decimal numbers throughout my project, and the objects created through `horizons_object()` will use `Decimal` instead of `float`, as lots of the numbers for large objects get truncuated heavily when turning them into floats and multiplying them by 10^24 (for example). Please note that when using `Decimal` objects, the project code runs much slower than with `float` objects.
+## Premade Examples
+### `SolarSystemMB`: a Simulation of the Solar System's Major Bodies
+You can initialise this simulation using its defaults by running the code below:
+
+```python
+solarsystem = SolarSystemMB()
+solarsystem.start()
+```
+The options are the same as the `Simulation` Class, however autoscaling and focusing is locked to keep the Sun as the central body.
+
+### `BouncingBalls`: Bouncing Balls in a Box, Colliding with each other and the walls.
+Similarly, we initialise and run the simulation as below:
+```python
+bouncingballs = BouncingBalls()
+bouncingballs.start()
+```
+This simulation is great at showcasing the ability for `Body` instances with non zero radius to collide with each other or physical planes. Note that the collisions may not always be accurate as the bodies collisions are modelled to be head on, and estimate collision points by evaluating positional information before and after the actual time of collision.
