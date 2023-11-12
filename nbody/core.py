@@ -1,8 +1,6 @@
-
+from __future__ import annotations
 # Python Builtins
-from dataclasses import field
 import math
-import pickle
 import re
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -14,6 +12,7 @@ import numpy as np
 
 # Plotting and animation Packages
 import matplotlib as mpl
+mpl.use('QT5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Slider
@@ -31,20 +30,18 @@ try:
 except ModuleNotFoundError:
     G = 6.6743*10**(-11)
 
-
 NoneType = type(None)
-DecType= type(Decimal('3.45'))
-Numeric = (int, float, DecType)
-VectorType = (Vector,HistoricVector)
-VarType = (Variable, HistoricVariable)
+DecType= type(Decimal())
+NumType = (DecType, int, float)
+Iterable = (list, tuple)
 
-def _O(obj) -> list | tuple | Numeric:
+def _O(obj):
     if isinstance(obj, (*VectorType, *VarType)):
         return obj.c()
     else:
         return obj
     
-def _V(obj: list | tuple | VectorType) -> VectorType:
+def _V(obj):
     if not isinstance(obj, VectorType):
         if len(obj) == 3:
             return Vector(li=obj)
@@ -53,79 +50,77 @@ def _V(obj: list | tuple | VectorType) -> VectorType:
     else:
         return obj
 
-def sphere(pos: list | tuple, radius:Numeric, N:int=20) -> tuple:
+def sphere(pos, radius, N=20):
     (c, r) = (pos, radius)
     u, v = np.mgrid[0:2*np.pi:N*1j, 0:np.pi:N*1j]
     x = r*np.cos(u)*np.sin(v) + c[0]
     y = r*np.sin(u)*np.sin(v) + c[1]
     z = r*np.cos(v) + c[2]
     return x,y,z
-def typecheck(argtype:dict) -> NoneType:
+def typecheck(argtype):
     for (inpt, typ) in argtype:
         if not isinstance(inpt, typ):
             e.raise_type_error('input', typ, inpt)
 
 #START of Variable Class
 class Variable:
-    def __init__(self, init_var:Numeric, identity:str='Variable', units:str=None) -> None:
-        typecheck(((init_var, Numeric), (identity, str), (units, (str, NoneType))))
+    def __init__(self, init_var, identity='Variable', units=None):
+        typecheck(((init_var, NumType), (identity, str), (units, (str, NoneType))))
         self.record = init_var
         self.identity = identity
         self.units = (units if units else '')
-    def c(self) -> float | int:
+    def c(self) :
         return self.record
-    def __len__(self) -> int:
+    def __len__(self):
         return 1
-    def __contains__(self, item:int | float) -> bool:
+    def __contains__(self, item:Any) -> bool:
         return item in self.record
     def __str__(self):
         return f'{self.c()} {self.units}, len:{len(self)} id:"{self.identity}"'
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f'VarType Object (current={self.c()} {self.units},\
 len={len(self)}, rec={self.record}, id={self.identity})'
-    def __contains__(self, item:int | float) -> bool:
-        return item in self.record
-    def __add__(self, other: Numeric ) -> Numeric:
+    def __add__(self, other) :
         num_type = type(_O(other))
         return num_type(self.c()) + num_type(_O(other))
-    def __sub__(self, other: Numeric) -> Numeric:
+    def __sub__(self, other) :
         num_type = type(_O(other))
         return num_type(self.c()) - num_type(_O(other))
-    def __mul__(self, other: Numeric) -> Numeric:
+    def __mul__(self, other):
         num_type = type(_O(other))
         return num_type(self.c()) * num_type(_O(other))
-    def __truediv__(self, other: Numeric) -> Numeric:
+    def __truediv__(self, other) :
         num_type = type(_O(other))
         return num_type(self.c()) / num_type(_O(other))
-    def __floordiv__(self, other: Numeric) -> Numeric:
+    def __floordiv__(self, other) :
         num_type = type(_O(other))
         return num_type(self.c()) // num_type(_O(other))
-    def __iadd__(self, other: Numeric) -> Numeric:
+    def __iadd__(self, other) :
         num_type = type(_O(other))
         self.next(num_type(self.c()) + num_type(_O(other)))   
         return self
-    def __isub__(self, other: Numeric) -> Numeric:
+    def __isub__(self, other) :
         num_type = type(_O(other))
         self.next(num_type(self.c()) - num_type(_O(other)))   
         return self
-    def __imul__(self, other: Numeric) -> Numeric:
+    def __imul__(self, other) :
         num_type = type(_O(other))
         self.next(num_type(self.c()) * num_type(_O(other)))   
         return self
-    def __itruediv__(self, other: Numeric) -> Numeric:
+    def __itruediv__(self, other) :
         num_type = type(_O(other))
         self.next(num_type(self.c()) / num_type(_O(other)))   
         return self
     
 # --- SUBCLASSES ---
 class HistoricVariable(Variable):
-    def __init__(self, init_var, identity:str='HistoricVariable', units:str=None) -> None:
-        if isinstance(init_var, Numeric):
+    def __init__(self, init_var, identity='HistoricVariable', units=None):
+        if isinstance(init_var, NumType):
             self.record = [init_var]
         elif isinstance(init_var, list):
             self.record = init_var
         else: 
-            e.raise_type_error('init_var', (*Numeric, list, tuple), init_var)
+            e.raise_type_error('init_var', (*NumType, *Iterable), init_var)
         typecheck(((units, str), (identity, str)))
         self.identity = identity
         self.units = units
@@ -133,21 +128,21 @@ class HistoricVariable(Variable):
     def c(self) -> float | int:
         return self.record[-1]
 
-    def next(self, next_val: int | float | list | tuple) -> None:
-        if isinstance(next_val, Numeric):
+    def next(self, next_val):
+        if isinstance(next_val, NumType):
             self.record.append(next_val)
-        elif isinstance(next_val, (list, tuple)):
+        elif isinstance(next_val, Iterable):
             for val in next_val:
-                if isinstance(val, Numeric):
+                if isinstance(val, NumType):
                     self.record.append(val)
                 else: 
-                    e.raise_list_type_error('next_val', Numeric, val)
+                    e.raise_list_type_error('next_val', NumType, val)
         else: 
-            e.raise_type_error('next_val', (*Numeric, list, tuple), next_val)
+            e.raise_type_error('next_val', (*NumType, *Iterable), next_val)
     # dUnder Methods
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.record)
-    def __getitem__(self, ind: int | str) -> int | float | list | tuple:
+    def __getitem__(self, ind):
         if isinstance(ind, int):
             return self.record[ind]
         elif isinstance(ind, str):
@@ -168,36 +163,36 @@ class HistoricVariable(Variable):
 
 #START of Vector Class
 class Vector:
-    def __init__(self, li : tuple | list = None,
-                x: Numeric | list = None,
-                y: Numeric | list = None,
-                z: Numeric | list = None) -> None:
-        if (isinstance(li, (tuple, list)) and len(li) == 3):
+    def __init__(self, li = None,
+                x = None,
+                y = None,
+                z = None):
+        if (isinstance(li, Iterable) and len(li) == 3):
             self.X, self.Y, self.Z = li
-        elif all(isinstance(var, Numeric) for var in (x, y, z)):
+        elif all(isinstance(var, NumType) for var in (x, y, z)):
             self.X, self.Y, self.Z = x, y, z
-        elif isinstance(li, (Vector, HistoricVector)):
+        elif isinstance(li, VectorType):
             (self.X, self.Y, self.Z) = li.c()
         else:
-            e.raise_list_type_error('l,x,y,z', (tuple, list,*Numeric), (li,x,y,z))
+            e.raise_list_type_error('l,x,y,z', (*Iterable, *NumType, *VectorType), (li,x,y,z))
 
-    def c(self, usage:int | NoneType = None) -> tuple | Numeric:
+    def c(self, usage = None):
         _usage_lookup ={None: (self.X, self.Y, self.Z), 0:self.X, 1:self.Y, 2:self.Z}
         try:
             return _usage_lookup[usage]
         except KeyError: 
             e.raise_out_of_range('c()', usage)
 
-    def magnitude(self) -> Numeric:
+    def magnitude(self):
         num_type = type(self.c(0))
         return num_type(math.sqrt(sum([n**2 for n in self.c()])))
-    def unit(self) -> VectorType:
+    def unit(self):
         if float(self.magnitude()) == 0.:
             return Vector(li=(0,0,0))
         else:
             num_type = type(self.c(0))
             return Vector(li=list((num_type(n)/self.magnitude()) for n in self.c()))
-    def cross(self, other: tuple | list | VectorType) -> VectorType:
+    def cross(self, other):
         temp = _O(other)
         if len(temp) == 3:
             e1 = self.Y * temp[2] - self.Z * temp[1]
@@ -208,7 +203,7 @@ class Vector:
             e.raise_component_error('other', other)
 
     # dUnder Methods
-    def __getitem__(self, ind: int | str) -> int | float | list | tuple:
+    def __getitem__(self, ind):
         if isinstance(ind, str):
             _get_lookup = {'x':self.X, 'i':self.X, 'y':self.Y, 'j':self.Y, 'z':self.Z, 'k':self.Z, 'current':self.c}
             try:
@@ -219,52 +214,52 @@ class Vector:
             e.raise_type_error('ind', str, ind)
     def __len__(self):
         return 1
-    def __str__(self) -> str: 
+    def __str__(self): 
         return f'[{self.X}i+{self.Y}j+({self.Z})k]'
-    def __repr__(self) -> str: 
+    def __repr__(self): 
         return f'{self.c()}, len={len(self)}'
     def __iter__(self):
         return iter((self.X, self.Y, self.Z))
-    def __add__(self, other: list | tuple | VectorType) -> VectorType:
+    def __add__(self, other):
         temp = _O(other)
         if len(temp) == 3:
             num_type = type(temp[0])
             return Vector(li=[num_type(val) + num_type(temp[i]) for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other or temp', temp)
-    def __sub__(self, other: list | tuple | VectorType) -> VectorType:
+    def __sub__(self, other):
         temp = _O(other)
         if len(temp) == 3:
             num_type = type(temp[0])
             return Vector(li=[num_type(val) - num_type(temp[i]) for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other or temp', temp)
-    def __mul__(self, other: list | tuple | VectorType | Numeric) -> VectorType | Numeric:
+    def __mul__(self, other):
         temp = _O(other)
         if len(temp) == 3:
             num_type = type(temp[0])
             return sum(([num_type(val) * num_type(temp[i]) for i, val in enumerate(self['current'])]))
-        elif isinstance(temp, Numeric):
+        elif isinstance(temp, NumType):
             num_type = type(temp)
             return Vector(li=[(num_type(val)*num_type(temp)) for val in self['current']])
         else:
             e.raise_component_error('other or temp', temp)
-    def __truediv__(self, other: Numeric) -> VectorType:
+    def __truediv__(self, other):
         temp = _O(other)
         num_type = type(temp)
-        if isinstance(temp, Numeric):
+        if isinstance(temp, NumType):
             return Vector(li=[(num_type(val)/num_type(temp)) for val in self['current']])
         else:
-            e.raise_type_error('other', (*Numeric, *VectorType), other)
+            e.raise_type_error('other', NumType, other)
 
 # --- SUBCLASSES ---
 class HistoricVector(Vector):
-    def __init__(self, x: float | int | list = None,
-                 y: float | int | list = None,
-                 z: float | int | list = None,
-                 li : tuple | list = None, # update x from x_init etc
-                 identity: str = None,
-                 units_v: str = None) -> None:
+    def __init__(self, x = None,
+                 y = None,
+                 z = None,
+                 li = None, # update x from x_init etc
+                 identity= None,
+                 units_v= None):
         if isinstance(units_v, str):
             self.units = units_v
         elif units_v is None:
@@ -278,36 +273,36 @@ class HistoricVector(Vector):
             self.identity = 'HistoricVector'
         else:
             e.raise_type_error('identity', (str, NoneType), identity)
-
+        li = _O(li)
         if isinstance(li, (tuple, list)) and len(li) == 3:
             self.X = HistoricVariable(li[0], f'{self.identity}_x', self.units)
             self.Y = HistoricVariable(li[1], f'{self.identity}_y', self.units)
             self.Z = HistoricVariable(li[2], f'{self.identity}_z', self.units)
-        elif (isinstance(x, Numeric) and
-              isinstance(y, Numeric) and
-              isinstance(z, Numeric)):
+        elif (isinstance(x, NumType) and
+              isinstance(y, NumType) and
+              isinstance(z, NumType)):
             self.X = HistoricVariable(x, f'{self.identity}_x', self.units)
             self.Y = HistoricVariable(y, f'{self.identity}_y', self.units)
             self.Z = HistoricVariable(z, f'{self.identity}_z', self.units)
         else:
-            e.raise_type_error('l,x,y,z', (tuple, list,*Numeric), (li,x,y,z))
+            e.raise_type_error('l,x,y,z', (*Iterable,*NumType), (li,x,y,z))
 
-    def x(self) -> Numeric:
+    def x(self) :
         return self.X.c()
-    def y(self) -> Numeric:
+    def y(self) :
         return self.Y.c()
-    def z(self) -> Numeric:
+    def z(self) :
         return self.Z.c()
         
-    def c(self, usage:int|NoneType=None) -> tuple | Numeric:
-        _usage_lookup ={None: (self.x(), self.y(), self.z()), 0:self.x, 1:self.y, 2:self.z}
+    def c(self, usage=None):
+        _usage_lookup ={None: (self.x(), self.y(), self.z()), 0:self.x(), 1:self.y(), 2:self.z()}
         try:
-            return _usage_lookup[usage]()
+            return _usage_lookup[usage]
         except KeyError: 
             e.raise_out_of_range('c()', usage)
-    def next(self, next_vals: tuple | list) -> None:
+    def next(self, next_vals):
         temp = _O(next_vals)
-        if isinstance(temp, (list, tuple)):
+        if isinstance(temp, Iterable):
             if len(temp) == 3:
                 self.X.next(temp[0])
                 self.Y.next(temp[1])
@@ -315,27 +310,27 @@ class HistoricVector(Vector):
             else:
                 e.raise_component_error('next_vals', next_vals)
         else:
-            e.raise_type_error('next_vals', (list, tuple), next_vals)
+            e.raise_type_error('next_vals', Iterable, next_vals)
     # dUnder Methods
-    def __iter__(self) -> iter:
+    def __iter__(self):
         return iter((self.X.record, self.Y.record, self.Z.record))
     
-    def __len__(self) -> int:
+    def __len__(self):
         if len(self.X) == len(self.Y) and len(self.Y) == len(self.Z):
             return int(len(self.X))
         else:
             e.raise_unmatched_error(('x', 'y', 'z'),(self.X, self.Y, self.Z))
-    def __str__(self) -> str:
+    def __str__(self):
         
-        return f'"{self.identity}":[{self.x()}i+{self.y()}j+({self.z()})k], units ="{self.units}"'
-    def __repr__(self) -> str:
+        return f'"{self.identity}":{self.x()}i+{self.y()}j+{self.z()})k, units ="{self.units}"'
+    def __repr__(self):
         
         return f'HistoricVector("{self.identity}", current={self.c()}, len={len(self)})'
-    def __getitem__(self, ind: int | str) -> Numeric | list | tuple:
+    def __getitem__(self, ind):
         if isinstance(ind, str):
             _get_lookup = {'current':self.c,**dict.fromkeys(['x', 'i'], self.x), **dict.fromkeys(['y', 'j'], self.y), 
                            **dict.fromkeys(['z', 'k'], self.z),**dict.fromkeys(['full', 'all', 'record'],
-                                                                               ((self.X.hist), (self.Y.hist), (self.Z.hist)))}
+                                                                               ((self.X.record), (self.Y.record), (self.Z.record)))}
             ind = ind.lower()
             try:
                 return _get_lookup[ind]()
@@ -349,16 +344,19 @@ class HistoricVector(Vector):
         else:
             e.raise_type_error('ind', (str, int), ind)
 #END of Vector Class
+VectorType = (Vector, HistoricVector)
+VarType = (Variable, HistoricVariable)
+
 #START of Body Class
 class Body:
     def __init__(self,
-                mass: Numeric,
-                init_pos: list | tuple,
-                init_vel: list | tuple=(0,0,0),
-                radius: Numeric = 0,
-                bounce: Numeric = 0.999,
-                color: str= None,
-                identity:str = None) -> None:
+                mass,
+                init_pos,
+                init_vel=(0,0,0),
+                radius = 0,
+                bounce = 0.999,
+                color= None,
+                identity = None):
         if isinstance(identity, str):
             self.identity = identity
         elif identity is None:
@@ -367,37 +365,37 @@ class Body:
             e.raise_type_error('identity', str, identity)
         
         init_pos, init_vel = _O(init_pos), _O(init_vel)
-        typecheck(((init_pos,(list,tuple)),(init_vel,(list, tuple)),(mass,Numeric),
-                     (radius,Numeric),(bounce,Numeric),(color,(NoneType, str))))
-        with self.identity as id:
-            self.pos = HistoricVector(li=init_pos, id=f'{id}_pos', units_v='m')
-            self.vel = HistoricVector(li=init_vel, id=f'{id}_vel', units_v='ms^-1')
-            self.acc = HistoricVector(0,0,0,identity=f'{id}_acc',units_v='ms^-2')
-            self.mass = Variable(mass,identity=f'{id}_mass',units='kg')
-            self.radius = Variable(radius,identity=f'{id}_rad',units='m')
+        typecheck(((init_pos,Iterable),(init_vel,Iterable),(mass,NumType),
+                     (radius,NumType),(bounce,NumType),(color,(NoneType, str))))
+        _id = self.identity
+        self.pos = HistoricVector(li=init_pos, identity=f'{_id}_pos', units_v='m')
+        self.vel = HistoricVector(li=init_vel, identity=f'{_id}_vel', units_v='ms^-1')
+        self.acc = HistoricVector(0,0,0,identity=f'{_id}_acc',units_v='ms^-2')
+        self.mass = Variable(mass,identity=f'{_id}_mass',units='kg')
+        self.radius = Variable(radius,identity=f'{_id}_rad',units='m')
         self.bounce = bounce
         self.color = color
-    def __str__(self) -> str:
+    def __str__(self):
         return f'Body("{self.identity}",\n\
     mass="{self.mass.c()} {self.mass.units}",\n\
     currentpos="{self.pos.c()} {self.pos.units}",\n\
     currentvel="{self.vel.c()} {self.vel.units}",\n\
     currentvel="{self.acc.c()} {self.acc.units}")'
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f'Body("{self.identity}", m={self.mass.c()}, r={self.pos.c()},\
 v={self.vel.c()}), a={self.acc.c()})'
 
-    def update(self, dt: Numeric = 1,
-                vel_change: list | tuple=None,
-                acc_change: list | tuple=None,
-                vel_next: list | tuple=None) -> None:
+    def update(self, dt = 1,
+                vel_change=None,
+                acc_change=None,
+                vel_next=None):
         if vel_next:
             vel = _O(vel_next)
         else:
             vel = self.vel.c()
         if acc_change is not None:
             acc_change = _O(acc_change)
-            if isinstance(acc_change, (list, tuple)):
+            if isinstance(acc_change, Iterable):
                 if len(acc_change) == 3:
                     self.vel.next((Vector((acc_change))*dt + vel).c())
                     self.acc.next(acc_change)
@@ -406,39 +404,39 @@ v={self.vel.c()}), a={self.acc.c()})'
             self.acc.next((0,0,0))
         if vel_change is not None:
             acc_change = _O(acc_change)
-            if isinstance(vel_change, (list, tuple)):
+            if isinstance(vel_change, Iterable):
                 if len(vel_change) == 3:
                     self.pos.next(self.pos + (Vector(vel) + vel_change)*dt)
         else:
             self.pos.next(self.pos + Vector(vel)*dt)
         
     
-    def _reinitialise(self, init_pos=None, init_vel=None) -> None:
+    def _reinitialise(self, init_pos=None, init_vel=None):
         self.acc = HistoricVector(0,0,0,
                              identity=f'{self.identity}_acc',
                              units_v='ms^-2')
         if init_pos != None:
-            if isinstance(init_pos, (list, tuple)):
+            if isinstance(init_pos, (*Iterable, *VectorType)):
                 self.pos = HistoricVector(li=init_pos,
                                     identity=f'{self.identity}_pos',
                                     units_v='m')
             else:
-                e.raise_type_error('init_pos', (list, tuple), init_pos)
+                e.raise_type_error('init_pos', Iterable, init_pos)
         if init_vel != None:
-            if isinstance(init_vel, (list, tuple)):
+            if isinstance(init_vel, (*Iterable, *VectorType)):
                 self.vel = HistoricVector(li=init_vel,
                                     identity=f'{self.identity}_vel',
                                     units_v='ms^-1')
             else:
-                e.raise_type_error('init_vel', (list, tuple), init_vel)
+                e.raise_type_error('init_vel', (*Iterable, *VectorType), init_vel)
 
 #END of Body Class
 
-def horizons_query(searchquery: str,
-                   observer: str = '0',
-                   time: str = '2023-11-03',
+def horizons_query(searchquery,
+                   observer = '0',
+                   time = '2023-11-03',
                    num_type: type = float,
-                   return_type: str = 'body') -> Body | dict | None:
+                   return_type = 'body'):
     typecheck(((searchquery, str),(observer,str), (time, str), (num_type, type), (return_type,str)))
     if all([return_type.lower() != opt for opt in ('body', 'dict', 'print')]) :
         e.raise_value_error('return_type', type, return_type)
@@ -495,11 +493,11 @@ def horizons_query(searchquery: str,
     elif return_type.lower() == 'body':
         return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
 
-def horizons_batch(search_queries: tuple | list,
-                   observer: str = '0',
-                   time: str = '2023-11-03',
-                   num_type: type = float,
-                   return_type: str = 'body') -> list | None:
+def horizons_batch(search_queries,
+                   observer = '0',
+                   time = '2023-11-03',
+                   num_type= float,
+                   return_type = 'body'):
     new_bodies = []
     for query in tqdm(search_queries, desc='Getting data from JPL Horizons', unit='queries'):
         if isinstance(query, str):
@@ -510,31 +508,31 @@ def horizons_batch(search_queries: tuple | list,
 
 #START of PhysEngine class
 class PhysEngine:
-    def __init__(self, dt: Numeric = 1, checking_range:int=3) -> None:
+    def __init__(self, dt = 1, checking_range=3):
         self.bodies, self.planes, self.fields = [], [], []
-        typecheck(((dt, Numeric), (checking_range,Numeric)))
+        typecheck(((dt, NumType), (checking_range,NumType)))
         self.dt = dt
         self._rangechk = checking_range
-    def attach_bodies(self, new_bodies: list | tuple) -> None:
-        if isinstance(new_bodies, (list, tuple)):
+    def attach_bodies(self, new_bodies):
+        if isinstance(new_bodies, Iterable):
             for i, new_body in enumerate(new_bodies):
                 if isinstance(new_body, Body) or issubclass(type(new_body), Body):
                     self.bodies.append(new_body)
                 else:
                     e.raise_type_error(f'new_body at index {i}', type(Body), new_body)
         else:
-            e.raise_type_error('new_bodies', (list, tuple), new_bodies)
+            e.raise_type_error('new_bodies', Iterable, new_bodies)
         tqdm.write(f'{len(self.bodies)} bodies attached.')
     def _loadeng(self,eng):
         self = eng
     
-    def save(self,dump:str='engine',file_name:str='nbody_data'):
+    def save(self,dump='engine',file_name='nbody_data'):
         _saveobjs = {'bodies': {'bodies':self.bodies},
                      'engine':{'engine':self}}
         with open(f'{file_name}.npz','wb') as file:
             np.savez(file, **_saveobjs[dump])
 
-    def load(self, objects:str='engine', file_name:str='nbody_data'):   
+    def load(self, objects='engine', file_name='nbody_data'):   
         _loadobjs = {'bodies': ("self.attach_bodies(objs['bodies'])",),
                      'engine': ("self._loadeng(objs['engine'])",)}
         with open(f'{file_name}.npz') as file:
@@ -546,7 +544,7 @@ class PhysEngine:
                     raise LookupError(f'cannot find {objects} value in "{file}"')
 
 
-    def make_relative_to(self, target_body: Body) -> None:
+    def make_relative_to(self, target_body):
         for body in self.bodies:
             if body != target_body:
                 body._reinitialise((body.pos-target_body.pos), (body.vel-target_body.vel))
@@ -555,24 +553,24 @@ class PhysEngine:
         tqdm.write(f"Bodies' positions and velocities have been made relative to {target_body.identity}.")
         target_body.identity = f'{target_body.identity}(Static)'
   
-    def orbit_around(self, main_body, other_bodies) -> None:
+    def orbit_around(self, main_body, other_bodies):
             pass
     
-    def create_acceleration(self, accel_vector : tuple | list | VectorType) -> None:
+    def create_acceleration(self, accel_vector):
         _acc = _O(accel_vector)
-        if len(_acc) == 3 and isinstance(_acc[0], Numeric):
+        if len(_acc) == 3 and isinstance(_acc[0], NumType):
             self.fields+= [Vector(li=_acc)] 
         else:
-            e.raise_type_error('accel_vector', (list, tuple, *VectorType), accel_vector)
+            e.raise_type_error('accel_vector', (*Iterable, *VectorType), accel_vector)
     
-    def create_plane(self, const_axis : str='z', const_val : Numeric = 0) -> None:
-        if const_axis in ('x', 'y', 'z') and isinstance(const_val, Numeric):
+    def create_plane(self, const_axis ='z', const_val  = 0):
+        if const_axis in ('x', 'y', 'z') and isinstance(const_val, NumType):
             self.planes.append([const_axis, const_val])
             tqdm.write(f'constant plane {const_axis}={const_val} has been initialized.')
         else:
-            e.raise_value_error('const_axis,const_val',((str),(int,float)),(const_axis,const_val))
+            e.raise_value_error('const_axis,const_val',(str,*NumType),(const_axis,const_val))
     
-    def _check_collision(self, body: Body, co_restitution: Numeric=0) -> tuple:
+    def _check_collision(self, body, co_restitution=0):
         returned_coll = False
         for bod in self.bodies:
             if body != bod: 
@@ -604,7 +602,7 @@ class PhysEngine:
             return Vector(body.vel.c()), False
     
 
-    def _find_gravity(self, body: Body)-> VectorType:
+    def _find_gravity(self, body):
         res = Vector((0,0,0))
         for bod2 in self.bodies: 
             if bod2 != body:
@@ -620,7 +618,7 @@ class PhysEngine:
                 res += force_on_bod1
         return res/body.mass.c()
     
-    def evaluate(self) -> None:
+    def evaluate(self):
         _temp = [[0,0,0] for _ in self.bodies]
         for i, body in enumerate(self.bodies):
             _temp[i][0:2] = self._check_collision(body, body.bounce)
@@ -636,14 +634,14 @@ class PhysEngine:
 
 # --- SUBCLASSES ---
 class PhysEngineMP(PhysEngine):
-    def __init__(self, dt: int | float = 1, checking_range: int = 3) -> None:
+    def __init__(self, dt = 1, checking_range = 3):
         super().__init__(dt, checking_range)
 
-    def _process_body(self,body: Body) -> list:
+    def _process_body(self,body):
         return [body, *self._check_collision(body), self._find_gravity(body)]
 
 
-    def evaluate(self) -> None:
+    def evaluate(self):
         if __name__ == '__main__':
             with Pool as workers:
                 _temp = workers.map(self._process_body, self.bodies)
@@ -659,22 +657,22 @@ class PhysEngineMP(PhysEngine):
 # START of Simulation Class
 class Simulation:
     def __init__(self,
-                name: str = 'Nbody Simulation',
-                engine: PhysEngine = None,
-                focus_body: Body|NoneType = None,
-                focus_range: Numeric|NoneType = None,
+                name = 'Nbody Simulation',
+                engine = None,
+                focus_body = None,
+                focus_range = None,
                 autoscale: bool = True,
                 show_grid: bool = True, 
                 show_shadows: bool = False,
                 show_acceleration: bool = False,
                 show_velocity: bool = False,
-                vector_size: Numeric = 1,
-                labelling_type: str = 'legend',
-                body_model: str = 'dots',
-                guistyle: str = 'default') -> None:
-        typecheck((engine,PhysEngine),(focus_range,(*Numeric, NoneType)),
+                vector_size = 1,
+                labelling_type = 'legend',
+                body_model = 'dots',
+                guistyle = 'default'):
+        typecheck(((engine,PhysEngine),(focus_range,(*NumType, NoneType)),
 (autoscale,bool),(show_grid,bool),(show_shadows,bool),(show_acceleration,bool),(show_velocity,bool),
-(vector_size,Numeric),(labelling_type,str),(body_model,str),(guistyle,str))
+(vector_size,NumType),(labelling_type,str),(body_model,str),(guistyle,str)))
         self._engine = engine
         self.focus_range = focus_range
         self.autoscale = autoscale
@@ -726,11 +724,13 @@ class Simulation:
             _clearpanes()
 
 
-    def _init(self, i:int) -> None:
+    def _init(self, i):
         for _ in trange(i, desc='Evaluating motion for each frame', unit='frames'):
             self._engine.evaluate()
         tqdm.write('Calculations finished, Starting interactive window...')
-    def _animate(self, i:int) -> None:
+    
+    
+    def _animate(self, i):
         co = {'clip_on':False}
         _def = {'color':b.color, **co}
         
@@ -801,7 +801,7 @@ class Simulation:
             self.ax.legend()
 
 
-    def start(self, eval_length:int=None, fps:Numeric=None, frameskip:int=1, plotskip:int=1) -> mpl.figure.Figure:
+    def start(self, eval_length=None, fps=None, frameskip=1, plotskip=1):
         self._frameskip, self._plotskip = frameskip, plotskip
         f,inv = eval_length, (1/fps)/1000
         tqdm.write('Starting Simulation Instance, Running Calculations:')
@@ -811,14 +811,14 @@ class Simulation:
 
 # --- SUBCLASSES ---
 class SolarSystemMB(Simulation):
-        def __init__(self, dt=1000, show_grid: bool = True,
-                     show_shadows: bool = False,
-                     show_acceleration: bool = False,
-                     show_velocity: bool = False,
-                     vector_size: int | float = 1,
-                     labelling_type: str = 'label',
-                     body_model: str = 'dots',
-                     guistyle: str = 'dark') -> None:
+        def __init__(self, dt=1000, show_grid= True,
+                     show_shadows= False,
+                     show_acceleration = False,
+                     show_velocity= False,
+                     vector_size = 1,
+                     labelling_type = 'label',
+                     body_model = 'dots',
+                     guistyle = 'dark'):
             name = 'Major Bodies in Solar System'
             engine = PhysEngine(dt)
             bodies = list(horizons_query(obj_id) for obj_id in (
@@ -831,11 +831,11 @@ class SolarSystemMB(Simulation):
                              show_shadows, show_acceleration, show_velocity,
                              vector_size, labelling_type, body_model, guistyle)
 
-        def start(self, eval_length:int=50000, fps:Numeric=30, frameskip:int=1000, plotskip:int=500) -> mpl.figure.Figure:
+        def start(self, eval_length=50000, fps=30, frameskip=1000, plotskip=500):
             super().start(eval_length, fps, frameskip, plotskip)
 
 class BouncingBalls(Simulation):
-        def __init__(self, name: str = 'Balls in a Box', show_grid: bool = True, show_shadows: bool = False, show_acceleration: bool = False, show_velocity: bool = False, vector_size: Numeric = 1, labelling_type: str = 'legend', guistyle: str = 'default') -> None:
+        def __init__(self, name = 'Balls in a Box', show_grid = True, show_shadows = False, show_acceleration = False, show_velocity = False, vector_size = 1, labelling_type = 'legend', guistyle = 'default'):
             balls = (
                     Body(3,(0,-1,1),(0,0.6,-0.01), 0.1, identity='4', color='yellow'),
                     Body(3,(0,1,0),(0.2,-0.5,-0.5), 0.1, identity='5', color='magenta'),
@@ -847,9 +847,7 @@ class BouncingBalls(Simulation):
             autoscale, body_model, focus_range, focus_body = False, 'surface', 1.2, None
             super().__init__(name, engine, focus_body, focus_range, autoscale, show_grid, show_shadows, show_acceleration, show_velocity, vector_size, labelling_type, body_model, guistyle)
     
-    
-    
-        def start(self, eval_length:int=3000, fps:Numeric=30, frameskip:int=2, plotskip:int=1):
+        def start(self, eval_length=3000, fps=30, frameskip=2, plotskip=1):
             super().start(eval_length, fps, frameskip, plotskip)
             
             

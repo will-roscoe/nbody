@@ -73,7 +73,8 @@ phys = PhysEngine(dt: int | float = 1,
 ```
 You must then load the bodies using the function: 
 ```python
-phys.attach_bodies(new_bodies:list | tuple) #you must pass the bodies in a list or tuple.
+phys.attach_bodies(new_bodies:list | tuple) 
+    #you must pass the bodies in a list or tuple.
 ```
 >Optionally, you can create some infinite planes parallel to a plane by passing:
 >```python
@@ -105,7 +106,7 @@ sim = Simulation(name: str = 'Nbody Simulation',
                 vector_size: int|float = 1,
                 labelling_type: str = 'legend',
                 body_model: str = 'dots',
-                guistyle: str = 'default'
+                guistyle: str = 'default',
                 ) -> None:
 ```
 > The optional arguments are as follows:
