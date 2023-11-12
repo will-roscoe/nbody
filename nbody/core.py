@@ -1,6 +1,8 @@
 
 # Python Builtins
+from dataclasses import field
 import math
+import pickle
 import re
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -513,7 +515,6 @@ class PhysEngine:
         typecheck(((dt, Numeric), (checking_range,Numeric)))
         self.dt = dt
         self._rangechk = checking_range
-    
     def attach_bodies(self, new_bodies: list | tuple) -> None:
         if isinstance(new_bodies, (list, tuple)):
             for i, new_body in enumerate(new_bodies):
@@ -524,7 +525,27 @@ class PhysEngine:
         else:
             e.raise_type_error('new_bodies', (list, tuple), new_bodies)
         tqdm.write(f'{len(self.bodies)} bodies attached.')
+    def _loadeng(self,eng):
+        self = eng
     
+    def save(self,dump:str='engine',file_name:str='nbody_data'):
+        _saveobjs = {'bodies': {'bodies':self.bodies},
+                     'engine':{'engine':self}}
+        with open(f'{file_name}.npz','wb') as file:
+            np.savez(file, **_saveobjs[dump])
+
+    def load(self, objects:str='engine', file_name:str='nbody_data'):   
+        _loadobjs = {'bodies': ("self.attach_bodies(objs['bodies'])",),
+                     'engine': ("self._loadeng(objs['engine'])",)}
+        with open(f'{file_name}.npz') as file:
+            objs = np.load(file, allow_pickle=True)
+            for func in _loadobjs[objects]:
+                try:
+                    eval(func)
+                except KeyError:
+                    raise LookupError(f'cannot find {objects} value in "{file}"')
+
+
     def make_relative_to(self, target_body: Body) -> None:
         for body in self.bodies:
             if body != target_body:
