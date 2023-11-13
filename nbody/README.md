@@ -1,19 +1,8 @@
-<style>
-.row {
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  padding-bottom: 0.9em;
-  justify-content: space-around; /* for centering 3 blocks in the center */
-  /* justify-content: space-between; for space in between */ 
-}
-</style>
 
 <h1 style="text-align: center;"><code>nBody</code> Scientific Modelling Project v1.4</h1>
-<div class="row">
-    <div style="text-align: left;">By Will Roscoe</div>
-    <div style="text-align: right">05th Nov 2023</div>
-</div>
+
+  By Will Roscoe -- 13th Nov 2023
+
 
 ----
 
