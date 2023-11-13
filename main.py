@@ -1,5 +1,6 @@
 
-import nbody.core as nb
-
-ss = nb.SolarSystemMB()
-ss.start(eval_length=1000, frameskip=100, plotskip=100)
+import nbody.models as nb
+bb = nb.BouncingBalls()
+bb._engine.load('bodies')
+print(bb._engine.bodies)
+bb.start()
