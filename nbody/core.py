@@ -29,7 +29,7 @@ try:
     from scipy.constants import G
 except ModuleNotFoundError:
     G = 6.6743*10**(-11)
-
+Any = object
 NoneType = type(None)
 DecType= type(Decimal())
 NumType = (DecType, int, float)
@@ -81,34 +81,34 @@ class Variable:
         return f'VarType Object (current={self.c()} {self.units},\
 len={len(self)}, rec={self.record}, id={self.identity})'
     def __add__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         return num_type(self.c()) + num_type(_O(other))
     def __sub__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         return num_type(self.c()) - num_type(_O(other))
     def __mul__(self, other):
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         return num_type(self.c()) * num_type(_O(other))
     def __truediv__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         return num_type(self.c()) / num_type(_O(other))
     def __floordiv__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         return num_type(self.c()) // num_type(_O(other))
     def __iadd__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         self.next(num_type(self.c()) + num_type(_O(other)))   
         return self
     def __isub__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         self.next(num_type(self.c()) - num_type(_O(other)))   
         return self
     def __imul__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         self.next(num_type(self.c()) * num_type(_O(other)))   
         return self
     def __itruediv__(self, other) :
-        num_type = type(_O(other))
+        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
         self.next(num_type(self.c()) / num_type(_O(other)))   
         return self
     
@@ -167,12 +167,12 @@ class Vector:
                 x = None,
                 y = None,
                 z = None):
+        if li:
+            li = _O(li)
         if (isinstance(li, Iterable) and len(li) == 3):
             self.X, self.Y, self.Z = li
         elif all(isinstance(var, NumType) for var in (x, y, z)):
             self.X, self.Y, self.Z = x, y, z
-        elif isinstance(li, VectorType):
-            (self.X, self.Y, self.Z) = li.c()
         else:
             e.raise_list_type_error('l,x,y,z', (*Iterable, *NumType, *VectorType), (li,x,y,z))
 
@@ -184,13 +184,13 @@ class Vector:
             e.raise_out_of_range('c()', usage)
 
     def magnitude(self):
-        num_type = type(self.c(0))
+        num_type = (type(self.c(0)) if type(self.c(0)) is not int else float)
         return num_type(math.sqrt(sum([n**2 for n in self.c()])))
     def unit(self):
         if float(self.magnitude()) == 0.:
             return Vector(li=(0,0,0))
         else:
-            num_type = type(self.c(0))
+            num_type =(type(self.c(0)) if type(self.c(0)) is not int else float)
             return Vector(li=list((num_type(n)/self.magnitude()) for n in self.c()))
     def cross(self, other):
         temp = _O(other)
@@ -205,9 +205,9 @@ class Vector:
     # dUnder Methods
     def __getitem__(self, ind):
         if isinstance(ind, str):
-            _get_lookup = {'x':self.X, 'i':self.X, 'y':self.Y, 'j':self.Y, 'z':self.Z, 'k':self.Z, 'current':self.c}
+            _get_lookup = {'x':self.X, 'i':self.X, 'y':self.Y, 'j':self.Y, 'z':self.Z, 'k':self.Z, 'current':self.c()}
             try:
-                return _get_lookup[ind]()
+                return _get_lookup[ind]
             except KeyError:
                 e.raise_value_error('ind', str, ind)
         else: 
@@ -223,30 +223,30 @@ class Vector:
     def __add__(self, other):
         temp = _O(other)
         if len(temp) == 3:
-            num_type = type(temp[0])
+            num_type = (type(temp[0]) if type(temp[0]) is not int else float)
             return Vector(li=[num_type(val) + num_type(temp[i]) for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other or temp', temp)
     def __sub__(self, other):
         temp = _O(other)
         if len(temp) == 3:
-            num_type = type(temp[0])
+            num_type = (type(temp[0]) if type(temp[0]) is not int else float)
             return Vector(li=[num_type(val) - num_type(temp[i]) for i, val in enumerate(self['current'])])
         else:
             e.raise_component_error('other or temp', temp)
     def __mul__(self, other):
         temp = _O(other)
-        if len(temp) == 3:
-            num_type = type(temp[0])
+        if isinstance(temp, Iterable) and len(temp) == 3:
+            num_type = (type(temp[0]) if type(temp[0]) is not int else float)
             return sum(([num_type(val) * num_type(temp[i]) for i, val in enumerate(self['current'])]))
         elif isinstance(temp, NumType):
-            num_type = type(temp)
+            num_type = (type(temp) if type(temp) is not int else float)
             return Vector(li=[(num_type(val)*num_type(temp)) for val in self['current']])
         else:
             e.raise_component_error('other or temp', temp)
     def __truediv__(self, other):
         temp = _O(other)
-        num_type = type(temp)
+        num_type = (type(temp) if type(temp) is not int else float)
         if isinstance(temp, NumType):
             return Vector(li=[(num_type(val)/num_type(temp)) for val in self['current']])
         else:
@@ -394,19 +394,29 @@ v={self.vel.c()}), a={self.acc.c()})'
         else:
             vel = self.vel.c()
         if acc_change is not None:
-            acc_change = _O(acc_change)
-            if isinstance(acc_change, Iterable):
-                if len(acc_change) == 3:
-                    self.vel.next((Vector((acc_change))*dt + vel).c())
-                    self.acc.next(acc_change)
+            print(acc_change, 'NotNone')
+            acc_change = _V(acc_change)
+            print(acc_change, 'Unpack')
+            print(self.vel)
+            print(dt)
+            print(acc_change*dt)
+            self.vel.next((acc_change*dt + vel).c())
+            print(self.vel)
+            self.acc.next(acc_change.c())
         else:
+            raise RuntimeError
             self.vel.next((Vector((self.acc*dt))+vel).c())
             self.acc.next((0,0,0))
+        
         if vel_change is not None:
             acc_change = _O(acc_change)
             if isinstance(vel_change, Iterable):
                 if len(vel_change) == 3:
                     self.pos.next(self.pos + (Vector(vel) + vel_change)*dt)
+                else:
+                    raise RuntimeError
+            else:
+                raise RuntimeError
         else:
             self.pos.next(self.pos + Vector(vel)*dt)
         
@@ -543,7 +553,6 @@ class PhysEngine:
                 except KeyError:
                     raise LookupError(f'cannot find {objects} value in "{file}"')
 
-
     def make_relative_to(self, target_body):
         for body in self.bodies:
             if body != target_body:
@@ -617,11 +626,12 @@ class PhysEngine:
                     force_on_bod1 = unit_12*(force_on_bod1_t/(mag_12)**2)
                 res += force_on_bod1
         return res/body.mass.c()
+
     
     def evaluate(self):
         _temp = [[0,0,0] for _ in self.bodies]
         for i, body in enumerate(self.bodies):
-            _temp[i][0:2] = self._check_collision(body, body.bounce)
+            _temp[i][0:2] =self._check_collision(body, body.bounce)
         for i, body in enumerate(self.bodies):
             _temp[i][2] = self._find_gravity(body)
         for i, body in enumerate(self.bodies):
@@ -629,8 +639,8 @@ class PhysEngine:
             if not on_plane:
                 fieldvel = list(sum(f.c(i) for f in self.fields) for i in range(3))
             else:
-                fieldvel = (0,0,0)
-            body.update(self.dt, vel_next=(col_vel+fieldvel).c(), acc_change=acc_g)
+                fieldvel = Vector((0,0,0)) 
+            body.update(dt=self.dt, vel_next=(col_vel+fieldvel).c(), acc_change=acc_g)
 
 # --- SUBCLASSES ---
 class PhysEngineMP(PhysEngine):
@@ -724,17 +734,16 @@ class Simulation:
             _clearpanes()
 
 
-    def _init(self, i):
-        for _ in trange(i, desc='Evaluating motion for each frame', unit='frames'):
+    def _init(self, eval_length, frameN, plotN):
+        for _ in trange(eval_length, desc='Evaluating motion for each frame', unit='frames'):
             self._engine.evaluate()
+        self.framelist = list(frameN*x for x in range(int(eval_length/frameN)))
         tqdm.write('Calculations finished, Starting interactive window...')
     
     
     def _animate(self, i):
         co = {'clip_on':False}
-        _def = {'color':b.color, **co}
-        
-        maxim = len(self._engine.bodies[0].pos.X.hist)
+        maxim = len(self._engine.bodies[0].pos.X.record)
         ind = int(i*self._frameskip)
         step = self._plotskip
         while ind >= maxim:
@@ -771,6 +780,7 @@ class Simulation:
             self.ax.plot_surface(*points[plane[0]], zorder=1,color=('xkcd:azure', 0.5), **co)
         
         for b in self._engine.bodies:
+            _def = {'color':b.color, **co}
             _poshist = list(list(float(m) for m in _b.record[0:ind:step]) for _b in (b.pos.X, b.pos.Y, b.pos.Z))
             if self.show_velocity or self.show_acceleration:
                 _pos = [float(m) for m in b.pos[ind]]
@@ -789,12 +799,12 @@ class Simulation:
                                 marker='o', zorder=4, **_def)
             else:
                 _sf = {'wireframe':self.ax.plot_wireframe, 'surface':self.ax.plot_surface}
-                _sf[self.body_model](*sphere(b.pos[ind], b.radius.c()), zorder=2, **_def)
+                _sf[self.body_model](*sphere(list(float(m) for m in b.pos[ind]), b.radius.c()), zorder=2, **_def)
 
             if self.labelling_type == 'label':
-                self.ax.text(*b.pos[ind], b.identity, zorder=10)
+                self.ax.text(*list(float(m) for m in b.pos[ind]), b.identity, zorder=10)
             if self.show_shadows:
-                self.ax.plot(*_poshist[0:2],[(self.focus_body.pos.Z[ind]-self.focus_range)]*
+                self.ax.plot(*_poshist[0:2],[(_poshist[2][ind]-self.focus_range)]*
                              len(_poshist[2]),
                     color='black', zorder=1.5, **co)
         if self.labelling_type == 'legend':
@@ -802,11 +812,11 @@ class Simulation:
 
 
     def start(self, eval_length=None, fps=None, frameskip=1, plotskip=1):
-        self._frameskip, self._plotskip = frameskip, plotskip
-        f,inv = eval_length, (1/fps)/1000
+        self._init(eval_length, frameskip, plotskip)
+        
+        inv = (1/fps)/1000
         tqdm.write('Starting Simulation Instance, Running Calculations:')
-        anim = animation.FuncAnimation(self.fig, func = self._animate,
-                                       init_func = self._init(f), interval=inv, frames=f) 
+        anim = animation.FuncAnimation(self.fig, func = self._animate, interval=inv, frames=self.framelist) 
         plt.show()
 
 # --- SUBCLASSES ---
@@ -821,7 +831,7 @@ class SolarSystemMB(Simulation):
                      guistyle = 'dark'):
             name = 'Major Bodies in Solar System'
             engine = PhysEngine(dt)
-            bodies = list(horizons_query(obj_id) for obj_id in (
+            bodies = list(horizons_query(obj_id, num_type=Decimal) for obj_id in (
                 '10','199','299','399','499','599','699','799','899'))
             engine.attach_bodies(bodies)
             engine.make_relative_to(bodies[0])
