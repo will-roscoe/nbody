@@ -353,38 +353,21 @@ class PhysEngineMP(PhysEngine):
 
 # START of Simulation Class
 class Simulation:
-    def __init__(self,
-                name = 'Nbody Simulation',
-                engine = None,
-                focus_body = None,
-                focus_range = None,
-                autoscale: bool = True,
-                show_grid: bool = True, 
-                show_shadows: bool = False,
-                show_acceleration: bool = False,
-                show_velocity: bool = False,
-                vector_size = 1,
-                labelling_type = 'legend',
-                body_model = 'dots',
-                guistyle = 'default'):
-        typecheck(((engine,PhysEngine),(focus_range,(*NumType, NoneType)),
-(autoscale,bool),(show_grid,bool),(show_shadows,bool),(show_acceleration,bool),(show_velocity,bool),
-(vector_size,NumType),(labelling_type,str),(body_model,str),(guistyle,str)))
-        self._engine = engine
-        self.focus_range = focus_range
-        self.autoscale = autoscale
-        self.show_grid = show_grid
-        self.show_shadows = show_shadows
-        self.show_acceleration = show_acceleration
-        self.show_velocity = show_velocity
-        self.vector_size = vector_size
-        self.labelling_type = labelling_type
-        self.body_model = body_model
-        self.guistyle = guistyle
-        if issubclass(type(focus_body), Body) or isinstance(focus_body, (NoneType, Body)):
-            self.focus_body = focus_body
-        else:
-            e.raise_type_error('focus_body', (Body, 'subclassBody', NoneType), focus_body)
+    def __init__(self,name='Nbody Simulation',engine=None,
+                focus_body=None,focus_range=None,
+                autoscale=True,show_grid=True,show_shadows=False,
+                show_acceleration=False,show_velocity=False,vector_size=1,
+                labelling_type='legend',body_model='dots',guistyle='default',
+                do_picking = False, show_info=False):
+        
+        (self.engine,self.focus_body,self.focus_range,self.autoscale,self.show_grid,
+        self.show_shadows,self.show_acceleration,self.show_velocity,self.vector_size,
+        self.labelling_type,self.body_model,self.guistyle,self.do_picking, self.show_info) = typecheck((
+        (engine,PhysEngine),(focus_body,(Body,NoneType)),(focus_range,(*NumType, NoneType)),
+        (autoscale,bool),(show_grid,bool),(show_shadows,bool),(show_acceleration,bool),
+        (show_velocity,bool),(vector_size,NumType),(labelling_type,str),(body_model,str),
+        (guistyle,str),(do_picking,bool), (show_info, bool)))
+        
         self.fig = plt.figure(name, figsize=(16,9))
         self.ax = self.fig.add_subplot(projection = '3d')
         self.ax.computed_zorder = False
@@ -494,8 +477,40 @@ class Simulation:
                 self.ax.plot(*_poshist[0:2],[(_poshist[2][ind]-self.focus_range)]*
                              len(_poshist[2]),
                     color='black', zorder=1.5, **co)
+        def sm_a(body):
+            try:
+                a = max(list(Vector(body.pos[i]).magnitude() for i in range(0,ind,self._plotskip)))
+                return a
+            except ValueError:
+                return 'NaN'
+        
+        def period(body):
+            a = sm_a(body)
+            if a != 'NaN':
+                m = 0
+                for bod in self.engine.bodies:
+                    if bod.mass.c() > m:
+                        m = bod.mass.c()
+                return 2*math.pi*math.sqrt((a**3)/(G*m))
+            else:
+                return a
+            
+        
+        
+        def ke(body):
+            return Vector(body.vel[ind])*(body.vel[ind])*(1/2)*body.mass.c()
+        
         if self.labelling_type == 'legend':
-            self.ax.legend()
+            self.leg = self.ax.legend(draggable=True)
+            for text in self.leg.get_texts():
+                text.set_picker(pr)
+        
+        if self.show_info:
+            self.ax.text2D(0.05, 0.2, f"{self.inf_b.identity}\npos:{self.inf_b.pos[ind]}m\nvel:{self.inf_b.vel[ind]}ms^-1\
+\nacc:{self.inf_b.acc[ind]}ms^-2\nmass:{self.inf_b.mass.c()} kg\nbody radius:{self.inf_b.radius.c()}\nKE:{ke(self.inf_b)} J\
+\nest period:{period(self.focus_body)} s", size='small', transform=self.ax.transAxes)
+
+   
 
 
     def start(self, eval_length=None, fps=None, frameskip=1, plotskip=1):
