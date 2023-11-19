@@ -511,6 +511,17 @@ class Simulation:
 \nest period:{period(self.focus_body)} s", size='small', transform=self.ax.transAxes)
 
    
+    def _on_pick(self,event):
+            print(event.artist)
+            if isinstance(event.artist,(Line3D, Text)):
+                if isinstance(event.artist,Line3D):
+                    identity = event.artist.get_label()
+                else:
+                    identity = event.artist.get_text()
+                body = (b for b in self.engine.bodies if b.identity == identity)
+                if not body:
+                    return
+                self.focus_body = body
 
 
     def start(self, eval_length=None, fps=None, frameskip=1, plotskip=1):
@@ -518,7 +529,9 @@ class Simulation:
         
         inv = (1/fps)/1000
         tqdm.write('Starting Simulation Instance, Running Calculations:')
-        anim = animation.FuncAnimation(self.fig, func = self._animate, interval=inv, frames=self.framelist) 
+        anim = animation.FuncAnimation(self.fig,func = self._animate,interval=inv,frames=self.framelist,cache_frame_data=cache) 
+        if self.do_picking:
+            self.fig.canvas.mpl_connect('pick_event',self._on_pick)
         plt.show()
 
 # --- SUBCLASSES ---
