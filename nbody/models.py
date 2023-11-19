@@ -10,7 +10,9 @@ class SolarSystemMB(Simulation):
                      vector_size = 1,
                      labelling_type = 'label',
                      body_model = 'dots',
-                     guistyle = 'dark'):
+                     guistyle = 'dark',
+                     do_picking = False,
+                     show_info = False):
             name = 'Major Bodies in Solar System'
             engine.dt = dt
             bodies = list(horizons_query(obj_id) for obj_id in (
@@ -22,7 +24,7 @@ class SolarSystemMB(Simulation):
             super().__init__(name, engine, focus_body,
                              focus_range, autoscale, show_grid,
                              show_shadows, show_acceleration, show_velocity,
-                             vector_size, labelling_type, body_model, guistyle)
+                             vector_size, labelling_type, body_model, guistyle, do_picking, show_info)
 
         def start(self, eval_length=100000, fps=30, frameskip=5000, plotskip=5000):
             super().start(eval_length, fps, frameskip, plotskip)
@@ -38,11 +40,9 @@ class BouncingBalls(Simulation):
             engine.do_collisions, engine.do_fieldgravity = True, True
             engine.dt = 0.01
             engine.attach_bodies(balls)
-            for ax in ('x', 'y', 'z'):
-                 for num in (-1.2, 1.2):
-                    engine.create_plane(ax, num)  
-            autoscale, body_model, focus_range, focus_body = False, 'surface', 1.2, None
-            super().__init__(name, engine, focus_body, focus_range, autoscale, show_grid, show_shadows, show_acceleration, show_velocity, vector_size, labelling_type, body_model, guistyle)
+              
+            autoscale, body_model, focus_range, focus_body, do_picking, show_info = False, 'surface', 1.2, None, False, False
+            super().__init__(name, engine, focus_body, focus_range, autoscale, show_grid, show_shadows, show_acceleration, show_velocity, vector_size, labelling_type, body_model, guistyle, do_picking, show_info)
             
         def start(self, eval_length=10000, fps=30, frameskip=10, plotskip=10):
             super().start(eval_length, fps, frameskip, plotskip)
