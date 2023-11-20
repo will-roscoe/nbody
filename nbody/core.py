@@ -91,7 +91,6 @@ class Body:
         return f'Body("{self.identity}", m={self.mass.c()}, r={self.pos.c()},\
 v={self.vel.c()}), a={self.acc.c()})'
 
-    
     def update(self,dt=1,vel_change=None,acc_change=None,vel_next=None):
         if vel_next:
             vel = _O(vel_next)
@@ -236,12 +235,17 @@ def horizons_batch(search_queries,observer='0',time='2023-11-03',num_type=float,
 
 
 
-class PhysEngine:
+class Engine:
     def __init__(self,dt=1,checking_range=3):
-        self.bodies = []
+        self.bodies, self.planes, self.fields= [], [], []
         (self.dt,self._rangechk) = typecheck(((dt,NumType),(checking_range,NumType)))
         self.do_collisions,self.do_bodygravity,self.do_fieldgravity = True,True,True
     
+    def __len__(self):
+        if len(self.bodies) is not None:
+            return len(self.bodies[0].pos)
+        else:
+            return 0
     
     def attach_bodies(self, new_bodies):
         if isinstance(new_bodies,Iterable):
@@ -255,13 +259,13 @@ class PhysEngine:
         self = eng
     
     
-    def save(self,dump='engine',file_name='nbody_data'):
+    def save_as(self,dump='engine',file_name='nbody_data'):
         _saveobjs = {'bodies':{'bodies':self.bodies},'engine':{'engine':self}}
         with open(f'{file_name}.npz','wb') as file:
             np.savez(file, **_saveobjs[dump])
 
 
-    def load(self,objects='engine',file_name='nbody_data'):   
+    def load_as(self,objects='engine',file_name='nbody_data'):   
         _loadobjs = {'bodies':("self.attach_bodies(objs['bodies'])",),
                      'engine':("self._loadeng(objs['engine'])",)}
         
@@ -301,7 +305,7 @@ class PhysEngine:
             tqdm.write(f'constant plane {const_axis}={const_val} has been initialized.')
         else:
             e.raise_value_error('const_axis,const_val',(str,*NumType),(const_axis,const_val))
-
+            
     def _check_collision(self,body,co_restitution=0):
         if self.do_collisions:
             returned_coll = False
@@ -349,25 +353,30 @@ class PhysEngine:
         return res/body.mass.c()
 
     
-    def evaluate(self):
-        _temp = [[0,0,0] for _ in self.bodies]
-        
-        for i,body in enumerate(self.bodies):
-            _temp[i] = [*self._check_collision(body, body.bounce),self._find_gravity(body)]
-        
-        for i,body in enumerate(self.bodies):
-            col_vel,on_plane,acc_g = _temp[i]
-            if not on_plane and self.do_fieldgravity:
-                fieldvel = list(sum(v.vec.c(i) for v in self.fields) for i in range(3))
-            else:
-                fieldvel = NullVector()
-            body.update(dt=self.dt,vel_next=(col_vel+fieldvel).c(),acc_change=acc_g)
+    def simulate(self,intervals):
+        if isinstance(intervals, int) and len(self.bodies) > 0:
+            for _ in trange(intervals, desc=f'Evaluating motion for each interval of {self.dt} seconds', unit='ints'):
+                _temp = [[0,0,0] for _ in self.bodies]
+                
+                for i,body in enumerate(self.bodies):
+                    _temp[i] = [*self._check_collision(body, body.bounce),self._find_gravity(body)]
+                
+                for i,body in enumerate(self.bodies):
+                    col_vel,on_plane,acc_g = _temp[i]
+                    if not on_plane and self.do_fieldgravity:
+                        fieldvel = list(sum(v.vec.c(i) for v in self.fields) for i in range(3))
+                    else:
+                        fieldvel = NullVector()
+                    body.update(dt=self.dt,vel_next=(col_vel+fieldvel).c(),acc_change=acc_g)
+            
+            if intervals+1 == len(self.bodies[0].pos):
+                tqdm.write(f'Finished Evaluating {intervals} intervals, ~{len(self.bodies[0].pos)} total intervals.')
+            
 
 
 
-
-class Simulation:
-    def __init__(self,name='Nbody Simulation',engine=None,
+class mplVisual:
+    def __init__(self, engine, name='NBody Simulation (Matplotib)',
                 focus_body=None,focus_range=None,
                 autoscale=True,show_grid=True,show_shadows=False,
                 show_acceleration=False,show_velocity=False,vector_size=1,
@@ -377,7 +386,7 @@ class Simulation:
         (self.engine,self.focus_body,self.focus_range,self.autoscale,self.show_grid,
         self.show_shadows,self.show_acceleration,self.show_velocity,self.vector_size,
         self.labelling_type,self.body_model,self.guistyle,self.do_picking, self.show_info) = typecheck((
-        (engine,PhysEngine),(focus_body,(Body,NoneType)),(focus_range,(*NumType, NoneType)),
+        (engine,Engine),(focus_body,(Body,NoneType)),(focus_range,(*NumType, NoneType)),
         (autoscale,bool),(show_grid,bool),(show_shadows,bool),(show_acceleration,bool),
         (show_velocity,bool),(vector_size,NumType),(labelling_type,str),(body_model,str),
         (guistyle,str),(do_picking,bool), (show_info, bool)))
@@ -417,16 +426,6 @@ class Simulation:
             _axcolor((0.,0.,0.,0.))
             _clearpanes()
     
-    
-    def _init(self,eval_length,frameN,plotN):
-        self.framelist = list(frameN*x for x in range(int(eval_length/frameN)))
-        for _ in trange(eval_length, desc='Evaluating motion for each frame', unit='frames'):
-            self.engine.evaluate()
-        print(len(self.engine.bodies[0].pos))
-        
-        tqdm.write('Calculations finished, Starting interactive window...')
-    
-    
     def _draw_vectors(self,pos,other,c):
             self.ax.quiver(*pos,*other,length=self.vector_size,color=c,zorder=8,clip_on=False)
     
@@ -456,7 +455,16 @@ class Simulation:
             self.ax.set_autoscale_on(True)
             self.ax.set_box_aspect(None,zoom=self.zoom_slider.val)
         
-        #self.engine.const_objs.draw(self.ax)
+        for plane in self.engine.planes:
+            xl, yl, zl, = self.ax.get_xlim(), self.ax.get_ylim(), self.ax.get_zlim()
+            pl_const = np.array([[plane[1], plane[1]], [plane[1], plane[1]]])
+            points = {'x':(pl_const,np.array([[yl[0],yl[1]],[yl[0],yl[1]]]),
+                           np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
+                      'y':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),pl_const,
+                           np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
+                      'z':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),
+                           np.array([[yl[0],yl[0]],[yl[1],yl[1]]]),pl_const)}
+            self.ax.plot_surface(*points[plane[0]], zorder=1,color=('xkcd:azure', 0.5), **co)
         
         for b in self.engine.bodies:
             _def, _poshist = {'color':b.color, **co}, list(list(float(m) for m in _b.record[0:ind:self._plotskip]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
@@ -531,11 +539,11 @@ class Simulation:
 
 
     
-    def start(self,eval_length=None,fps=None,frameskip=1,plotskip=1,cache=False):
-        self._init(eval_length, frameskip, plotskip)
+    def start(self,fps=None,frameskip=1,plotskip=1,cache=False):
         self._plotskip, inv = plotskip, (1/fps)/1000
-        tqdm.write('Starting Simulation Instance, Running Calculations:')
-        anim = animation.FuncAnimation(self.fig,func = self._animate,interval=inv,frames=self.framelist,cache_frame_data=cache) 
+        f = list(frameskip*x for x in range(int(len(self.engine)/frameskip)))
+        tqdm.write('Starting Visual Environment')
+        anim = animation.FuncAnimation(self.fig, func=self._animate, interval=inv, frames=f, cache_frame_data=cache) 
         if self.do_picking:
             self.fig.canvas.mpl_connect('pick_event',self._on_pick)
         plt.show()
