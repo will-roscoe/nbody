@@ -9,6 +9,7 @@ import math
 from tqdm import tqdm, trange
 import numpy as np
 
+
 # Plotting and animation Packages
 import matplotlib as mpl
 #mpl.use('QT5Agg')
@@ -91,6 +92,15 @@ class Body:
         return f'Body("{self.identity}", m={self.mass.c()}, r={self.pos.c()},\
 v={self.vel.c()}), a={self.acc.c()})'
 
+    def __getitem__(self, ind):
+        if isinstance(ind, int):
+            return (self.pos[ind], self.vel[ind], self.acc[ind])
+        elif isinstance(ind, str):
+            _get_lookup = {'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'], 'current':list(d.c() for d in (self.pos, self.vel, self.acc)),
+                           'info':{'identity':self.identity, 'mass':self.mass, 'radius':self.radius, 'color':self.color, 'bounce':self.bounce},
+                           'x':list(d.X for d in (self.pos, self.vel, self.acc)),'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc))}
+            return _get_lookup[ind]
+
     def update(self,dt=1,vel_change=None,acc_change=None,vel_next=None):
         if vel_next:
             vel = _O(vel_next)
@@ -134,12 +144,8 @@ v={self.vel.c()}), a={self.acc.c()})'
             else:
                 e.raise_type_error('init_vel',(*Iterable,*VectorType),init_vel)
 
-
-
-
-
-
-
+    
+    
 
 def horizons_query(searchquery,observer='0',time='2023-11-03',num_type=float,return_type='body'):
     typecheck(((searchquery,str),(observer,str),(time,str),(num_type,type),(return_type,str)))
@@ -210,13 +216,11 @@ def horizons_query(searchquery,observer='0',time='2023-11-03',num_type=float,ret
 
 def horizons_batch(search_queries,observer='0',time='2023-11-03',num_type=float,return_type='body'):
     new_bodies = []
-    
     for query in tqdm(search_queries,desc='Getting data from JPL Horizons',unit='queries'):
         if isinstance(query,str):
             new_bodies.append(horizons_query(query,observer,time,num_type,return_type))
         else:
             raise e.raise_type_error('item in search_queries',str,query)
-    
     return new_bodies
 
 
