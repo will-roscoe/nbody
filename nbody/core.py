@@ -422,6 +422,8 @@ class mplVisual:
             _axcolor('white')
             mpl.rcParams['text.color'] = 'white'
             self.tcolor = 'white'
+            self.zoom_slider.label.set_color(self.tcolor)
+
         else:
             self.tcolor = 'black'
         
@@ -429,6 +431,10 @@ class mplVisual:
             self.ax.grid(False)
             _axcolor((0.,0.,0.,0.))
             _clearpanes()
+        self._mass_big = 0
+        for bod in self.engine.bodies:
+            if bod.mass.c() > self._mass_big:
+                self._mass_big = bod.mass.c()
     
     def _draw_vectors(self,pos,other,c):
             self.ax.quiver(*pos,*other,length=self.vector_size,color=c,zorder=8,clip_on=False)
@@ -436,6 +442,30 @@ class mplVisual:
 
     
     def _animate(self,ind):
+        def sm_a(body):
+            try:
+                a = max(list(Vector(body.pos[i]).magnitude() for i in range(0,ind,self._plotskip)))
+                return a
+            except ValueError:
+                return 'NaN'
+        
+        def period(body):
+            a = sm_a(body)
+            if a != 'NaN':
+                
+                return 2*math.pi*math.sqrt((a**3)/(G*self._mass_big))
+            else:
+                return a
+            
+        
+        
+        def ke(body):
+            return Vector(body.vel[ind])*(body.vel[ind])*(1/2)*body.mass.c()
+        
+        
+        
+        
+        
         co,pr = {'clip_on':False}, 10
         self.ax.clear()
         self.ax.set(xlabel='x',ylabel='y',zlabel='z')
@@ -471,7 +501,14 @@ class mplVisual:
             self.ax.plot_surface(*points[plane[0]], zorder=1,color=('xkcd:azure', 0.5), **co)
         
         for b in self.engine.bodies:
-            _def, _poshist = {'color':b.color, **co}, list(list(float(m) for m in _b.record[0:ind:self._plotskip]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+            cut = 0
+            try:
+                tau = (ind-(2*period(b)/self.engine.dt))
+                if tau > cut:
+                    cut = math.ceil(tau)
+            except TypeError:
+                cut = 0
+            _def, _poshist = {'color':b.color, **co}, list(list(float(m) for m in _b.record[cut:ind:self._plotskip]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
             _pos = [float(m) for m in b.pos[ind]]
             
             if self.show_velocity:
@@ -495,33 +532,13 @@ class mplVisual:
                 self.ax.plot(*_poshist[0:2],[(_poshist[2][ind]-self.focus_range)]*
                              len(_poshist[2]),color='black',zorder=1.5,**co)
         
-        def sm_a(body):
-            try:
-                a = max(list(Vector(body.pos[i]).magnitude() for i in range(0,ind,self._plotskip)))
-                return a
-            except ValueError:
-                return 'NaN'
         
-        def period(body):
-            a = sm_a(body)
-            if a != 'NaN':
-                m = 0
-                for bod in self.engine.bodies:
-                    if bod.mass.c() > m:
-                        m = bod.mass.c()
-                return 2*math.pi*math.sqrt((a**3)/(G*m))
-            else:
-                return a
-            
-        
-        
-        def ke(body):
-            return Vector(body.vel[ind])*(body.vel[ind])*(1/2)*body.mass.c()
         
         if self.labelling_type == 'legend':
-            self.leg = self.ax.legend(draggable=True)
+            self.leg = self.ax.legend(draggable=True, facecolor='black', fancybox=True)
             for text in self.leg.get_texts():
                 text.set_picker(pr)
+                text.set_color(self.tcolor)
         
         if self.show_info:
             self.ax.text2D(0.05, 0.2, f"{self.inf_b.identity}\npos:{self.inf_b.pos[ind]}m\nvel:{self.inf_b.vel[ind]}ms^-1\
@@ -536,10 +553,11 @@ class mplVisual:
                     identity = event.artist.get_label()
                 else:
                     identity = event.artist.get_text()
-                body = (b for b in self.engine.bodies if b.identity == identity)
+                body = list(b for b in self.engine.bodies if b.identity == identity)[0]
                 if not body:
                     return
                 self.focus_body = body
+                self.inf_b = body
 
 
     

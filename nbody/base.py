@@ -384,12 +384,12 @@ class HistoricVector(Vector):
     def __getitem__(self,ind):
         
         if isinstance(ind,str):
-            _get_lookup = {'current':self.c,**dict.fromkeys(['x','i'],self.x),**dict.fromkeys(['y','j'],self.y), 
-                           **dict.fromkeys(['z','k'],self.z),**dict.fromkeys(['full','all','record'],
+            _get_lookup = {'current':self.c(),**dict.fromkeys(['x','i'],self.x()),**dict.fromkeys(['y','j'],self.y()), 
+                           **dict.fromkeys(['z','k'],self.z()),**dict.fromkeys(['full','all','record'],
                                                                                ((self.X.record),(self.Y.record),(self.Z.record)))}
             ind = ind.lower()
             try:
-                return _get_lookup[ind]()
+                return _get_lookup[ind]
             except KeyError:
                 if ind in ('first','initial','past','old'):
                     return (self.X[ind],self.Y[ind],self.Z[ind]) 
