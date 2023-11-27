@@ -1,12 +1,8 @@
-from genericpath import exists
-import re
-from datetime import datetime, timedelta
-from multiprocessing import Pool, freeze_support
+
 from decimal import Decimal
-from matplotlib.text import Text
+
 import math
-
-
+from time import sleep
 from tqdm import tqdm, trange
 import numpy as np
 
@@ -20,21 +16,20 @@ from matplotlib.widgets import Slider
 from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3D
-from pint import UnitRegistry, Quantity
+from matplotlib.text import Text
 
-# JPL Querying Packages
-from astroquery.jplhorizons import Horizons
-import astropy.units as ast
 
 
 from . import errors as e
 from .base import (NullVector, Variable, Vector, HistoricVector, _V, _O, typecheck,
 Iterable, NoneType, NumType, VectorType, DecType)
 
+
 try:
     from scipy.constants import G
 except ModuleNotFoundError:
     G = 6.6743*10**(-11)
+
 
 
 def sphere(pos,radius,N=20):
@@ -48,15 +43,10 @@ def sphere(pos,radius,N=20):
     return x,y,z
 
 
-
-
-
-
-
-
 class Body:
     def __init__(self,mass,init_pos,init_vel=(0,0,0),
                 radius=0,bounce=0.999,color=None,identity=None):
+
         
         if isinstance(identity,str):
             self.identity = identity
@@ -97,10 +87,10 @@ v={self.vel.c()}), a={self.acc.c()})'
         if isinstance(ind, int):
             return (self.pos[ind], self.vel[ind], self.acc[ind])
         elif isinstance(ind, str):
-            _get_lookup = {'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'], 'current':list(d.c() for d in (self.pos, self.vel, self.acc)),
-                           'info':{'identity':self.identity, 'mass':self.mass, 'radius':self.radius, 'color':self.color, 'bounce':self.bounce},
-                           'x':list(d.X for d in (self.pos, self.vel, self.acc)),'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc))}
-            return _get_lookup[ind]
+            return {'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'], 
+            'current':list(d.c() for d in (self.pos, self.vel, self.acc)),'info':{'identity':self.identity, 'mass':self.mass, 
+            'radius':self.radius, 'color':self.color, 'bounce':self.bounce},'x':list(d.X for d in (self.pos, self.vel, self.acc)),
+            'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc))}[ind]
 
     def update(self,dt=1,vel_change=None,acc_change=None,vel_next=None):
         if vel_next:
@@ -112,7 +102,7 @@ v={self.vel.c()}), a={self.acc.c()})'
             acc_change = _V(acc_change)
             self.vel.next((acc_change*dt + vel).c())
             self.acc.next(acc_change.c())
-        
+
         else:
             self.vel.next((Vector((self.acc*dt))+vel).c())
             self.acc.next((0,0,0))
@@ -147,117 +137,31 @@ v={self.vel.c()}), a={self.acc.c()})'
 
     
     
-
-def horizons_query(searchquery,observer='0',time='2023-11-03',num_type=float,return_type='body'):
-    typecheck(((searchquery,str),(observer,str),(time,str),(num_type,type),(return_type,str)))
-    if all([return_type.lower() != opt for opt in ('body','dict','print')]) :
-        e.raise_value_error('return_type',type,return_type)
-    
-    tqdm.write(f'Querying "{searchquery}" @JPL Horizons System')
-    _later_time = (datetime.strptime(time,'%Y-%m-%d')+timedelta(days=2)).strftime('%Y-%m-%d')
-    
-    _raw0 = Horizons(id=searchquery,location=observer,epochs={'start':time,
-                                                               'stop':_later_time,
-                                                               'step':'3d'}).vectors(get_raw_response=True)
-    _tab = Horizons(id=searchquery,location=observer,epochs={'start':time,
-                                                               'stop':_later_time,
-                                                               'step':'3d'}).vectors()
-    
-    _n = re.search(r"Target body name: (.+?) \((\d+)\)", _raw0)
-    if _n:    
-        name = f'{_n.groups()[0]} ({_n.groups()[1]})'
-    else:
-        tqdm.write(f'could not find name for object "{searchquery}", reverting to placeholder name.')
-        name = f'JPL_{searchquery}'
-    
-    try:
-        _raw =_raw0.split('Ephemeris')[0]
-        m_exp_unit = _raw.split('Mass')[1].split('^')[1].split('=')[0].strip(') ,~ (')
-        m_exp = "".join(c for c in m_exp_unit if c.isdigit() or c == '.')
-        m_unit = "".join(c for c in m_exp_unit.lower() if c == 'k' or c == 'g')
-        mass = "".join(c for c in  _raw.split('Mass')[1].split('^')[1].split('=')[1].strip(') ,~ (').lower() if 
-                        c.isdigit() or c == '.' or c=='+' or c=='-')
-    except IndexError:
-        print(_raw0)
-    
-    try:
-        rad_string = _raw.lower().split('vol. mean radius')[1].split('=')[0:2]
-    except IndexError:
-        rad_string = _raw.lower().split('radius')[1].split('=')[0:2] 
-    
-    r_unit = "".join(c for c in rad_string[0].lower() if c == 'k' or c == 'm') 
-    rad = list(c for c in rad_string[1].split(' ') if c != '') 
-    _rad = []
-    
-    for x in rad:
-        if any(char.isdigit() for char in x): 
-            _rad.append(x)
-    mass = num_type(''.join(mass.split('+-')[0]))*num_type(10**int(m_exp))
-    rad = num_type(_rad[0].split('+-')[0])
-    
-    if r_unit == 'km':
-        rad *= 1000
-    if m_unit == 'g':
-        mass /= 1000
-    
-    x, y, z = [num_type(_tab[pos].quantity[0].to_value(ast.m)) for pos in ('x', 'y', 'z')]
-    vx, vy, vz = [num_type(_tab[pos].quantity[0].to_value(ast.m/ast.s)) for pos in ('vx', 'vy', 'vz')]
-    
-    if return_type.lower() == 'print':
-        print(f'''Object: {name}\n***********\nMass: {mass} kg\nRadius: {rad} m\n
-***********\nposition: ({x}, {y}, {z}) (m)\nvelocity: ({vx}, {vy}, {vz}) (ms^-1)\n
-***********\nQuery Date: {time}''')
-    
-    elif return_type.lower() == 'dict':
-        return {'identity': name, 'mass': mass, 'radius': rad, 'position':(x,y,z), 'velocity':(vx,vy,vz)}
-    
-    elif return_type.lower() == 'body':
-        return Body(mass=mass, init_pos=(x,y,z), init_vel=(vx,vy,vz), radius=rad, identity=name)
-
-
-def horizons_batch(search_queries,observer='0',time='2023-11-03',num_type=float,return_type='body'):
-    new_bodies = []
-    for query in tqdm(search_queries,desc='Getting data from JPL Horizons',unit='queries'):
-        if isinstance(query,str):
-            new_bodies.append(horizons_query(query,observer,time,num_type,return_type))
-        else:
-            raise e.raise_type_error('item in search_queries',str,query)
-    return new_bodies
+    def get_(self, item, ind, params):
+            (plotskip, c_mass) = params
+            def sma():
+                try:
+                    a = max(list(Vector(self.pos[ind]).magnitude() for i in range(0,ind,plotskip)))
+                    return a
+                except ValueError:
+                    return 'NaN'
+            def per():
+                a = sma()
+                if a != 'NaN':
+                    return 2*math.pi*math.sqrt((a**3)/(G*c_mass))
+                else:
+                    return a
+            def ke():
+                return Vector(self.vel[ind])*(self.vel[ind])*(1/2)*self.mass.c()
+            
+            _get_lookup = {**dict.fromkeys(['sma', 'semi_major_axis'],sma),
+                       **dict.fromkeys(['per', 'period'],per),
+                       **dict.fromkeys(['ke', 'kinetic_energy'], ke)}
+            return _get_lookup[item]()
+        
 
 
 
-
-ur = UnitRegistry()
-ur.default_format = '~P'
-class Formatter:
-    def __init__(self, output_raw = False):
-        self.b = None
-        self.i = 0
-        {'identity':'','scalars':{'mass':0*ur.kg,'radius':0*ur.m,'energy':0*ur.joule,
-        'period':0*ur.s},'vectors':{'pos':[0*ur.m for n in range(3)],
-        'vel':[0*ur.m/ur.s for n in range(3)],'acc':[0*ur.m/ur.s**2 for n in range(3)]}}      
-    def _quantities(self):
-        self.q = {'identity' : self.b.identity,
-                'scalars':{
-                    'mass'   : self.b.mass[self.i]*ur(self.b.mass.units),
-                    'radius' : self.b.radius[self.i]*ur(self.b.radius.units),
-                    'energy' : mplVisual.ke(self.b) * ur.joule,
-                    'period' : mplVisual.period(self.b) * ur.s},
-                'vectors':{
-                    'pos' : [self.b.pos[self.i][n]*ur(self.b.pos.units) for n in range(3)],
-                    'vel' : [self.b.vel[self.i][n]*ur(self.b.vel.units) for n in range(3)],
-                    'acc' : [self.b.acc[self.i][n]*ur(self.b.acc.units) for n in range(3)]}    
-                }
-        return self.q  
-    def _str(self):
-        return "{}\npos:{}\nvel:{}\
-\nacc:{}\nmass:{}\nbody radius:{}\nKE:{}\
-\nest period:{}"
-    def standardise(self):
-        if self.q['mass'] > 1.*ur.light_year:
-            self.q['mass'] = self.q['mass'].ito(ur.light_year)
-        if self.q['mass'] > 1.*ur.astronomical_unit:
-            self.q['mass'] = self.q['mass'].ito(ur.astronomical_unit)
 
 class Engine:
     def __init__(self,dt=1,checking_range=3):
@@ -395,8 +299,40 @@ class Engine:
             
             if intervals+1 == len(self.bodies[0].pos):
                 tqdm.write(f'Finished Evaluating {intervals} intervals, ~{len(self.bodies[0].pos)} total intervals.')
-            
 
+
+
+
+
+
+
+
+
+
+PICKRADIUS = 10
+
+_ax_loc = dict(zoom=(0.05,0.25,0.05,0.5), #ax1
+               fps=(0.1,0.25,0.05,0.5), #ax2
+               subadj=(0,0,1,1,0,0), #fig.subplots
+               fsize=(16,9), b_as=(1,1,1)) #fig , fig.bbox
+
+_c = dict(w='white', b='black', cl=(0.,0.,0.,0.),) 
+
+
+_artists = dict(dot = dict(zorder=4, clip_on=False,picker=True, marker='o', pickradius=PICKRADIUS),
+                plane=dict(zorder=1, clip_on=False, color=('xkcd:azure', 0.5)),
+                trail=dict(zorder=7, clip_on=False, picker=True, pickradius=PICKRADIUS),
+                surf=dict(zorder=2, clip_on=False, pickradius=PICKRADIUS),
+                label=dict(zorder=10, clip_on=False),
+                shadw=dict(zorder=1.5, clip_on=False, color='black'),
+                vect=dict(zorder=8, clip_on=False))
+
+_slider = dict(zoom=dict(label='Zoom', valmin=0.1, valmax=10, orientation='vertical'),
+               fps=dict(label='Interval',valmax=2,orientation='vertical'))
+
+_text = dict(info=dict(x=0.05, y=0.2, size='small'),
+             ax_labels=dict(xlabel='x',ylabel='y',zlabel='z'),
+             leg=dict(draggable=True, facecolor='black', fancybox=True))
 
 
 class mplVisual:
@@ -405,27 +341,29 @@ class mplVisual:
                 autoscale=True,show_grid=True,show_shadows=False,
                 show_acceleration=False,show_velocity=False,vector_size=1,
                 labelling_type='legend',body_model='dots',guistyle='default',
-                do_picking = False, show_info=False, info_best_units = 'simple'):
+                do_picking = False, show_info=False, info_params = {'output_raw':True,
+                    'vector_pos':False, 'vector_vel':False, 'vector_acc':False}):
         
         (self.engine,self.focus_body,self.focus_range,self.autoscale,self.show_grid,
         self.show_shadows,self.show_acceleration,self.show_velocity,self.vector_size,
-        self.labelling_type,self.body_model,self.guistyle,self.do_picking, self.show_info, self.change_units) = typecheck((
+        self.labelling_type,self.body_model,self.guistyle,self.do_picking, self.show_info, self.info_params) = typecheck((
         (engine,Engine),(focus_body,(Body,NoneType)),(focus_range,(*NumType, NoneType)),
         (autoscale,bool),(show_grid,bool),(show_shadows,bool),(show_acceleration,bool),
         (show_velocity,bool),(vector_size,NumType),(labelling_type,str),(body_model,str),
-        (guistyle,str),(do_picking,bool),(show_info, bool),(info_best_units, str)))
+        (guistyle,str),(do_picking,bool),(show_info, bool),(info_params, dict))) # new options here
         
-        self.fig = plt.figure(name, figsize=(16,9))
+        self.fig = plt.figure(name, figsize=_ax_loc['fsize'])
         self.ax = self.fig.add_subplot(projection='3d')
-        self.ax1 = self.fig.add_axes((0.05,0.25,0.05,0.5))
+        self.ax1 = self.fig.add_axes(_ax_loc['zoom'])
         
-        self.fig.subplots_adjust(left=0,bottom=0,right=1,top=1,wspace=0,hspace=0)
-        (self.zoom_slider,self._frameskip,self._plotskip,self.ax.computed_zorder, self.inf_b) = (
-        Slider(self.ax1,'Zoom',0.1,10,valinit=1,orientation='vertical'),1,1,False, self.focus_body)
+        self.fig.subplots_adjust(*_ax_loc['subadj'])
+        self.zoom_slider = Slider(self.ax1,valinit=1,**_slider['zoom'])
+        (self._frameskip,self._plotskip, self.ax.computed_zorder, self.inf_b) = (
+        1,1,False, self.focus_body)
         
         def _clearpanes():
             for ax in (self.ax.xaxis,self.ax.yaxis,self.ax.zaxis):
-                ax.set_pane_color((0.,0.,0.,0.))
+                ax.set_pane_color(_c['cl'])
         
         def _axcolor(color):
             for spine in self.ax.get_children():
@@ -435,72 +373,43 @@ class mplVisual:
             for ax in (self.ax.xaxis,self.ax.yaxis,self.ax.zaxis):
                 ax.label.set_color(color)
             mpl.rcParams['axes.labelcolor'] = color
-        self.do_fast_units = {'simple':False, 'fast':True, 'long':False}[self.change_units]
-        self.change_units = {'simple':True, 'fast':False, 'long':False}[self.change_units]
-
+        
 
         if self.guistyle == 'dark':
             for artist in (self.fig,self.ax):
-                artist.set_facecolor('black')
+                artist.set_facecolor(_c['b'])
             _clearpanes()
-            _axcolor('white')
-            mpl.rcParams['text.color'] = 'white'
-            self.tcolor = 'white'
+            _axcolor(_c['w'])
+            mpl.rcParams['text.color'] = _c['w']
+            self.tcolor = _c['w']
             self.zoom_slider.label.set_color(self.tcolor)
             
         else:
-            self.tcolor = 'black'
+            self.tcolor = _c['b']
         
         if not self.show_grid:
             self.ax.grid(False)
-            _axcolor((0.,0.,0.,0.))
+            _axcolor(_c['cl'])
             _clearpanes()
-        self._mass_big = 0
+        self._cmass = 0 # changed big mass thing here
         for bod in self.engine.bodies:
-            if bod.mass.c() > self._mass_big:
-                self._mass_big = bod.mass.c()
+            if bod.mass.c() > self._cmass:
+                self._cmass = bod.mass.c()
+        if self.show_info:
+            self.fm = Formatter(plotskip=1, c_mass=self._cmass, **self.info_params)
     
     def _draw_vectors(self,pos,other,c):
-            self.ax.quiver(*pos,*other,length=self.vector_size,color=c,zorder=8,clip_on=False)
-    
-    def convert_to_str(self, quantity, simple=True):
-        try:    
-            if simple == False:
-                if isinstance(quantity, Iterable):
-                    return '('+''.join((f'{q:~P}' for q in quantity))+')'
-                else:
-                    return f'{quantity:~P}'
-            elif simple == True:
-                if isinstance(quantity, Iterable):
-                    return '('+''.join((f'{(q.to_compact()):.4f~P}' for q in quantity))+')'
-                else:
-                    return f'{(quantity.to_compact()):.4f~P}'
-        except ValueError:
-            return 'NaN'
-    def sm_a(self,body,ind):
-            try:
-                a = max(list(Vector(body.pos[i]).magnitude() for i in range(0,ind,self._plotskip)))
-                return a
-            except ValueError:
-                return 'NaN'
-    def period(self,body):
-        a = self.sm_a(body)
-        if a != 'NaN':
-            
-            return 2*math.pi*math.sqrt((a**3)/(G*self._mass_big))
-        else:
-            return a
-    def ke(self,body,ind):
-        return Vector(body.vel[ind])*(body.vel[ind])*(1/2)*body.mass.c()
+            self.ax.quiver(*pos,*other,length=self.vector_size,color=c,**_artists['vect'])
+
     def _animate(self,ind):
-        
-        
-        co,pr = {'clip_on':False}, 10
+        sleep(self._int)
         self.ax.clear()
-        self.ax.set(xlabel='x',ylabel='y',zlabel='z')
         
+        # figure building
+
+        self.ax.set(**_text['ax_labels'])
         if not self.autoscale:
-            self.ax.set_box_aspect((1,1,1), zoom=self.zoom_slider.val)
+            self.ax.set_box_aspect(_ax_loc['b_as'], zoom=self.zoom_slider.val)
             self.ax.set_autoscale_on(False)
             
             if self.focus_body is not None:
@@ -518,6 +427,8 @@ class mplVisual:
             self.ax.set_autoscale_on(True)
             self.ax.set_box_aspect(None,zoom=self.zoom_slider.val)
         
+        # plot planes
+
         for plane in self.engine.planes:
             xl, yl, zl, = self.ax.get_xlim(), self.ax.get_ylim(), self.ax.get_zlim()
             pl_const = np.array([[plane[1], plane[1]], [plane[1], plane[1]]])
@@ -527,69 +438,62 @@ class mplVisual:
                            np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
                       'z':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),
                            np.array([[yl[0],yl[0]],[yl[1],yl[1]]]),pl_const)}
-            self.ax.plot_surface(*points[plane[0]], zorder=1,color=('xkcd:azure', 0.5), **co)
-        
+            self.ax.plot_surface(*points[plane[0]], **_artists['plane'])
+            
+        # plot bodies
+
         for b in self.engine.bodies:
+            # cutting away any excessive looping orbits for performance
             cut = 0
             try:
-                tau = (ind-(2*self.period(b)/self.engine.dt))
+                tau = (ind-(2*b.get_('period', ind, self._plotskip, self._cmass)/self.engine.dt))
                 if tau > cut:
                     cut = math.ceil(tau)
             except TypeError:
                 cut = 0
-            _def, _poshist = {'color':b.color, **co}, list(list(float(m) for m in _b.record[cut:ind:self._plotskip]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+            # position and trail
+            _poshist = list(list(float(m) for m in _b.record[cut:ind:self._plotskip]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
             _pos = [float(m) for m in b.pos[ind]]
-            
+            # draw vectors
             if self.show_velocity:
-                self._draw_vectors(_pos,[float(m) for m in b.vel[ind]],'r')    
-                
+                self._draw_vectors(_pos,[float(m) for m in b.vel[ind]],'r')     
             if self.show_acceleration:
                 self._draw_vectors(_pos,[float(m) for m in b.acc[ind]],'g')
-            
-            self.ax.plot(*_poshist,label=f'{b.identity}',zorder=7,**_def)
-            
+            # draw trail
+            self.ax.plot(*_poshist,label=f'{b.identity}',color=b.color, **_artists['trail'])
+            # draw body
             if self.body_model == 'dots':
-                self.ax.plot(*_pos,marker='o',zorder=4,pickradius= pr,**_def)
+                self.ax.plot(*_pos,label=f'{b.identity}',color=b.color,**_artists['dot'])
             else:
                 _sf = {'wireframe':self.ax.plot_wireframe, 'surface':self.ax.plot_surface}
-                _sf[self.body_model](*sphere(_pos,b.radius.c()),zorder=2,pickradius= pr,**_def)
-            
+                _sf[self.body_model](*sphere(_pos,b.radius.c()),label=f'{b.identity}', color=b.color **_artists['surf'])
+            # draw label
             if self.labelling_type == 'label':
-                self.ax.text(*_pos,b.identity,zorder=10)
-            
+                self.ax.text(*_pos,b.identity,color=b.color, **_artists['label'])
+            # draw shadows
             if self.show_shadows:
                 self.ax.plot(*_poshist[0:2],[(_poshist[2][ind]-self.focus_range)]*
-                             len(_poshist[2]),color='black',zorder=1.5,**co)
-        
-        
+                             len(_poshist[2]), **_artists['shadw'])
+        # draw legend
         if self.labelling_type == 'legend':
-            self.leg = self.ax.legend(draggable=True, facecolor='black', fancybox=True)
+            handles, labels = self.ax.get_legend_handles_labels()
+            handle_list, label_list = [], []
+            for handle, label in zip(handles, labels):
+                if label not in label_list:
+                    handle_list.append(handle)
+                    label_list.append(label)
+            self.leg = self.ax.legend(handle_list, label_list, **_text['leg'])
+            
+            
+            
             for text in self.leg.get_texts():
-                text.set_picker(pr)
+                text.set_picker(PICKRADIUS)
                 text.set_color(self.tcolor)
-        
+        # draw info panel
         if self.show_info:
-            ident = self.inf_b.identity 
-            if not self.do_fast_units:
-                dets = {'po' : [self.inf_b.pos[ind][n]*ur(self.inf_b.pos.units) for n in range(3)],
-                'v' : [self.inf_b.vel[ind][n]*ur(self.inf_b.vel.units) for n in range(3)],
-                'a': [self.inf_b.acc[ind][n]*ur(self.inf_b.acc.units) for n in range(3)],
-                'm' : self.inf_b.mass.c() * ur(self.inf_b.mass.units),
-                'r' : self.inf_b.radius.c() * ur(self.inf_b.radius.units),
-                'k' : ke(self.inf_b) * ur.joule,
-                'pe' : period(self.focus_body) * ur.s}
-                print(dets)
-                for key,quant in dets.items():
-                    dets[key] = self.convert_to_str(quant, simple=self.change_units)
-            else:
-                dets = {'po' : f'({self.inf_b.pos[ind]}) m','v' : f'({self.inf_b.vel[ind]}) ms^-1',
-                'a' :  f'({self.inf_b.acc[ind]}) ms^-2','m' : f'{self.inf_b.mass.c()} kg',
-                'r' : f'{self.inf_b.radius.c()} m','k' : f'{ke(self.inf_b)} J',
-                'pe' : f'{period(self.focus_body)} s'}
-            _str = f"{ident}\npos:{dets['po']}\nvel:{dets['v']}\
-\nacc:{dets['a']}\nmass:{dets['m']}\nbody radius:{dets['r']}\nKE:{dets['k']}\
-\nest period:{dets['pe']}"
-            self.ax.text2D(0.05, 0.2 ,_str , size='small', transform=self.ax.transAxes)
+            self.fm.target = [self.inf_b, ind] # new all inside formatter object
+            self.ax.text2D(s=str(self.fm), transform=self.ax.transAxes, **_text['info'])
+    # object picking in interactive window
     def _on_pick(self,event):
             print(event.artist)
             if isinstance(event.artist,Text):
@@ -605,20 +509,23 @@ class mplVisual:
                     return
                 self.focus_body = body
             
-                
-    def start(self,fps,frameskip=1,plotskip=1,cache=False, speed_control=False):
-        self._plotskip, self._fps = plotskip, fps
+  
+    def start(self,interval=0.033,frameskip=1,plotskip=1,cache=False, speed_control=False):
+        self._plotskip, self.int = plotskip, interval
+        self.fm.par['ps'] = self._plotskip
         f = list(frameskip*x for x in range(int(len(self.engine)/frameskip)))
-        tqdm.write('Starting Visual Environment')    
-        anim = animation.FuncAnimation(self.fig, func=self._animate, interval=1000/self._fps, frames=f, cache_frame_data=cache) 
+        tqdm.write('Starting Visual Environment')
+        self._int = 0    
+        anim = animation.FuncAnimation(self.fig, func=self._animate, interval=self.int*1000, frames=f, cache_frame_data=cache, ) 
         if speed_control:
-            self.ax2 = self.fig.add_axes((0.1,0.25,0.05,0.5))
-            self.speed_slider = Slider(self.ax2,'FPS',0.1,120,valinit=self._fps,orientation='vertical')
+            self.ax2 = self.fig.add_axes(_ax_loc['fps'])
+            self.speed_slider = Slider(self.ax2,valinit=self.int, valmin=self.int,**_slider['fps'])
             self.speed_slider.label.set_color(self.tcolor)
             def _sp_ud(val):
-                anim.event_source.interval = 1000/val
+                self._int = val-self.int
             self.speed_slider.on_changed(_sp_ud)
         if self.do_picking:
             self.fig.canvas.mpl_connect('pick_event',self._on_pick)
         plt.show()
 
+from .text import Formatter

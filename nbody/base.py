@@ -28,7 +28,8 @@ def _V(obj):
     
     else:
         return obj
-
+def _ntype(other):
+    return (type(_O(other)) if type(_O(other)) is not int else float)
 
 def typecheck(argtype):
     if isinstance(argtype[0], Iterable):
@@ -52,73 +53,59 @@ class Variable:
         (self.record,self.identity,self.units) = typecheck(((init_var,NumType),(identity,str),(units,(str,NoneType))))
         self.units = (units if units else '')
     
-
     def c(self):
         return self.record
-    
 
     def __len__(self):
         return 1
     
-
     def __contains__(self,item):
         return item in self.record
-    
 
     def __str__(self):
         return f'{self.c()} {self.units}, len:{len(self)} id:"{self.identity}"'
-    
     
     def __repr__(self):
         return f'VarType Object (current={self.c()} {self.units},\
 len={len(self)}, rec={self.record}, id={self.identity})'
     
-    
     def __add__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         return num_type(self.c()) + num_type(_O(other))
     
-    
     def __sub__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         return num_type(self.c()) - num_type(_O(other))
     
-    
     def __mul__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         return num_type(self.c()) * num_type(_O(other))
     
-    
     def __truediv__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         return num_type(self.c()) / num_type(_O(other))
     
-    
     def __floordiv__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         return num_type(self.c()) // num_type(_O(other))
     
-    
     def __iadd__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         self.next(num_type(self.c()) + num_type(_O(other)))   
         return self
     
-    
     def __isub__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         self.next(num_type(self.c()) - num_type(_O(other)))   
         return self
     
-    
     def __imul__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         self.next(num_type(self.c()) * num_type(_O(other)))   
         return self
     
-    
     def __itruediv__(self,other):
-        num_type = (type(_O(other)) if type(_O(other)) is not int else float)
+        num_type = _ntype(other)
         self.next(num_type(self.c()) / num_type(_O(other)))   
         return self
     
@@ -201,27 +188,22 @@ class Vector:
         else:
             e.raise_list_type_error('l,x,y,z',(*Iterable,*NumType,*VectorType),(li,x,y,z))
 
-    
     def c(self,usage=None):
-        _usage_lookup ={None:(self.X,self.Y,self.Z),0:self.X,1:self.Y,2:self.Z}
         try:
-            return _usage_lookup[usage]
+            return {None:(self.X,self.Y,self.Z),0:self.X,1:self.Y,2:self.Z}[usage]
         except KeyError: 
             e.raise_out_of_range('c()',usage)
 
-    
     def magnitude(self):
-        num_type = (type(self.c(0)) if type(self.c(0)) is not int else float)
+        num_type = _ntype(self.c(0))
         return num_type(math.sqrt(sum([n**2 for n in self.c()])))
-    
     
     def unit(self):
         if float(self.magnitude()) == 0.:
             return Vector(li=(0,0,0))
         else:
-            num_type =(type(self.c(0)) if type(self.c(0)) is not int else float)
+            num_type = _ntype(self.c(0))
             return Vector(li=list((num_type(n)/self.magnitude()) for n in self.c()))
-    
     
     def cross(self,other):
         temp = _O(other)
@@ -239,59 +221,51 @@ class Vector:
 
     def __getitem__(self,ind):
         if isinstance(ind, str):
-            _get_lookup = {'x':self.X,'i':self.X,'y':self.Y,'j':self.Y,'z':self.Z,'k':self.Z,'current':self.c()}
             try:
-                return _get_lookup[ind]
+                return {'x':self.X,'i':self.X,'y':self.Y,'j':self.Y,'z':self.Z,'k':self.Z,'current':self.c()}[ind]
             except KeyError:
                 e.raise_value_error('ind',str,ind)
         else: 
             e.raise_type_error('ind',str,ind)
     
-    
     def __len__(self):
         return 1
-    
     
     def __str__(self): 
         return f'{self.c()}'
     
-    
     def __repr__(self): 
         return f'{self.c()}, len={len(self)}'
-    
     
     def __iter__(self):
         return iter((self.X,self.Y,self.Z))
     
-    
     def __add__(self,other):
         temp = _O(other)
         if len(temp) == 3:
-            num_type = (type(temp[0]) if type(temp[0]) is not int else float)
+            num_type = _ntype(temp[0])
             return Vector(li=[num_type(val) + num_type(temp[i]) for i,val in enumerate(self['current'])])
         
         else:
             e.raise_component_error('other or temp',temp)
     
-    
     def __sub__(self,other):
         temp = _O(other)
         if len(temp) == 3:
-            num_type = (type(temp[0]) if type(temp[0]) is not int else float)
+            num_type = _ntype(temp[0])
             return Vector(li=[num_type(val) - num_type(temp[i]) for i,val in enumerate(self['current'])])
         
         else:
             e.raise_component_error('other or temp',temp)
     
-    
     def __mul__(self,other):
         temp = _O(other)
         if isinstance(temp,Iterable) and len(temp) == 3:
-            num_type = (type(temp[0]) if type(temp[0]) is not int else float)
+            num_type = _ntype(temp[0])
             return sum(([num_type(val) * num_type(temp[i]) for i, val in enumerate(self['current'])]))
         
         elif isinstance(temp,NumType):
-            num_type = (type(temp) if type(temp) is not int else float)
+            num_type = _ntype(temp)
             return Vector(li=[(num_type(val)*num_type(temp)) for val in self['current']])
         
         else:
@@ -299,7 +273,7 @@ class Vector:
     
     def __truediv__(self,other):
         temp = _O(other)
-        num_type = (type(temp) if type(temp) is not int else float)
+        num_type = _ntype(temp)
         
         if isinstance(temp,NumType):
             return Vector(li=[(num_type(val)/num_type(temp)) for val in self['current']])
@@ -329,24 +303,19 @@ class HistoricVector(Vector):
     
     def x(self):
         return self.X.c()
-    
-    
+
     def y(self):
         return self.Y.c()
-    
-    
+
     def z(self):
         return self.Z.c()
-        
-    
+
     def c(self, usage=None):
-        _usage_lookup ={None:(self.x(),self.y(),self.z()),0:self.x(),1:self.y(),2:self.z()}
         try:
-            return _usage_lookup[usage]
+            return {None:(self.x(),self.y(),self.z()),0:self.x(),1:self.y(),2:self.z()}[usage]
         except KeyError: 
             e.raise_out_of_range('c()',usage)
-    
-    
+
     def next(self,next_vals):
         temp = _O(next_vals)
         if isinstance(temp,Iterable):
@@ -360,36 +329,29 @@ class HistoricVector(Vector):
         else:
             e.raise_type_error('next_vals',Iterable,next_vals)
 
-    
-    
     def __iter__(self):
         return iter((self.X.record, self.Y.record, self.Z.record))
-    
-    
+
     def __len__(self):
         if len(self.X) == len(self.Y) and len(self.Y) == len(self.Z):
             return int(len(self.X))
         else:
             e.raise_unmatched_error(('x', 'y', 'z'),(self.X, self.Y, self.Z))
-    
 
     def __str__(self):
         return f'{self.c()}'
     
-    
     def __repr__(self):
         return f'HistoricVector("{self.identity}", current={self.c()}, len={len(self)})'
-    
     
     def __getitem__(self,ind):
         
         if isinstance(ind,str):
-            _get_lookup = {'current':self.c(),**dict.fromkeys(['x','i'],self.x()),**dict.fromkeys(['y','j'],self.y()), 
-                           **dict.fromkeys(['z','k'],self.z()),**dict.fromkeys(['full','all','record'],
-                                                                               ((self.X.record),(self.Y.record),(self.Z.record)))}
             ind = ind.lower()
             try:
-                return _get_lookup[ind]
+                return {'current':self.c(),**dict.fromkeys(['x','i'],self.x()),**dict.fromkeys(['y','j'],self.y()), 
+                           **dict.fromkeys(['z','k'],self.z()),**dict.fromkeys(['full','all','record'],
+                                                                               ((self.X.record),(self.Y.record),(self.Z.record)))}[ind]
             except KeyError:
                 if ind in ('first','initial','past','old'):
                     return (self.X[ind],self.Y[ind],self.Z[ind]) 
@@ -409,8 +371,6 @@ class HistoricVector(Vector):
 class NullVector(Vector):
     def __init__(self):
         super().__init__(li=(0,0,0),x=None,y=None,z=None)
-
-
 
 VectorType = (Vector,HistoricVector)
 VarType = (Variable,HistoricVariable)

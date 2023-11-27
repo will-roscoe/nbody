@@ -2,15 +2,23 @@
 
 
 
-import nbody.core as nb
 
+import nbody.core as nb
+import nbody.horizons as source
 phys = nb.Engine(dt=1000)
-phys.load_as('bodies','solarsystem_bodies')
-#for i,color in enumerate(['#F28322','#BFBEBD', '#D9B391', '#63BAA6', '#F27A5E', '#BFAE99', '#D9B779', '#95BBBF', '#789EBF']):
-    #phys.bodies[i].color = color
-for b in phys.bodies:
-    b.pos.units, b.vel.units, b.acc.units = 'metre', 'metre / second', 'metre / second^2'
+'''
+bodies = source.horizons_batch(('10','199','299','399','499','599','699','799','899'))
+
+for i,color in enumerate(['#F28322','#BFBEBD', '#D9B391', '#63BAA6', '#F27A5E', '#BFAE99', '#D9B779', '#95BBBF', '#789EBF']):
+    bodies[i].color = color
+phys.attach_bodies(bodies)
+phys.make_relative_to(bodies[0])
+phys.do_collisions = False
+phys.do_fieldgravity = False
+phys.simulate(20000)
 phys.save_as('bodies','solarsystem_bodies')
+'''
+phys.load_as('bodies','solarsystem_bodies')
 sim = nb.mplVisual(phys, 'SS', phys.bodies[0],None, False,
                      show_grid= True,
                      show_shadows= False,
@@ -22,12 +30,4 @@ sim = nb.mplVisual(phys, 'SS', phys.bodies[0],None, False,
                      guistyle = 'dark',
                      do_picking = True,
                      show_info = True)
-sim.start(fps=30, frameskip=1000, plotskip=200)
-'''
-s = 615634.456743
-k = s * nb.ur.metre/nb.ur.second**2
-print(k)
-nb.ur.default_format = '~P'
-k = (s * nb.ur.m/nb.ur.s**2).to_compact()
-print(f'{k:.3f~P}')
-'''
+sim.start(frameskip=1000, plotskip=200, speed_control=True, cache=True)
