@@ -45,12 +45,12 @@ ur.default_format = '~P'
 
 class Formatter:
     def __init__(self, output_raw = False, items=('identity','mass','radius','energy',
-                  'period','pos','vel','acc','time'), vector_pos=True, vector_vel=False, vector_acc = False, dt=None, plotskip=0, c_mass=0):
+                  'period','pos','vel','acc','time'), vector_pos=True, vector_vel=False, vector_acc = False, engine=None, plotskip=0, c_mass=0):
         
         self.par = {'raw':output_raw, 'ps': plotskip, 'cm': c_mass}
         self.items = items
         self.target = [None, 0]
-        self.dt = dt
+        self.engine = engine
         self._m = {'pos':vector_pos, 'vel':vector_vel, 'acc':vector_acc}
         self.q = {'identity':'','mass':0*ur.kg,'radius':0*ur.m,'energy':0*ur.joule,
                   'period':0*ur.s,'pos':0*ur.m,'vel':0*ur.m/ur.s,'acc':0*ur.m/ur.s**2}
@@ -59,7 +59,7 @@ class Formatter:
                     'mass'   : self.target[0].mass.c()*ur(self.target[0].mass.units),
                     'radius' : self.target[0].radius.c()*ur(self.target[0].radius.units),
                     'energy' : self.target[0].get_('ke', self.target[1], self.par['ps'], self.par['cm']) * ur.joule,
-                    'period' : self.target[0].get_('period', self.target[1], self.par['ps'], self.par['cm']) * ur.s,
+                    'period' : self.target[0].get_('period', self.target[1], self.par['ps'], self.par['cm'], engine=self.engine) * ur.s,
                     'pos' : ([self.target[0].pos[self.target[1]][n]*ur(self.target[0].pos.units)
                             for n in range(3)] if self._m['pos']
                             else Vector(self.target[0].pos[self.target[1]]).magnitude()*ur(self.target[0].pos.units)),
@@ -69,7 +69,7 @@ class Formatter:
                     'acc' : ([self.target[0].acc[self.target[1]][n]*ur(self.target[0].acc.units) 
                             for n in range(3)] if self._m['acc'] 
                             else Vector(self.target[0].acc[self.target[1]]).magnitude()*ur(self.target[0].acc.units)),
-                    'time' : self.target[1]*self.dt * ur.s,
+                    'time' : self.target[1]*self.engine.dt * ur.s,
     }
    
     def _basetemplate(self):
@@ -118,9 +118,9 @@ class Formatter:
         for key, value in args.items():
             try:    
                 if isinstance(value, Iterable):
-                    strings.append('('+''.join((f'{q.to_compact():.4f~P}' for q in value))+')')
+                    strings.append('('+''.join((f'{q:.4f~P}' for q in value))+')') #q.to_compact()
                 elif isinstance(value, Quantity) and value.m != 'NaN':
-                    strings.append(f'{value.to_compact():.4f~P}')
+                    strings.append(f'{value:.4f~P}') #value.to_compact()
                 elif isinstance(value, Quantity) and value.m == 'NaN':
                     strings.append('NaN')
                 else:

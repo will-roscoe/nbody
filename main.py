@@ -1,7 +1,7 @@
 
 
 import nbody.core as nb
-from nbody.errors import raise_type_error
+import nbody.base as bs
 import nbody.horizons as source
 phys = nb.Engine(dt=1000)
 '''
@@ -21,7 +21,7 @@ phys.load_as('bodies','solarsystem_bodies')
 
 sim = nb.mplVisual(engine=phys, 
                    name='SS',
-                   focus_body=phys.bodies[0], show_info=True, autoscale=False, frameskip=200, plotskip=200, max_p=1, max_pts=10, cache=False, do_picking=True) #do_picking=True, autoscale=False)
+                   focus_body=phys.bodies[0], show_info=True, autoscale=False, step_skip_frames=200, step_skip_points=200, max_period=1, max_pts=10, cache=False, do_picking=True, info_calc=True) #do_picking=True, autoscale=False)
 
 sim.start()
 

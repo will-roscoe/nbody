@@ -135,12 +135,12 @@ v={self.vel.c()}), a={self.acc.c()})'
 
     
     
-    def get_(self, item, ind, plotskip, c_mass):
+    def get_(self, item, ind=-1, plotskip=0, c_mass=None, engine=None):
             def sma():
-                try:
-                    a = max(list(Vector(self.pos[ind]).magnitude() for i in range(0,ind,plotskip)))
+                if not plotskip >= ind:
+                    a = max([(Vector(self.pos[i])-engine.barycenter(ind)).magnitude() for i in range(0,ind,plotskip)])
                     return a
-                except ValueError:
+                else:
                     return 'NaN'
             def per():
                 a = sma()
@@ -200,7 +200,7 @@ class Engine:
             for new_body in new_bodies:
                 typecheck((new_body, Body))
                 self.bodies.append(new_body)
-            tqdm.write(f'{len(self.bodies)} bodies currently attached to engine.')
+            tqdm.write(f'«Engine» → {len(self.bodies)} bodies currently attached to engine.')
     
     
     def _loadeng(self,eng):
@@ -233,12 +233,10 @@ class Engine:
                 body.identity = f'{body.identity}:Rel.{target_body.identity}'
         
         target_body._reinitialise((0,0,0),(0,0,0))
-        tqdm.write(f"Bodies' positions and velocities have been made relative to {target_body.identity}.")
+        tqdm.write(f"«Engine» → Bodies' positions and velocities have been made relative to {target_body.identity}.")
         target_body.identity = f'{target_body.identity}(Static)'
   
 
-    def orbit_around(self, main_body, other_bodies):
-            pass
     
     def create_acceleration(self, accel_vector):
         _acc = _O(accel_vector)
@@ -250,10 +248,11 @@ class Engine:
     def create_plane(self, const_axis ='z', const_val  = 0):
         if const_axis in ('x', 'y', 'z') and isinstance(const_val, NumType):
             self.planes.append([const_axis, const_val])
-            tqdm.write(f'constant plane {const_axis}={const_val} has been initialized.')
+            tqdm.write(f'«Engine» → constant plane {const_axis}={const_val} has been initialized.')
         else:
             e.raise_value_error('const_axis,const_val',(str,*NumType),(const_axis,const_val))
-            
+
+       
     def _check_collision(self,body,co_restitution=0):
         if self.do_collisions == True:
             returned_coll = False
@@ -303,7 +302,7 @@ class Engine:
     
     def simulate(self,intervals):
         if isinstance(intervals, int) and len(self.bodies) > 0:
-            for _ in trange(intervals, desc=f'Evaluating motion for each interval of {self.dt} seconds', unit='ints'):
+            for _ in trange(intervals, desc=f'«Engine» → Evaluating motion for each interval of {self.dt} seconds', unit='ints'):
                 _temp = [[0,0,0] for _ in self.bodies]
                 
                 for i,body in enumerate(self.bodies):
@@ -318,8 +317,14 @@ class Engine:
                     body.update(dt=self.dt,vel_next=(col_vel+fieldvel).c(),acc_change=acc_g)
             
             if intervals+1 == len(self.bodies[0].pos):
-                tqdm.write(f'Finished Evaluating {intervals} intervals, ~{len(self.bodies[0].pos)} total intervals.')
+                tqdm.write(f'«Engine» → Finished Evaluating {intervals} intervals, ~{len(self.bodies[0].pos)} total intervals.')
 
+    def barycenter(self, index):
+        mass_dist = NullVector()
+        for b in self.bodies:
+            mass_dist += Vector(b.pos[index])*b.mass.c()
+        total_mass =sum([b.mass.c() for b in self.bodies]) 
+        return mass_dist/total_mass
 # kwargs
 '''
 kwargs
@@ -351,7 +356,6 @@ class mplVisual:
                  step_skip_points=1,
                  max_period=2,
                  max_pts=None, **kwargs):
-        self.vct, self.col = dict(), 
         self.args = {
             'color_dict': dict(line='black', face=(0,0,0,0), bkgd='white', text='black'),
             'speed_control': False,
@@ -366,12 +370,13 @@ class mplVisual:
             'labelling_type':'legend',
             'body_model':'dots',
             'info_body':focus_body,
-            'fmt_params':dict()}
+            'fmt_params':dict(),
+            'file':None}
         self.files = dict()
         self.args.update(kwargs)
         if self.args['show_grid'] == False:
-            self.col['line'] = (0,0,0,0)
-            self.col['face'] = (0,0,0,0)
+            self.args['color_dict']['line'] = (0,0,0,0)
+            self.args['color_dict']['face'] = (0,0,0,0)
         
         
         
@@ -391,35 +396,39 @@ class mplVisual:
         self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/fps), frames=flist, cache_frame_data=self.args['anim_cache'])
         
         self.trail_data = dict()
-        for b in self.engine.bodies:
-            body_data = dict()
-            for f in flist: 
-                try:
-                    tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'], self.plt['major_body'])/self.engine.dt))
-                    if tau > 0:
-                        lower = math.ceil(tau)
-                    else: raise TypeError
-                except TypeError:
-                    lower = self.args['start_index']
-                body_data_f = list(list(float(m) for m in _b.record[lower:f:self.plt['ptstep']]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
-                if self.plt['maxpts'] is not None:
-                    while any(len(i) > self.plt['maxpts'] for i in body_data_f):
-                        for i in body_data_f:
-                            i.pop(0)  
-                body_data[f] = body_data_f
-            self.trail_data[b] = body_data
+        with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Building Trails', unit='items') as tbar:
+            for b in self.engine.bodies:
+                body_data = dict()
+                for f in flist: 
+                    try:
+                        tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'], self.plt['major_body'], engine=self.engine)/self.engine.dt))
+                        if tau > 0:
+                            lower = math.ceil(tau)
+                        else: raise TypeError
+                    except TypeError:
+                        lower = self.args['start_index']
+                    body_data_f = list(list(float(m) for m in _b.record[lower:f:self.plt['ptstep']]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+                    if self.plt['maxpts'] is not None:
+                        while any(len(i) > self.plt['maxpts'] for i in body_data_f):
+                            for i in body_data_f:
+                                i.pop(0)
+                    body_data[f] = body_data_f
+                    tbar.update(1)
+                self.trail_data[b] = body_data
         
         if show_info == True:
-            self.fmt = Formatter(output_raw=False,items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'], vector_pos=False, vector_vel=False, vector_acc=False, dt=self.engine.dt, c_mass=self.plt['major_body'])
+            self.fmt = Formatter(output_raw=False,items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'], vector_pos=False, vector_vel=False, vector_acc=False, engine=self.engine,plotskip=self.plt['ptstep'], c_mass=self.plt['major_body'])
         
         if self.args['info_calc'] is True:
             self.info_data = dict()
-            for b in self.engine.bodies: 
-                body_data = dict()
-                for f in flist:
-                    self.fmt.target = [b,f]
-                    body_data[f] = str(self.fmt)
-                self.info_data[b] = body_data
+            with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Precomputing All Descriptions', unit='items') as pbar:
+                for b in self.engine.bodies: 
+                    body_data = dict()
+                    for f in flist:
+                        self.fmt.target = [b,f]
+                        body_data[f] = str(self.fmt)
+                        pbar.update(1)
+                    self.info_data[b] = body_data
         else:
             self.info_data = None    
         
@@ -438,37 +447,38 @@ class mplVisual:
         if self.args['speed_control'] == True:
             self.spd_ax = self.fig.add_axes((0.1,0.25,0.05,0.5))
             self.speed_slider = Slider(self.spd_ax,valinit=1000/self.plt['interval'], valmax=1000/5,label='Target\nFPS',valmin=0.1,orientation='vertical')
-            self.speed_slider.label.set_color(self.col['t'])
+            self.speed_slider.label.set_color(self.args['color_dict']['text'])
             def _sp_ud(val):
                 self.plt['interval'] = 1000/val
             self.speed_slider.on_changed(_sp_ud)
         
         self.fig.subplots_adjust(0,0,1,1,0,0)
-        self.ax.tick_params(color=self.col['line'],labelcolor=self.col['text'])
+        self.ax.tick_params(color=self.args['color_dict']['line'],labelcolor=self.args['color_dict']['text'])
         for artist in (self.fig,self.ax):
-            artist.set_facecolor(self.col['bkgd'])
+            artist.set_facecolor(self.args['color_dict']['bkgd'])
         for spine in self.ax.get_children():
             if isinstance(spine,mpl.spines.Spine):
-                spine.set_color(self.col['line'])      
-        mpl.rcParams['text.color'] = self.col['text']
+                spine.set_color(self.args['color_dict']['line'])      
+        mpl.rcParams['text.color'] = self.args['color_dict']['text']
         for ax in (self.ax.xaxis,self.ax.yaxis, self.ax.zaxis):
-            ax.label.set_color((self.col['text'] if show_grid is True else (0,0,0,0)))
-            ax.set_pane_color(self.col['face'])
+            ax.label.set_color((self.args['color_dict']['text'] if show_grid is True else (0,0,0,0)))
+            ax.set_pane_color(self.args['color_dict']['face'])
         if show_grid == False:
             self.ax.grid(False)
         self.ax.set_autoscale_on(False)
-        
-         
-
-        
+        if self.args['save_to'] is not None:
+            with open(f'{self.args['save_to']}.npz', 'wb') as file:
+                np.savez(file, mplVisual=self)
+                tqdm.write(f'«mplVisual» → Saved instance to {self.args['save_to']}.npz')
+    
     def _draw_info(self, ind):
         if self.info_data is None:
-            self.fmt.target = [self.info_body, ind]
+            self.fmt.target = [self.args['info_body'], ind]
             inf_string = str(self.fmt)
         else:
-            inf_string = self.info_data[self.info_body][ind]
+            inf_string = self.info_data[self.args['info_body']][ind]
         self.ax.text2D(s=inf_string, transform=self.ax.transAxes, x=0.05, y=0.2, size='small', horizontalalignment='left',
-                verticalalignment='bottom', color=self.col['t'])  
+                verticalalignment='bottom', color=self.args['color_dict']['text'])  
     def _draw_legend(self):
         handles, labels = self.ax.get_legend_handles_labels()
         handle_list, label_list = [], []
@@ -476,13 +486,13 @@ class mplVisual:
             if label not in label_list:
                 handle_list.append(handle)
                 label_list.append(label)
-        self.leg = self.ax.legend(handle_list, label_list, draggable=True, facecolor=self.col['b'], fancybox=True, loc=1, fontsize='small')
+        self.leg = self.ax.legend(handle_list, label_list, draggable=True, facecolor=self.args['color_dict']['bkgd'], fancybox=True, loc=1, fontsize='small')
         for text in self.leg.get_texts():
             text.set_picker(PICKRADIUS)
-            text.set_color(self.col['t'])
+            text.set_color(self.args['color_dict']['text'])
 
     def _draw_vectors(self,pos,other,c):
-        self.ax.quiver(*pos,*other,length=self.vct['size'],color=c,zorder=8, clip_on=False)
+        self.ax.quiver(*pos,*other,length=self.args['vect_params']['size'],color=c,zorder=8, clip_on=False)
 
 
     
@@ -534,11 +544,11 @@ class mplVisual:
             _poshist = self.trail_data[b][ind]
             _pos = [float(m) for m in b.pos[ind]]
             # draw vectors
-            if self.vct['vel'] == True:
+            if self.args['vect_params']['vel'] == True:
                 self._draw_vectors(_pos,
                                    [float(m) for m in b.vel[ind]],
                                    'r')     
-            if self.vct['acc'] == True:
+            if self.args['vect_params']['acc'] == True:
                 self._draw_vectors(_pos,
                                    [float(m) for m in b.acc[ind]],
                                    'g')
@@ -569,7 +579,7 @@ class mplVisual:
                                    clip_on=False,
                                    pickradius=PICKRADIUS)
             # draw label
-        if self.gui['label'] == 'label':
+        if self.args['labelling_type'] == 'label':
             for b in self.engine.bodies:
                 self.ax.text(*[float(m) for m in b.pos[ind]],b.identity,
                             color=b.color,
@@ -584,7 +594,7 @@ class mplVisual:
 
 # object picking in interactive window
     def _on_pick(self,event):
-            print(event.artist)
+            tqdm.write(f'«mplVisual» → [click] {event.artist}')
             if isinstance(event.artist,Text):
                 identity = event.artist.get_text()
                 body = list(b for b in self.engine.bodies if b.identity == identity)[0]
@@ -610,7 +620,7 @@ class mplVisual:
 
     
     def start(self, **viewparams):
-        tqdm.write('Starting Visual Environment')
+        tqdm.write('«mplVisual» → Starting Visual Environment')
         self.anim = animation.FuncAnimation(self.fig, func=self._animate, **self.anim_args) 
         if viewparams:
             self.ax.view_init(**viewparams)
