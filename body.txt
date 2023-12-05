@@ -1,0 +1,4 @@
+name = jul
+position = (-1.4,0,0)
+mass = 1.23
+radius = 60000000

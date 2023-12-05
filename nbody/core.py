@@ -3,21 +3,22 @@ from decimal import Decimal
 
 import math
 from time import sleep
+from matplotlib.lines import Line2D
 from tqdm import tqdm, trange
 import numpy as np
-
+import os
 
 # Plotting and animation Packages
 import matplotlib as mpl
 #mpl.use('QT5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.widgets import Slider
+from matplotlib.widgets import Button, Slider
 from cycler import cycler
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3D
 from matplotlib.text import Text
-
+from matplotlib.patches import Circle
 
 
 from . import errors as e
@@ -30,16 +31,14 @@ try:
 except ModuleNotFoundError:
     G = 6.6743*10**(-11)
 
-
+PICKRADIUS = 10
 
 def sphere(pos,radius,N=20):
     (c,r) = (pos,radius)
     u,v = np.mgrid[0:2*np.pi:N*1j, 0:np.pi:N*1j]
-
     x = r*np.cos(u)*np.sin(v)+c[0]
     y = r*np.sin(u)*np.sin(v)+c[1]
     z = r*np.cos(v)+c[2]
-    
     return x,y,z
 
 
@@ -47,7 +46,6 @@ class Body:
     def __init__(self,mass,init_pos,init_vel=(0,0,0),
                 radius=0,bounce=0.999,color=None,identity=None):
 
-        
         if isinstance(identity,str):
             self.identity = identity
         elif identity is None:
@@ -76,7 +74,7 @@ class Body:
     mass="{self.mass.c()} {self.mass.units}",\n\
     currentpos="{self.pos.c()} {self.pos.units}",\n\
     currentvel="{self.vel.c()} {self.vel.units}",\n\
-    currentvel="{self.acc.c()} {self.acc.units}")'
+    currentacc="{self.acc.c()} {self.acc.units}")'
     
     
     def __repr__(self):
@@ -121,24 +119,23 @@ v={self.vel.c()}), a={self.acc.c()})'
     
     
     def _reinitialise(self,init_pos=None,init_vel=None):
-        self.acc = HistoricVector(0,0,0,identity=f'{self.identity}_acc',units_v='ms^-2')
+        self.acc = HistoricVector(0,0,0,identity=f'{self.identity}_acc',units_v=self.acc.units)
         
         if init_pos != None:
             if isinstance(init_pos,(*Iterable,*VectorType)):
-                self.pos = HistoricVector(li=init_pos,identity=f'{self.identity}_pos',units_v='m')
+                self.pos = HistoricVector(li=init_pos,identity=f'{self.identity}_pos',units_v=self.pos.units)
             else:
                 e.raise_type_error('init_pos',Iterable,init_pos)
         
         if init_vel != None:
             if isinstance(init_vel,(*Iterable,*VectorType)):
-                self.vel = HistoricVector(li=init_vel,identity=f'{self.identity}_vel',units_v='ms^-1')
+                self.vel = HistoricVector(li=init_vel,identity=f'{self.identity}_vel',units_v=self.vel.units)
             else:
                 e.raise_type_error('init_vel',(*Iterable,*VectorType),init_vel)
 
     
     
-    def get_(self, item, ind, params):
-            (plotskip, c_mass) = params
+    def get_(self, item, ind, plotskip, c_mass):
             def sma():
                 try:
                     a = max(list(Vector(self.pos[ind]).magnitude() for i in range(0,ind,plotskip)))
@@ -159,8 +156,31 @@ v={self.vel.c()}), a={self.acc.c()})'
                        **dict.fromkeys(['ke', 'kinetic_energy'], ke)}
             return _get_lookup[item]()
         
-
-
+def body_from(object):
+    if isinstance(object, str) and os.path.isfile(object):
+        params = dict()
+        with open(object, 'r') as f:
+            for line in f:
+                p = list(l.strip() for l in line.strip().split('='))
+                if p[0] in ('name', 'identity', 'id'):
+                    params['identity'] = p[1]
+                elif p[0] in ('color', 'color'):
+                    params['color'] = p[1]
+                elif p[0] in ('mass', 'radius', 'bounce'):
+                    params[p[0]] = float(p[1])
+                elif 'pos' in p[0]:
+                    tp = p[1].strip('()[]').split(',')
+                    params['init_pos'] = list(float(t) for t in tp)
+                elif 'vel' in p[0]:
+                    tp = p[1].strip('()[]').split(',')
+                    params['init_vel'] = list(float(t) for t in tp)
+                else:
+                    print(p)
+            return Body(**params)
+    if isinstance(object, dict):
+        return Body(**object)
+    else:
+        e.raise_type_error('object', (dict, str), object)
 
 
 class Engine:
@@ -235,7 +255,7 @@ class Engine:
             e.raise_value_error('const_axis,const_val',(str,*NumType),(const_axis,const_val))
             
     def _check_collision(self,body,co_restitution=0):
-        if self.do_collisions:
+        if self.do_collisions == True:
             returned_coll = False
             for bod in self.bodies:
                 if body != bod: 
@@ -263,7 +283,7 @@ class Engine:
     
     def _find_gravity(self,body):
         res = NullVector()
-        if self.do_bodygravity:
+        if self.do_bodygravity == True:
             for bod2 in self.bodies: 
                 if bod2 != body:
                     dist_12 = body.pos - bod2.pos
@@ -300,200 +320,269 @@ class Engine:
             if intervals+1 == len(self.bodies[0].pos):
                 tqdm.write(f'Finished Evaluating {intervals} intervals, ~{len(self.bodies[0].pos)} total intervals.')
 
+# kwargs
+'''
+kwargs
+
+info_calc
+show_acc
+show_vel
+vector_size
+speed_control
+start_ind
 
 
+as dict
+linecolor backgroundcolor facecolor textcolor
 
-
-
-
-
-
-
-PICKRADIUS = 10
-
-_ax_loc = dict(zoom=(0.05,0.25,0.05,0.5), #ax1
-               fps=(0.1,0.25,0.05,0.5), #ax2
-               subadj=(0,0,1,1,0,0), #fig.subplots
-               fsize=(16,9), b_as=(1,1,1)) #fig , fig.bbox
-
-_c = dict(w='white', b='black', cl=(0.,0.,0.,0.),) 
-
-
-_artists = dict(dot = dict(zorder=4, clip_on=False,picker=True, marker='o', pickradius=PICKRADIUS),
-                plane=dict(zorder=1, clip_on=False, color=('xkcd:azure', 0.5)),
-                trail=dict(zorder=7, clip_on=False, picker=True, pickradius=PICKRADIUS),
-                surf=dict(zorder=2, clip_on=False, pickradius=PICKRADIUS),
-                label=dict(zorder=10, clip_on=False),
-                shadw=dict(zorder=1.5, clip_on=False, color='black'),
-                vect=dict(zorder=8, clip_on=False))
-
-_slider = dict(zoom=dict(label='Zoom', valmin=0.1, valmax=10, orientation='vertical'),
-               fps=dict(label='Interval',valmax=2,orientation='vertical'))
-
-_text = dict(info=dict(x=0.05, y=0.2, size='small'),
-             ax_labels=dict(xlabel='x',ylabel='y',zlabel='z'),
-             leg=dict(draggable=True, facecolor='black', fancybox=True))
-
+'''
+        
 
 class mplVisual:
-    def __init__(self, engine, name='NBody Simulation (Matplotib)',
-                focus_body=None,focus_range=None,
-                autoscale=True,show_grid=True,show_shadows=False,
-                show_acceleration=False,show_velocity=False,vector_size=1,
-                labelling_type='legend',body_model='dots',guistyle='default',
-                do_picking = False, show_info=False, info_params = {'output_raw':True,
-                    'vector_pos':False, 'vector_vel':False, 'vector_acc':False}):
+    def __init__(self, 
+                 engine,
+                 name='NBody Simulation (Matplotib)',
+                 show_info=False,
+                 show_grid=True,
+                 focus_body=None,
+                 do_picking = False, 
+                 fps=30,
+                 step_skip_frames=1,
+                 step_skip_points=1,
+                 max_period=2,
+                 max_pts=None, **kwargs):
+        self.vct, self.col = dict(), 
+        self.args = {
+            'color_dict': dict(line='black', face=(0,0,0,0), bkgd='white', text='black'),
+            'speed_control': False,
+            'vect_params': dict(vel=False, acc=False, size=1),
+            'start_index':0,
+            'info_calc':False,
+            'focus_range':None,
+            'anim_cache':False,
+            'show_grid':True,
+            'max_pts':None,
+            'is_running':True, 
+            'labelling_type':'legend',
+            'body_model':'dots',
+            'info_body':focus_body,
+            'fmt_params':dict()}
+        self.files = dict()
+        self.args.update(kwargs)
+        if self.args['show_grid'] == False:
+            self.col['line'] = (0,0,0,0)
+            self.col['face'] = (0,0,0,0)
         
-        (self.engine,self.focus_body,self.focus_range,self.autoscale,self.show_grid,
-        self.show_shadows,self.show_acceleration,self.show_velocity,self.vector_size,
-        self.labelling_type,self.body_model,self.guistyle,self.do_picking, self.show_info, self.info_params) = typecheck((
-        (engine,Engine),(focus_body,(Body,NoneType)),(focus_range,(*NumType, NoneType)),
-        (autoscale,bool),(show_grid,bool),(show_shadows,bool),(show_acceleration,bool),
-        (show_velocity,bool),(vector_size,NumType),(labelling_type,str),(body_model,str),
-        (guistyle,str),(do_picking,bool),(show_info, bool),(info_params, dict))) # new options here
         
-        self.fig = plt.figure(name, figsize=_ax_loc['fsize'])
-        self.ax = self.fig.add_subplot(projection='3d')
-        self.ax1 = self.fig.add_axes(_ax_loc['zoom'])
         
-        self.fig.subplots_adjust(*_ax_loc['subadj'])
-        self.zoom_slider = Slider(self.ax1,valinit=1,**_slider['zoom'])
-        (self._frameskip,self._plotskip, self.ax.computed_zorder, self.inf_b) = (
-        1,1,False, self.focus_body)
+        self.engine = engine
+        self.show_info=show_info
+        self.show_grid=show_grid
+        self.focus_body=focus_body
+        self.do_pick=do_picking
         
-        def _clearpanes():
-            for ax in (self.ax.xaxis,self.ax.yaxis,self.ax.zaxis):
-                ax.set_pane_color(_c['cl'])
+        self.plt = dict(ptstep=step_skip_points,
+                        maxperiod=int(max_period),
+                        maxpts=(int(max_pts) if max_pts is not None else None),
+                        interval=1000/fps,
+                        frmstep=step_skip_frames,
+                        major_body=max((b.mass.c() for b in self.engine.bodies)))
+        flist = list(self.plt['frmstep']*x for x in range(int(len(self.engine)/self.plt['frmstep'])))
+        self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/fps), frames=flist, cache_frame_data=self.args['anim_cache'])
         
-        def _axcolor(color):
-            for spine in self.ax.get_children():
-                if isinstance(spine,mpl.spines.Spine):
-                    spine.set_color(color) 
-            self.ax.tick_params(color=color,labelcolor=color)
-            for ax in (self.ax.xaxis,self.ax.yaxis,self.ax.zaxis):
-                ax.label.set_color(color)
-            mpl.rcParams['axes.labelcolor'] = color
+        self.trail_data = dict()
+        for b in self.engine.bodies:
+            body_data = dict()
+            for f in flist: 
+                try:
+                    tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'], self.plt['major_body'])/self.engine.dt))
+                    if tau > 0:
+                        lower = math.ceil(tau)
+                    else: raise TypeError
+                except TypeError:
+                    lower = self.args['start_index']
+                body_data_f = list(list(float(m) for m in _b.record[lower:f:self.plt['ptstep']]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+                if self.plt['maxpts'] is not None:
+                    while any(len(i) > self.plt['maxpts'] for i in body_data_f):
+                        for i in body_data_f:
+                            i.pop(0)  
+                body_data[f] = body_data_f
+            self.trail_data[b] = body_data
         
-
-        if self.guistyle == 'dark':
-            for artist in (self.fig,self.ax):
-                artist.set_facecolor(_c['b'])
-            _clearpanes()
-            _axcolor(_c['w'])
-            mpl.rcParams['text.color'] = _c['w']
-            self.tcolor = _c['w']
-            self.zoom_slider.label.set_color(self.tcolor)
-            
+        if show_info == True:
+            self.fmt = Formatter(output_raw=False,items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'], vector_pos=False, vector_vel=False, vector_acc=False, dt=self.engine.dt, c_mass=self.plt['major_body'])
+        
+        if self.args['info_calc'] is True:
+            self.info_data = dict()
+            for b in self.engine.bodies: 
+                body_data = dict()
+                for f in flist:
+                    self.fmt.target = [b,f]
+                    body_data[f] = str(self.fmt)
+                self.info_data[b] = body_data
         else:
-            self.tcolor = _c['b']
+            self.info_data = None    
         
-        if not self.show_grid:
+        self.fig = plt.figure(name, figsize=(16,9))
+        
+        self.ax = self.fig.add_subplot(projection='3d', computed_zorder = False)
+        
+        self.zoom_ax = self.fig.add_axes((0.05,0.25,0.05,0.5))
+        self.zoom_slider = Slider(self.zoom_ax,valinit=1,label='Zoom',valmin=0.1,valmax=10, orientation='vertical')
+        
+        self.plpa_ax = self.fig.add_axes((0.48,0.05,0.04, 0.05))
+        self.playpause = Button(self.plpa_ax, label=' ▶ ▐▐ ', hovercolor='white', color=(0.5,0.5,0.5,0.5))
+        self.playpause.label.set(fontstretch=0.6, fontsize='large', color='black')
+        self.playpause.on_clicked(self._toggle)
+        
+        if self.args['speed_control'] == True:
+            self.spd_ax = self.fig.add_axes((0.1,0.25,0.05,0.5))
+            self.speed_slider = Slider(self.spd_ax,valinit=1000/self.plt['interval'], valmax=1000/5,label='Target\nFPS',valmin=0.1,orientation='vertical')
+            self.speed_slider.label.set_color(self.col['t'])
+            def _sp_ud(val):
+                self.plt['interval'] = 1000/val
+            self.speed_slider.on_changed(_sp_ud)
+        
+        self.fig.subplots_adjust(0,0,1,1,0,0)
+        self.ax.tick_params(color=self.col['line'],labelcolor=self.col['text'])
+        for artist in (self.fig,self.ax):
+            artist.set_facecolor(self.col['bkgd'])
+        for spine in self.ax.get_children():
+            if isinstance(spine,mpl.spines.Spine):
+                spine.set_color(self.col['line'])      
+        mpl.rcParams['text.color'] = self.col['text']
+        for ax in (self.ax.xaxis,self.ax.yaxis, self.ax.zaxis):
+            ax.label.set_color((self.col['text'] if show_grid is True else (0,0,0,0)))
+            ax.set_pane_color(self.col['face'])
+        if show_grid == False:
             self.ax.grid(False)
-            _axcolor(_c['cl'])
-            _clearpanes()
-        self._cmass = 0 # changed big mass thing here
-        for bod in self.engine.bodies:
-            if bod.mass.c() > self._cmass:
-                self._cmass = bod.mass.c()
-        if self.show_info:
-            self.fm = Formatter(plotskip=1, c_mass=self._cmass, **self.info_params)
-    
-    def _draw_vectors(self,pos,other,c):
-            self.ax.quiver(*pos,*other,length=self.vector_size,color=c,**_artists['vect'])
-
-    def _animate(self,ind):
-        sleep(self._int)
-        self.ax.clear()
+        self.ax.set_autoscale_on(False)
         
-        # figure building
+         
 
-        self.ax.set(**_text['ax_labels'])
-        if not self.autoscale:
-            self.ax.set_box_aspect(_ax_loc['b_as'], zoom=self.zoom_slider.val)
-            self.ax.set_autoscale_on(False)
-            
-            if self.focus_body is not None:
-                (limx,limy,limz) = (float(m) for m in self.focus_body.pos[ind])
-                if self.focus_range is None:
-                    self.focus_range = float(max((max(self.focus_body.pos - bod.pos) for bod in self.engine.bodies)))
-            else:
-                limx,limy,limz=0,0,0
-                if self.focus_range is None:
-                    self.focus_range = max(max(*bod.pos[ind]) for bod in self._engine.bodies)
-            
-            self.ax.set(xlim=((limx-self.focus_range),(limx+self.focus_range)),ylim=((limy-self.focus_range),
-                        (limy+self.focus_range)),zlim=((limz-self.focus_range),(limz+self.focus_range)))
+        
+    def _draw_info(self, ind):
+        if self.info_data is None:
+            self.fmt.target = [self.info_body, ind]
+            inf_string = str(self.fmt)
         else:
-            self.ax.set_autoscale_on(True)
-            self.ax.set_box_aspect(None,zoom=self.zoom_slider.val)
+            inf_string = self.info_data[self.info_body][ind]
+        self.ax.text2D(s=inf_string, transform=self.ax.transAxes, x=0.05, y=0.2, size='small', horizontalalignment='left',
+                verticalalignment='bottom', color=self.col['t'])  
+    def _draw_legend(self):
+        handles, labels = self.ax.get_legend_handles_labels()
+        handle_list, label_list = [], []
+        for handle, label in zip(handles, labels):
+            if label not in label_list:
+                handle_list.append(handle)
+                label_list.append(label)
+        self.leg = self.ax.legend(handle_list, label_list, draggable=True, facecolor=self.col['b'], fancybox=True, loc=1, fontsize='small')
+        for text in self.leg.get_texts():
+            text.set_picker(PICKRADIUS)
+            text.set_color(self.col['t'])
+
+    def _draw_vectors(self,pos,other,c):
+        self.ax.quiver(*pos,*other,length=self.vct['size'],color=c,zorder=8, clip_on=False)
+
+
+    
+    def _animate(self,ind):
+        if self.args['speed_control'] == True:
+            sleep((self.plt['interval']-5)/1000)
+        self.ax.clear()
+    
+        self.ax.set(xlabel='$x$',
+                    ylabel='$y$',
+                    zlabel='$z$')
+        
+        
+        self.ax.set_box_aspect((1,1,1),zoom=self.zoom_slider.val)
+        
+    
+        if self.focus_body is not None:
+            (limx,limy,limz) = (float(m) for m in self.focus_body.pos[ind])
+            if self.args['focus_range'] is None:
+                self.args['focus_range'] = float(max((max(abs(x) for x in (self.focus_body.pos - bod.pos)) for bod in self.engine.bodies)))
+        else:
+            limx,limy,limz=0,0,0
+            if self.args['focus_range'] is None:
+                self.args['focus_range'] = max(max(*bod.pos[ind]) for bod in self.engine.bodies)
+        rng = self.args['focus_range']
+        self.ax.set(xlim=((limx-rng),(limx+rng)),
+                ylim=((limy-rng),(limy+rng)),
+                zlim=((limz-rng),(limz+rng)))
+        
+        
+        
         
         # plot planes
-
+    
         for plane in self.engine.planes:
             xl, yl, zl, = self.ax.get_xlim(), self.ax.get_ylim(), self.ax.get_zlim()
             pl_const = np.array([[plane[1], plane[1]], [plane[1], plane[1]]])
             points = {'x':(pl_const,np.array([[yl[0],yl[1]],[yl[0],yl[1]]]),
-                           np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
-                      'y':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),pl_const,
-                           np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
-                      'z':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),
-                           np.array([[yl[0],yl[0]],[yl[1],yl[1]]]),pl_const)}
-            self.ax.plot_surface(*points[plane[0]], **_artists['plane'])
+                            np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
+                        'y':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),pl_const,
+                            np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
+                        'z':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),
+                            np.array([[yl[0],yl[0]],[yl[1],yl[1]]]),pl_const)}
+            self.ax.plot_surface(*points[plane[0]], zorder=1, clip_on=False, color=('xkcd:azure', 0.5))
             
         # plot bodies
 
         for b in self.engine.bodies:
-            # cutting away any excessive looping orbits for performance
-            cut = 0
-            try:
-                tau = (ind-(2*b.get_('period', ind, self._plotskip, self._cmass)/self.engine.dt))
-                if tau > cut:
-                    cut = math.ceil(tau)
-            except TypeError:
-                cut = 0
-            # position and trail
-            _poshist = list(list(float(m) for m in _b.record[cut:ind:self._plotskip]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+            _poshist = self.trail_data[b][ind]
             _pos = [float(m) for m in b.pos[ind]]
             # draw vectors
-            if self.show_velocity:
-                self._draw_vectors(_pos,[float(m) for m in b.vel[ind]],'r')     
-            if self.show_acceleration:
-                self._draw_vectors(_pos,[float(m) for m in b.acc[ind]],'g')
+            if self.vct['vel'] == True:
+                self._draw_vectors(_pos,
+                                   [float(m) for m in b.vel[ind]],
+                                   'r')     
+            if self.vct['acc'] == True:
+                self._draw_vectors(_pos,
+                                   [float(m) for m in b.acc[ind]],
+                                   'g')
             # draw trail
-            self.ax.plot(*_poshist,label=f'{b.identity}',color=b.color, **_artists['trail'])
+            self.ax.plot(*_poshist,
+                         label=f'{b.identity}',
+                         color=b.color,
+                         zorder=7,
+                         clip_on=False,
+                         picker=True,
+                         pickradius=PICKRADIUS)
             # draw body
-            if self.body_model == 'dots':
-                self.ax.plot(*_pos,label=f'{b.identity}',color=b.color,**_artists['dot'])
+            if self.args['body_model'] == 'dots':
+                self.ax.plot(*_pos,
+                             label=f'{b.identity}',
+                             color=b.color,
+                             zorder=4,
+                             clip_on=False,
+                             picker=True,
+                             marker='o',
+                             pickradius=PICKRADIUS)
             else:
                 _sf = {'wireframe':self.ax.plot_wireframe, 'surface':self.ax.plot_surface}
-                _sf[self.body_model](*sphere(_pos,b.radius.c()),label=f'{b.identity}', color=b.color **_artists['surf'])
+                _sf[self.args['body_model']](*sphere(_pos,b.radius.c()),
+                                   label=f'{b.identity}',
+                                   color=b.color,
+                                   zorder=2,
+                                   clip_on=False,
+                                   pickradius=PICKRADIUS)
             # draw label
-            if self.labelling_type == 'label':
-                self.ax.text(*_pos,b.identity,color=b.color, **_artists['label'])
-            # draw shadows
-            if self.show_shadows:
-                self.ax.plot(*_poshist[0:2],[(_poshist[2][ind]-self.focus_range)]*
-                             len(_poshist[2]), **_artists['shadw'])
-        # draw legend
-        if self.labelling_type == 'legend':
-            handles, labels = self.ax.get_legend_handles_labels()
-            handle_list, label_list = [], []
-            for handle, label in zip(handles, labels):
-                if label not in label_list:
-                    handle_list.append(handle)
-                    label_list.append(label)
-            self.leg = self.ax.legend(handle_list, label_list, **_text['leg'])
-            
-            
-            
-            for text in self.leg.get_texts():
-                text.set_picker(PICKRADIUS)
-                text.set_color(self.tcolor)
+        if self.gui['label'] == 'label':
+            for b in self.engine.bodies:
+                self.ax.text(*[float(m) for m in b.pos[ind]],b.identity,
+                            color=b.color,
+                            zorder=10,
+                            clip_on=False)
+        else:
+            self._draw_legend()
         # draw info panel
-        if self.show_info:
-            self.fm.target = [self.inf_b, ind] # new all inside formatter object
-            self.ax.text2D(s=str(self.fm), transform=self.ax.transAxes, **_text['info'])
-    # object picking in interactive window
+        if self.show_info == True:
+            self._draw_info(ind)
+
+
+# object picking in interactive window
     def _on_pick(self,event):
             print(event.artist)
             if isinstance(event.artist,Text):
@@ -501,31 +590,47 @@ class mplVisual:
                 body = list(b for b in self.engine.bodies if b.identity == identity)[0]
                 if not body:
                     return
-                self.inf_b = body
-            elif isinstance(event.artist,Line3D):
+                self.args['info_body'] = body
+            elif isinstance(event.artist,(Line3D, Line2D)):
                 identity = event.artist.get_label()
                 body = list(b for b in self.engine.bodies if b.identity == identity)[0]
                 if not body:
                     return
                 self.focus_body = body
-            
-  
-    def start(self,interval=0.033,frameskip=1,plotskip=1,cache=False, speed_control=False):
-        self._plotskip, self.int = plotskip, interval
-        self.fm.par['ps'] = self._plotskip
-        f = list(frameskip*x for x in range(int(len(self.engine)/frameskip)))
+                self.focus_range = None
+    
+    def _toggle(self, event):
+            if self.args['is_running'] == True:
+                self.anim.event_source.stop()
+                self.args['is_running'] = False
+            else:
+                self.anim.event_source.start()
+                self.args['is_running'] = True        
+    
+
+    
+    def start(self, **viewparams):
         tqdm.write('Starting Visual Environment')
-        self._int = 0    
-        anim = animation.FuncAnimation(self.fig, func=self._animate, interval=self.int*1000, frames=f, cache_frame_data=cache, ) 
-        if speed_control:
-            self.ax2 = self.fig.add_axes(_ax_loc['fps'])
-            self.speed_slider = Slider(self.ax2,valinit=self.int, valmin=self.int,**_slider['fps'])
-            self.speed_slider.label.set_color(self.tcolor)
-            def _sp_ud(val):
-                self._int = val-self.int
-            self.speed_slider.on_changed(_sp_ud)
-        if self.do_picking:
+        self.anim = animation.FuncAnimation(self.fig, func=self._animate, **self.anim_args) 
+        if viewparams:
+            self.ax.view_init(**viewparams)
+        if self.do_pick:
             self.fig.canvas.mpl_connect('pick_event',self._on_pick)
         plt.show()
-
+    
 from .text import Formatter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
