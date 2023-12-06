@@ -156,78 +156,7 @@ v={self.vel.c()}), a={self.acc.c()})'
                        **dict.fromkeys(['ke', 'kinetic_energy'], ke)}
             return _get_lookup[item]()
         
-def body_from(object,input_type='init'):
-    if input_type == 'init':    
-        if isinstance(object, str) and os.path.isfile(object):
-            params = dict()
-            with open(object, 'r') as f:
-                for line in f:
-                    p = list(l.strip() for l in line.strip().split('='))
-                    if p[0] in ('name', 'identity', 'id'):
-                        params['identity'] = p[1]
-                    elif p[0] in ('color', 'colour'):
-                        params['color'] = p[1]
-                    elif p[0] in ('mass', 'radius', 'bounce'):
-                        params[p[0]] = float(p[1])
-                    elif 'pos' in p[0]:
-                        tp = p[1].strip('()[]').split(',')
-                        params['init_pos'] = list(float(t) for t in tp)
-                    elif 'vel' in p[0]:
-                        tp = p[1].strip('()[]').split(',')
-                        params['init_vel'] = list(float(t) for t in tp)
-                    else:
-                        print(p)
-                return Body(**params)
-        if isinstance(object, dict):
-            return Body(**object)
-        else:
-            e.raise_type_error('object', (dict, str), object)
-    elif input_type.startswith() == 'pos':
-        result = {}
-        with open(object, 'r') as file:
-            lines = file.readlines()
 
-            parsing_position = False
-            found_dt = False
-            positions = []
-            dt = 0
-            for line in lines:
-                parts = line.split('=')
-                if len(parts) == 2:
-                    key, value = map(str.strip, parts)
-                    value = value.replace('(', '').replace(')', '').replace(',', '')
-                    if key in ('name', 'identity', 'id'):
-                        result['identity'] = value
-                    elif key in ('color', 'colour'):
-                        result['color'] = value
-                    elif key in ('mass', 'radius', 'bounce'):
-                        result[key] = float(value)
-                    elif key == 'position':
-                        parsing_position = True
-                        continue
-                    elif key == 'dt':
-                        found_dt = True
-                        dt = value
-
-                if parsing_position:
-                    if line.strip() == ')':
-                        result['position'] = positions
-                        parsing_position = False
-                    else:
-                        position_str = line.strip().replace('(', '').replace(')', '')
-                        position_tuple = tuple(map(int, position_str.split(',')))
-                        positions.append(position_tuple)
-        if found_dt == True:
-            params = result
-            params['init_pos'] = result['position'][0]
-            body = Body(**params)
-            for i,x in enumerate(result['position'][1:],):
-                body.pos.next(x)
-                body.vel.next((Vector(result['position'][i])-x)/dt)
-                body.acc.next((0,0,0))
-            return body
-        else:
-            raise LookupError('could not find a dt value.')
 
 
 class Engine:

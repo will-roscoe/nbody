@@ -1,0 +1,7 @@
+dt = 1.23
+*Obj_1 [
+name = object_name
+mass = 1.4213
+position = (1,2,3)
+radius = 23.124
+]

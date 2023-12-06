@@ -1,8 +1,8 @@
 from __future__ import annotations
 from .base import Iterable, Vector
 from pint import Quantity, UnitRegistry
-
-
+import os
+import errors as e
 ur = UnitRegistry()
 ur.define('light_year = 9460730472580800 * meter = ly = lightyear')
 ur.define('jupiter_mass = 1.89818*10**27 * kg = $M_J$ = jmass')
@@ -146,7 +146,130 @@ class Formatter:
         else:
             return self._basetemplate().format(*self._quantities_to_strings())
         
+def body_from(object,input_type='init'):
+    if input_type == 'init':    
+        if isinstance(object, str) and os.path.isfile(object):
+            params = dict()
+            with open(object, 'r') as f:
+                for line in f:
+                    p = list(l.strip() for l in line.strip().split('='))
+                    if p[0] in ('name', 'identity', 'id'):
+                        params['identity'] = p[1]
+                    elif p[0] in ('color', 'colour'):
+                        params['color'] = p[1]
+                    elif p[0] in ('mass', 'radius', 'bounce'):
+                        params[p[0]] = float(p[1])
+                    elif 'pos' in p[0]:
+                        tp = p[1].strip('()[]').split(',')
+                        params['init_pos'] = list(float(t) for t in tp)
+                    elif 'vel' in p[0]:
+                        tp = p[1].strip('()[]').split(',')
+                        params['init_vel'] = list(float(t) for t in tp)
+                    else:
+                        print(p)
+                return Body(**params)
+        if isinstance(object, dict):
+            return Body(**object)
+        else:
+            e.raise_type_error('object', (dict, str), object)
+    
+    elif input_type.startswith() == 'pos':
+        if isinstance(object, str) and os.path.isfile(object):
+            result = {}
+            with open(object, 'r') as file:
+                lines = file.readlines()
+                parsing_position = False
+                found_dt = False
+                positions = []
+                dt = 0
+                for line in lines:
+                    parts = line.split('=')
+                    if len(parts) == 2:
+                        key, value = map(str.strip, parts)
+                        value = value.replace('(', '').replace(')', '').replace(',', '')
+                        if key in ('name', 'identity', 'id'):
+                            result['identity'] = value
+                        elif key in ('color', 'colour'):
+                            result['color'] = value
+                        elif key in ('mass', 'radius', 'bounce'):
+                            result[key] = float(value)
+                        elif key == 'position':
+                            parsing_position = True
+                            continue
+                        elif key == 'dt':
+                            found_dt = True
+                            dt = value
 
-from .core import Body
+                    if parsing_position:
+                        if line.strip() == ')':
+                            result['position'] = positions
+                            parsing_position = False
+                        else:
+                            position_str = line.strip().replace('(', '').replace(')', '')
+                            position_tuple = tuple(map(int, position_str.split(',')))
+                            positions.append(position_tuple)
+            if found_dt == True:
+                params = result
+                params['init_pos'] = result['position'][0]
+                body = Body(**params)
+                for i,x in enumerate(result['position'][1:]):
+                    body.pos.next(x)
+                    body.vel.next((Vector(result['position'][i])-x)/dt)
+                    body.acc.next((0,0,0))
+                return body
+            else:
+                raise LookupError('could not find a dt value.')
+
+def engine_from(object):   
+    if isinstance(object, str) and os.path.isfile(object):
+        with open(object, 'r') as f:
+            # getting parameters for engine
+            eng_params = dict()
+            for line in f:
+                    parts = line.split('=')
+                    if len(parts) == 2:
+                        key, value = map(str.strip, parts)
+                        value = value.replace('(', '').replace(')', '').replace(',', '')
+                        if key == 'dt':
+                            eng_params['dt'] = value
+                        elif key == 'checking_range':
+                            eng_params['checking_range'] = value
+            # getting start and end indexes of each body
+            body_index = dict()
+            for i,line in enumerate(f):
+                if line.startswith('*'):
+                    body_index[line.strip('*')] = i
+                    for s_i,s_line in enumerate(f):
+                        if s_i > i:
+                            if s_line == ']':
+                                body_index[line.strip('*')] = [i,s_i]
+            bodies = []
+            for key,value in body_index:
+                params = dict()
+                for i,line in enumerate(f):
+                    if value[0] <= i <= value[1]:
+                        p = list(l.strip() for l in line.strip().split('='))
+                    if p[0] in ('name', 'identity', 'id'):
+                        params['identity'] = p[1]
+                    elif p[0] in ('color', 'colour'):
+                        params['color'] = p[1]
+                    elif p[0] in ('mass', 'radius', 'bounce'):
+                        params[p[0]] = float(p[1])
+                    elif 'pos' in p[0]:
+                        tp = p[1].strip('()[]').split(',')
+                        params['init_pos'] = list(float(t) for t in tp)
+                    elif 'vel' in p[0]:
+                        tp = p[1].strip('()[]').split(',')
+                        params['init_vel'] = list(float(t) for t in tp)
+                    elif '[]' in p[0] or ']' in p[0]:
+                        pass
+                    else:
+                        print(p)
+                bodies.append(Body(**params))
+            engine = Engine(**eng_params)
+            engine.bodies(bodies)
+            return engine
+        
+from .core import Body, Engine
 
 
