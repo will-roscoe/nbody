@@ -73,7 +73,18 @@ class Formatter:
     }
    
     def _basetemplate(self):
-        return "{}\nmass:{}\nradius:{}\nKE:{}\nperiod:{}\npos:{}\nvel:{}\nacc:{}"
+        ret = ''
+        for key,st in {'identity':"{identity}",
+                       'mass': "\nMass: {mass}",
+                       'radius':"\nRadius: {radius}",
+                       'energy':"\nKE: {energy}",
+                       'period':"\nPeriod: {period}",
+                       'pos':"\nPOS: {pos}",
+                       'vel':"\nVEL: {vel}",
+                       'acc':"\nACC: {acc}",
+                       'time': "\nT: {time}"}:
+            if key in self.items:
+                ret+=st
     
     def _quantities(self, body=None):
         if body != None: self.target[0] = body

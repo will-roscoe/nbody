@@ -1,0 +1,8 @@
+name = object_name
+mass = 1.4213
+position = (
+(1,2,3)
+(4,5,6)
+(7,8,9)
+)
+radius = 23.124

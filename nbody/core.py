@@ -156,31 +156,78 @@ v={self.vel.c()}), a={self.acc.c()})'
                        **dict.fromkeys(['ke', 'kinetic_energy'], ke)}
             return _get_lookup[item]()
         
-def body_from(object):
-    if isinstance(object, str) and os.path.isfile(object):
-        params = dict()
-        with open(object, 'r') as f:
-            for line in f:
-                p = list(l.strip() for l in line.strip().split('='))
-                if p[0] in ('name', 'identity', 'id'):
-                    params['identity'] = p[1]
-                elif p[0] in ('color', 'color'):
-                    params['color'] = p[1]
-                elif p[0] in ('mass', 'radius', 'bounce'):
-                    params[p[0]] = float(p[1])
-                elif 'pos' in p[0]:
-                    tp = p[1].strip('()[]').split(',')
-                    params['init_pos'] = list(float(t) for t in tp)
-                elif 'vel' in p[0]:
-                    tp = p[1].strip('()[]').split(',')
-                    params['init_vel'] = list(float(t) for t in tp)
-                else:
-                    print(p)
-            return Body(**params)
-    if isinstance(object, dict):
-        return Body(**object)
-    else:
-        e.raise_type_error('object', (dict, str), object)
+def body_from(object,input_type='init'):
+    if input_type == 'init':    
+        if isinstance(object, str) and os.path.isfile(object):
+            params = dict()
+            with open(object, 'r') as f:
+                for line in f:
+                    p = list(l.strip() for l in line.strip().split('='))
+                    if p[0] in ('name', 'identity', 'id'):
+                        params['identity'] = p[1]
+                    elif p[0] in ('color', 'colour'):
+                        params['color'] = p[1]
+                    elif p[0] in ('mass', 'radius', 'bounce'):
+                        params[p[0]] = float(p[1])
+                    elif 'pos' in p[0]:
+                        tp = p[1].strip('()[]').split(',')
+                        params['init_pos'] = list(float(t) for t in tp)
+                    elif 'vel' in p[0]:
+                        tp = p[1].strip('()[]').split(',')
+                        params['init_vel'] = list(float(t) for t in tp)
+                    else:
+                        print(p)
+                return Body(**params)
+        if isinstance(object, dict):
+            return Body(**object)
+        else:
+            e.raise_type_error('object', (dict, str), object)
+    elif input_type.startswith() == 'pos':
+        result = {}
+        with open(object, 'r') as file:
+            lines = file.readlines()
+
+            parsing_position = False
+            found_dt = False
+            positions = []
+            dt = 0
+            for line in lines:
+                parts = line.split('=')
+                if len(parts) == 2:
+                    key, value = map(str.strip, parts)
+                    value = value.replace('(', '').replace(')', '').replace(',', '')
+                    if key in ('name', 'identity', 'id'):
+                        result['identity'] = value
+                    elif key in ('color', 'colour'):
+                        result['color'] = value
+                    elif key in ('mass', 'radius', 'bounce'):
+                        result[key] = float(value)
+                    elif key == 'position':
+                        parsing_position = True
+                        continue
+                    elif key == 'dt':
+                        found_dt = True
+                        dt = value
+
+                if parsing_position:
+                    if line.strip() == ')':
+                        result['position'] = positions
+                        parsing_position = False
+                    else:
+                        position_str = line.strip().replace('(', '').replace(')', '')
+                        position_tuple = tuple(map(int, position_str.split(',')))
+                        positions.append(position_tuple)
+        if found_dt == True:
+            params = result
+            params['init_pos'] = result['position'][0]
+            body = Body(**params)
+            for i,x in enumerate(result['position'][1:],):
+                body.pos.next(x)
+                body.vel.next((Vector(result['position'][i])-x)/dt)
+                body.acc.next((0,0,0))
+            return body
+        else:
+            raise LookupError('could not find a dt value.')
 
 
 class Engine:
@@ -350,12 +397,8 @@ class mplVisual:
                  show_info=False,
                  show_grid=True,
                  focus_body=None,
-                 do_picking = False, 
-                 fps=30,
-                 step_skip_frames=1,
-                 step_skip_points=1,
-                 max_period=2,
-                 max_pts=None, **kwargs):
+                 do_picking = True, 
+                 **kwargs):
         self.args = {
             'color_dict': dict(line='black', face=(0,0,0,0), bkgd='white', text='black'),
             'speed_control': False,
@@ -364,36 +407,41 @@ class mplVisual:
             'info_calc':False,
             'focus_range':None,
             'anim_cache':False,
-            'show_grid':True,
             'max_pts':None,
             'is_running':True, 
             'labelling_type':'legend',
             'body_model':'dots',
             'info_body':focus_body,
             'fmt_params':dict(),
-            'file':None}
+            'file':None,
+            'step_skip_frames':1,
+            'step_skip_points':1,
+            'max_period':2,
+            'fps':30
+            }
         self.files = dict()
-        self.args.update(kwargs)
-        if self.args['show_grid'] == False:
-            self.args['color_dict']['line'] = (0,0,0,0)
-            self.args['color_dict']['face'] = (0,0,0,0)
-        
-        
-        
         self.engine = engine
         self.show_info=show_info
         self.show_grid=show_grid
         self.focus_body=focus_body
         self.do_pick=do_picking
+        self.args.update(kwargs)
+        if self.show_grid == False:
+            self.args['color_dict']['line'] = (0,0,0,0)
+            self.args['color_dict']['face'] = (0,0,0,0)
         
-        self.plt = dict(ptstep=step_skip_points,
-                        maxperiod=int(max_period),
-                        maxpts=(int(max_pts) if max_pts is not None else None),
-                        interval=1000/fps,
-                        frmstep=step_skip_frames,
+        
+        
+        
+        
+        self.plt = dict(ptstep=self.args['step_skip_points'],
+                        maxperiod=self.args['max_period'],
+                        maxpts=self.args['max_pts'],
+                        interval=1000/self.args['fps'],
+                        frmstep=self.args['step_skip_frames'],
                         major_body=max((b.mass.c() for b in self.engine.bodies)))
         flist = list(self.plt['frmstep']*x for x in range(int(len(self.engine)/self.plt['frmstep'])))
-        self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/fps), frames=flist, cache_frame_data=self.args['anim_cache'])
+        self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/self.args['fps']), frames=flist, cache_frame_data=self.args['anim_cache'])
         
         self.trail_data = dict()
         with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Building Trails', unit='items') as tbar:
