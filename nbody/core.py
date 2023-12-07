@@ -218,6 +218,7 @@ class Engine:
         _acc = _O(accel_vector)
         if len(_acc) == 3 and isinstance(_acc[0], NumType):
             self.fields+= [Vector(li=_acc)] 
+            tqdm.write(f'«Engine» → constant acceleration {accel_vector} has been initialized.')
         else:
             e.raise_type_error('accel_vector', (*Iterable, *VectorType), accel_vector)
     
@@ -287,7 +288,7 @@ class Engine:
                 for i,body in enumerate(self.bodies):
                     col_vel,on_plane,acc_g = _temp[i]
                     if not on_plane and self.do_fieldgravity:
-                        fieldvel = list(sum(v.vec.c(i) for v in self.fields) for i in range(3))
+                        fieldvel = list(sum(v.c(i) for v in self.fields) for i in range(3))
                     else:
                         fieldvel = NullVector()
                     body.update(dt=self.dt,vel_next=(col_vel+fieldvel).c(),acc_change=acc_g)

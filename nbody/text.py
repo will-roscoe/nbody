@@ -1,8 +1,10 @@
 from __future__ import annotations
-from .base import Iterable, Vector
+from .base import Iterable, NumType, Vector
 from pint import Quantity, UnitRegistry
 import os
-import errors as e
+from . import errors as e
+from tqdm import tqdm
+import pandas as pd
 ur = UnitRegistry()
 ur.define('light_year = 9460730472580800 * meter = ly = lightyear')
 ur.define('jupiter_mass = 1.89818*10**27 * kg = $M_J$ = jmass')
@@ -148,25 +150,28 @@ class Formatter:
         
 def body_from(object,input_type='init'):
     if input_type == 'init':    
-        if isinstance(object, str) and os.path.isfile(object):
-            params = dict()
-            with open(object, 'r') as f:
-                for line in f:
-                    p = list(l.strip() for l in line.strip().split('='))
-                    if p[0] in ('name', 'identity', 'id'):
-                        params['identity'] = p[1]
-                    elif p[0] in ('color', 'colour'):
-                        params['color'] = p[1]
-                    elif p[0] in ('mass', 'radius', 'bounce'):
-                        params[p[0]] = float(p[1])
-                    elif 'pos' in p[0]:
-                        tp = p[1].strip('()[]').split(',')
-                        params['init_pos'] = list(float(t) for t in tp)
-                    elif 'vel' in p[0]:
-                        tp = p[1].strip('()[]').split(',')
-                        params['init_vel'] = list(float(t) for t in tp)
-                    else:
-                        print(p)
+        if isinstance(object, str): 
+            if os.path.isfile(object):
+                params = dict()
+                with open(object, 'r') as f:
+                    for line in f:
+                        p = list(l.strip() for l in line.strip().split('='))
+                        if p[0] in ('name', 'identity', 'id'):
+                            params['identity'] = p[1]
+                        elif p[0] in ('color', 'colour'):
+                            params['color'] = p[1]
+                        elif p[0] in ('mass', 'radius', 'bounce'):
+                            params[p[0]] = float(p[1])
+                        elif 'pos' in p[0]:
+                            tp = p[1].strip('()[]').split(',')
+                            params['init_pos'] = list(float(t) for t in tp)
+                        elif 'vel' in p[0]:
+                            tp = p[1].strip('()[]').split(',')
+                            params['init_vel'] = list(float(t) for t in tp)
+                        else:
+                            tqdm.write(f'«body_from()» → Couldn\'t parse "{line}" so it has been skipped.')
+            else:
+                e.raise_fnf_error(object)
                 return Body(**params)
         if isinstance(object, dict):
             return Body(**object)
@@ -174,7 +179,7 @@ def body_from(object,input_type='init'):
             e.raise_type_error('object', (dict, str), object)
     
     elif input_type.startswith() == 'pos':
-        if isinstance(object, str) and os.path.isfile(object):
+        if os.path.isfile(object):
             result = {}
             with open(object, 'r') as file:
                 lines = file.readlines()
@@ -198,7 +203,7 @@ def body_from(object,input_type='init'):
                             continue
                         elif key == 'dt':
                             found_dt = True
-                            dt = value
+                            dt = float(value)
 
                     if parsing_position:
                         if line.strip() == ')':
@@ -219,57 +224,127 @@ def body_from(object,input_type='init'):
                 return body
             else:
                 raise LookupError('could not find a dt value.')
+        else:
+            e.raise_fnf_error(object)
+    else:
+        e.raise_value_error('input_type', str, input_type)
 
 def engine_from(object):   
-    if isinstance(object, str) and os.path.isfile(object):
-        with open(object, 'r') as f:
-            # getting parameters for engine
-            eng_params = dict()
-            for line in f:
+    if isinstance(object, str):
+        if os.path.isfile(object):
+            with open(object, 'r') as f:
+                _input = f.readlines()
+                # getting parameters for engine
+                eng_params = dict()
+                for line in _input:
                     parts = line.split('=')
                     if len(parts) == 2:
                         key, value = map(str.strip, parts)
                         value = value.replace('(', '').replace(')', '').replace(',', '')
                         if key == 'dt':
-                            eng_params['dt'] = value
+                            eng_params['dt'] = float(value)
                         elif key == 'checking_range':
-                            eng_params['checking_range'] = value
-            # getting start and end indexes of each body
-            body_index = dict()
-            for i,line in enumerate(f):
-                if line.startswith('*'):
-                    body_index[line.strip('*')] = i
-                    for s_i,s_line in enumerate(f):
-                        if s_i > i:
-                            if s_line == ']':
-                                body_index[line.strip('*')] = [i,s_i]
-            bodies = []
-            for key,value in body_index:
-                params = dict()
-                for i,line in enumerate(f):
-                    if value[0] <= i <= value[1]:
+                            eng_params['checking_range'] = float(value)
+                # getting start and end indexes of each body
+                body_strings = dict()
+                func_strings = []
+                for i,line in enumerate(_input):
+                    if line.startswith('*'):
+                        key = line.strip('[\n').strip(']').strip('*').strip()
+                        body_strings[key] = i
+                        for s_i,s_line in enumerate(_input):
+                            if s_i > i:
+                                if ']' in s_line and isinstance(body_strings[key], NumType):
+                                    body_strings[key] = _input[i:s_i]
+                    elif line.startswith('-*'):
+                        val = [p.strip() for p in line.strip('-*').strip('\n').split('=')]
+                        func_strings.append(val)
+                bodies = dict()
+                for key,value in body_strings.items():
+                    params = dict()
+                    for line in value:
                         p = list(l.strip() for l in line.strip().split('='))
-                    if p[0] in ('name', 'identity', 'id'):
-                        params['identity'] = p[1]
-                    elif p[0] in ('color', 'colour'):
-                        params['color'] = p[1]
-                    elif p[0] in ('mass', 'radius', 'bounce'):
-                        params[p[0]] = float(p[1])
-                    elif 'pos' in p[0]:
-                        tp = p[1].strip('()[]').split(',')
-                        params['init_pos'] = list(float(t) for t in tp)
-                    elif 'vel' in p[0]:
-                        tp = p[1].strip('()[]').split(',')
-                        params['init_vel'] = list(float(t) for t in tp)
-                    elif '[]' in p[0] or ']' in p[0]:
-                        pass
+                        if p[0] in ('name', 'identity', 'id'):
+                            params['identity'] = p[1]
+                        elif p[0] in ('color', 'colour'):
+                            params['color'] = p[1]
+                        elif p[0] in ('mass', 'radius', 'bounce'):
+                            params[p[0]] = float(p[1])
+                        elif p[0] in ('pos', 'position'):
+                            tp = p[1].strip('()[]').split(',')
+                            params['init_pos'] = list(float(t) for t in tp)
+                        elif p[0] in ('vel', 'velocity'):
+                            tp = p[1].strip('()[]').split(',')
+                            params['init_vel'] = list(float(t) for t in tp)
+                        elif '[' in p[0] or ']' in p[0] or '*' in p[0] or '#' in p[0]:
+                            pass
+                        else:
+                            tqdm.write(f'«engine_from()» → Couldn\'t parse "{line}" on line {i} so it has been skipped.')
+                    bodies[key] = Body(**params)
+                engine = Engine(**eng_params)
+                engine.attach_bodies(list(bodies.values()))
+                for val in func_strings:
+                    if val[0] == 'plane' and len(val) == 3:
+                        engine.create_plane(str(val[1]), float(val[2]))
+                    elif val[0] == 'field' and len(parts) == 2:
+                        vect = [float(v) for v in val[1].replace('(', '').replace(')', '').split(',')]
+                        engine.create_acceleration(vect)
+                    elif val[0] == 'rel' and len(val) == 2:
+                        engine.make_relative_to(bodies[val[1]])
+                    elif val[0] == 'sim' and len(val) == 2:
+                            engine.simulate(int(val[1]))
                     else:
-                        print(p)
-                bodies.append(Body(**params))
-            engine = Engine(**eng_params)
-            engine.bodies(bodies)
-            return engine
-        
+                        tqdm.write(f'«engine_from()» → Couldn\'t parse function "{' '.join(val)}" so it has been skipped.')
+                return engine
+        else:
+            e.raise_fnf_error(object)
+    else:
+        e.raise_type_error('object', str, object)
+
+def export_data(object, loc, overwrite=True):
+    if isinstance(object, Engine):
+        os.makedirs(loc, exist_ok=overwrite)
+        eng_info = [
+            f'dt = {object.dt}\n',
+            f'checking_range = {object._rangechk}\n',
+            f'number of intervals: {len(object)}\n',
+            f'# bodies:({len(object.bodies)})\n',
+        ]
+        ids = []
+        for b in object.bodies:  
+            obj_id = str(b.identity).replace(' ','_').split(':')[0].split('(Static)')[0]
+            ids.append(obj_id)
+            for line in [f'*{obj_id} [\n',
+                         f'name = {b.identity}\n',
+                         f'mass = {b.mass.c()}\n',
+                         f'radius = {b.radius.c()}\n',
+                         f'color = {b.color}\n',
+                         f'bounce = {b.bounce}\n',
+                         f'position = {b.pos.c()}\n',
+                         f'velocity = {b.vel.c()}\n' 
+                         ']\n']:
+                eng_info.append(line)
+        with open(f'{loc}/eng_info.txt', ('w' if overwrite is True else 'x')) as eng:
+            eng.writelines(eng_info)
+        for i,b in enumerate(object.bodies):
+                info_dict = {'dt':[t*object.dt for t in range(len(object))],
+                             'posX':b.pos.X.record,
+                             'posY':b.pos.Y.record,
+                             'posZ':b.pos.Z.record,
+                             'velX':b.vel.X.record,
+                             'velY':b.vel.Y.record,
+                             'velZ':b.vel.Z.record,
+                             'accX':b.acc.X.record,
+                             'accY':b.acc.Y.record,
+                             'accZ':b.acc.Z.record
+                             }
+                d_df = pd.DataFrame.from_dict(info_dict, 'index').transpose()
+                d_df.to_csv(f'{loc}/{ids[i]}.csv', sep=',',index=False, mode=('w' if overwrite is True else 'x'))
+
+
+
+
+
 from .core import Body, Engine
 
 

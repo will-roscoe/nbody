@@ -1,0 +1,22 @@
+dt = 1.23
+checking_range = 3
+number of intervals: 101
+# bodies:(2)
+*object_name [
+name = object_name(Static)
+mass = 1.4213
+radius = 23.124
+color = None
+bounce = 0.999
+position = (6211.49999998991, 6211.500000000001, 6211.500000000001)
+velocity = (100.00000000000767, 100.0, 100.0)
+]
+*object_name2 [
+name = object_name2:Rel.object_name
+mass = 2.0
+radius = 2.0
+color = None
+bounce = 0.999
+position = (6212.500000007166, 6211.500000000001, 6211.500000000001)
+velocity = (99.99999999999434, 100.0, 100.0)
+]

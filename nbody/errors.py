@@ -50,6 +50,9 @@ interpolating to give missing values.\
     raise RuntimeError(f'could not accurately evaluate body even after \
 interpolating to give missing values. {temp}.')
 
+def raise_fnf_error(loc):
+    '''raises the FileNotFoundError: Could not find file at {loc}.'''
+    raise FileNotFoundError(f'Could not find file at {loc}.')
 
 
 
