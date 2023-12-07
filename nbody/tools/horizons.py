@@ -2,11 +2,12 @@ import re
 from astroquery.jplhorizons import Horizons
 import astropy.units as ast
 from datetime import datetime, timedelta
-from .core import typecheck, Body
+
 from tqdm import tqdm
 from . import errors as e
 
 def horizons_query(searchquery,observer='0',time='2023-11-03',num_type=float,return_type='body'):
+    from ..core.body import typecheck, Body
     typecheck(((searchquery,str),(observer,str),(time,str),(num_type,type),(return_type,str)))
     if all([return_type.lower() != opt for opt in ('body','dict','print')]) :
         e.raise_value_error('return_type',type,return_type)

@@ -1,9 +1,6 @@
 
 
-import nbody.core as nb
-import nbody.base as bs
-import nbody.horizons as source
-import nbody.text as text
+import nbody as nb
 phys = nb.Engine(dt=1000)
 '''
 bodies = source.horizons_batch(('10','199','299','399','499','599','699','799','899'))
@@ -26,5 +23,5 @@ sim = nb.mplVisual(engine=phys,
 
 sim.start()
 '''
-eng = text.engine_from('engine.txt')
-text.export_data(eng, 'data')
+eng = nb.engine_from('eng_info.txt')
+nb.export_data(eng, 'data')

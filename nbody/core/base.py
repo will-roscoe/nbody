@@ -5,7 +5,7 @@ from decimal import Decimal
 
 import numpy
 # Local error definitions.
-from . import errors as e
+from ..tools import errors as e
 
 Any = object
 NoneType = type(None)
