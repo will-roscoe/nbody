@@ -1,7 +1,10 @@
 dt = 1.23
 checking_range = 3
-number of intervals: 101
+# intervals: 101
 # bodies:(2)
+~ do_collisions = False
+~ do_fieldgravity = True
+~ do_bodygravity = True
 *object_name [
 name = object_name(Static)
 mass = 1.4213
@@ -26,3 +29,5 @@ velocity = (99.99999999999434, 100.0, 100.0)
 -* rel = Obj_1
 
 -* sim = 100
+
+
