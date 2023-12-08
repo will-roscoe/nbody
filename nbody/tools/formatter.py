@@ -44,15 +44,18 @@ ur.default_format = '~P'
 class Formatter:
     def __init__(self, output_raw = False, items=('identity','mass','radius','energy',
                   'period','pos','vel','acc','time'), vector_pos=True, vector_vel=False, vector_acc = False, engine=None, plotskip=0, c_mass=0):
-        
+        # sort parameters into useful form
         self.par = {'raw':output_raw, 'ps': plotskip, 'cm': c_mass}
         self.items = items
-        self.target = [None, 0]
+        self.target = [None, 0] # target body and index
         self.engine = engine
+        # whether to do mag or vector
         self._m = {'pos':vector_pos, 'vel':vector_vel, 'acc':vector_acc}
+        # base quantity dict
         self.q = {'identity':'','mass':0*ur.kg,'radius':0*ur.m,'energy':0*ur.joule,
                   'period':0*ur.s,'pos':0*ur.m,'vel':0*ur.m/ur.s,'acc':0*ur.m/ur.s**2}
     def _lookup(self):
+        # dict containing pint quantities of target
         return {'identity' : self.target[0].identity,
                     'mass'   : self.target[0].mass.c()*ur(self.target[0].mass.units),
                     'radius' : self.target[0].radius.c()*ur(self.target[0].radius.units),
@@ -71,6 +74,7 @@ class Formatter:
     }
    
     def _basetemplate(self):
+        # template string with formattable entries
         ret = ''
         for key,st in {'identity':"{identity}",
                        'mass': "\nMass: {mass}",
@@ -93,13 +97,16 @@ class Formatter:
     
    
     def _get_best_unit(self, quant, units):
+        
         if units is None or (isinstance(quant, Quantity) and quant.m=='NaN'):
             return quant
+        # if we want to leave as is if object is small enough
         if units[0] == 'check_mass':
             if self.q['mass'] > 0.001*ur.emass:
                 return quant
             else:
                 units = units[1]
+        # test for best unit.
         for _un in units:
             if quant > 0.05*_un:
                 return quant.to(_un)
@@ -112,10 +119,13 @@ class Formatter:
             args = self._quantities()
         else:
             args = arg
+        # get best units for each item we want
         for key,value in args.items():
             if not isinstance(value, Iterable): 
+                # scalars
                 conv[key] = self._get_best_unit(value, _units[key])
             else:
+                # vectors : find best for each.
                 conv[key] = [self._get_best_unit(v, _units[key]) for v in value]
         return conv
     def _quantities_to_strings(self, arg=None):
@@ -127,12 +137,16 @@ class Formatter:
         for key, value in args.items():
             try:    
                 if isinstance(value, Iterable):
+                    # vectors
                     strings.append('('+''.join((f'{q:.4f~P}' for q in value))+')') #q.to_compact()
                 elif isinstance(value, Quantity) and value.m != 'NaN':
+                    # scalars
                     strings.append(f'{value:.4f~P}') #value.to_compact()
                 elif isinstance(value, Quantity) and value.m == 'NaN':
+                    # NaN values (not neccesarily a str)
                     strings.append('NaN')
                 else:
+                    # string values
                     strings.append(value)
             except ValueError:
                 strings.append('NaN')
@@ -140,6 +154,7 @@ class Formatter:
     
     def __str__(self):
         if self.par['raw'] == False:
+            # if called as a string, return _basetemplate with the correct items inserted.
             return self._basetemplate().format(*self._quantities_to_strings(self.convert()))
         else:
             return self._basetemplate().format(*self._quantities_to_strings())

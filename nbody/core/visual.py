@@ -30,35 +30,14 @@ PICKRADIUS = 10
 
 def sphere(pos,radius,N=20):
     (c,r) = (pos,radius)
+    # get a cubic mesh of points
     u,v = np.mgrid[0:2*np.pi:N*1j, 0:np.pi:N*1j]
+    # compute x,y,z values from spherical mesh
     x = r*np.cos(u)*np.sin(v)+c[0]
     y = r*np.sin(u)*np.sin(v)+c[1]
     z = r*np.cos(v)+c[2]
     return x,y,z
-
-
-
-
-
-
-
-# kwargs
-'''
-kwargs
-
-info_calc
-show_acc
-show_vel
-vector_size
-speed_control
-start_ind
-
-
-as dict
-linecolor backgroundcolor facecolor textcolor
-
-'''
-        
+   
 
 class mplVisual:
     def __init__(self, 
@@ -95,7 +74,9 @@ class mplVisual:
         self.show_grid=show_grid
         self.focus_body=focus_body
         self.do_pick=do_picking
+        # update args dep. on which kwargs were defined.
         self.args.update(kwargs)
+        # make gridlines and faces transparent if not show grid
         if self.show_grid == False:
             self.args['color_dict']['line'] = (0,0,0,0)
             self.args['color_dict']['face'] = (0,0,0,0)
@@ -103,16 +84,18 @@ class mplVisual:
         
         
         
-        
+        # plotting values
         self.plt = dict(ptstep=self.args['step_skip_points'],
                         maxperiod=self.args['max_period'],
                         maxpts=self.args['max_pts'],
                         interval=1000/self.args['fps'],
                         frmstep=self.args['step_skip_frames'],
                         major_body=max((b.mass.c() for b in self.engine.bodies)))
+        # list of data intervals to create frames for
         flist = list(self.plt['frmstep']*x for x in range(int(len(self.engine)/self.plt['frmstep'])))
+        # organise args for animation function.
         self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/self.args['fps']), frames=flist, cache_frame_data=self.args['anim_cache'])
-        
+        # build data for trails
         self.trail_data = dict()
         with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Building Trails', unit='items') as tbar:
             for b in self.engine.bodies:
@@ -133,10 +116,10 @@ class mplVisual:
                     body_data[f] = body_data_f
                     tbar.update(1)
                 self.trail_data[b] = body_data
-        
+        # init a formatter to manage the info readout
         if show_info == True:
             self.fmt = Formatter(output_raw=False,items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'], vector_pos=False, vector_vel=False, vector_acc=False, engine=self.engine,plotskip=self.plt['ptstep'], c_mass=self.plt['major_body'])
-        
+        # if true precalculate all info readouts for each frame and body.
         if self.args['info_calc'] is True:
             self.info_data = dict()
             with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Precomputing All Descriptions', unit='items') as pbar:
@@ -149,19 +132,19 @@ class mplVisual:
                     self.info_data[b] = body_data
         else:
             self.info_data = None    
-        
+        # Figure instance
         self.fig = plt.figure(name, figsize=(16,9))
-        
+        # axes3D instance
         self.ax = self.fig.add_subplot(projection='3d', computed_zorder = False)
-        
+        # axes instance to contain zoom slider
         self.zoom_ax = self.fig.add_axes((0.05,0.25,0.05,0.5))
         self.zoom_slider = Slider(self.zoom_ax,valinit=1,label='Zoom',valmin=0.1,valmax=10, orientation='vertical')
-        
+        # axes instance to contain control button/s
         self.plpa_ax = self.fig.add_axes((0.48,0.05,0.04, 0.05))
         self.playpause = Button(self.plpa_ax, label=' ▶ ▐▐ ', hovercolor='white', color=(0.5,0.5,0.5,0.5))
         self.playpause.label.set(fontstretch=0.6, fontsize='large', color='black')
         self.playpause.on_clicked(self._toggle)
-        
+        # axes to contain speed control slider
         if self.args['speed_control'] == True:
             self.spd_ax = self.fig.add_axes((0.1,0.25,0.05,0.5))
             self.speed_slider = Slider(self.spd_ax,valinit=1000/self.plt['interval'], valmax=1000/5,label='Target\nFPS',valmin=0.1,orientation='vertical')
@@ -169,8 +152,9 @@ class mplVisual:
             def _sp_ud(val):
                 self.plt['interval'] = 1000/val
             self.speed_slider.on_changed(_sp_ud)
-        
+        # adjust fig to fill entire window
         self.fig.subplots_adjust(0,0,1,1,0,0)
+        # style the fig and children
         self.ax.tick_params(color=self.args['color_dict']['line'],labelcolor=self.args['color_dict']['text'])
         for artist in (self.fig,self.ax):
             artist.set_facecolor(self.args['color_dict']['bkgd'])
@@ -191,15 +175,18 @@ class mplVisual:
     
     def _draw_info(self, ind):
         if self.info_data is None:
+            # get info from formatter live
             self.fmt.target = [self.args['info_body'], ind]
             inf_string = str(self.fmt)
         else:
+            # or read from precalculated.
             inf_string = self.info_data[self.args['info_body']][ind]
         self.ax.text2D(s=inf_string, transform=self.ax.transAxes, x=0.05, y=0.2, size='small', horizontalalignment='left',
                 verticalalignment='bottom', color=self.args['color_dict']['text'])  
     def _draw_legend(self):
         handles, labels = self.ax.get_legend_handles_labels()
         handle_list, label_list = [], []
+        # only drawing single item in key for each body
         for handle, label in zip(handles, labels):
             if label not in label_list:
                 handle_list.append(handle)
@@ -215,6 +202,7 @@ class mplVisual:
 
     
     def _animate(self,ind):
+        # if true, sleep to slow down fps manually
         if self.args['speed_control'] == True:
             sleep((self.plt['interval']-5)/1000)
         self.ax.clear()
@@ -223,17 +211,19 @@ class mplVisual:
                     ylabel='$y$',
                     zlabel='$z$')
         
-        
+        # set current zoom
         self.ax.set_box_aspect((1,1,1),zoom=self.zoom_slider.val)
         
     
         if self.focus_body is not None:
+            # set plot range to max distances from focus body
             (limx,limy,limz) = (float(m) for m in self.focus_body.pos[ind])
             if self.args['focus_range'] is None:
                 self.args['focus_range'] = float(max((max(abs(x) for x in (self.focus_body.pos - bod.pos)) for bod in self.engine.bodies)))
         else:
             limx,limy,limz=0,0,0
             if self.args['focus_range'] is None:
+                # find body furthest from origin and centre plot on origine.
                 self.args['focus_range'] = max(max(*bod.pos[ind]) for bod in self.engine.bodies)
         rng = self.args['focus_range']
         self.ax.set(xlim=((limx-rng),(limx+rng)),
@@ -248,6 +238,7 @@ class mplVisual:
         for plane in self.engine.planes:
             xl, yl, zl, = self.ax.get_xlim(), self.ax.get_ylim(), self.ax.get_zlim()
             pl_const = np.array([[plane[1], plane[1]], [plane[1], plane[1]]])
+            # build identity matrix-like dict
             points = {'x':(pl_const,np.array([[yl[0],yl[1]],[yl[0],yl[1]]]),
                             np.array([[zl[0],zl[0]],[zl[1],zl[1]]])),
                         'y':(np.array([[xl[0],xl[1]],[xl[0],xl[1]]]),pl_const,
@@ -313,12 +304,14 @@ class mplVisual:
 # object picking in interactive window
     def _on_pick(self,event):
             tqdm.write(f'«mplVisual» → [click] {event.artist}')
+            # if text, update info readout
             if isinstance(event.artist,Text):
                 identity = event.artist.get_text()
                 body = list(b for b in self.engine.bodies if b.identity == identity)[0]
                 if not body:
                     return
                 self.args['info_body'] = body
+            # if line/body update focus point
             elif isinstance(event.artist,(Line3D, Line2D)):
                 identity = event.artist.get_label()
                 body = list(b for b in self.engine.bodies if b.identity == identity)[0]
@@ -328,6 +321,7 @@ class mplVisual:
                 self.focus_range = None
     
     def _toggle(self, event):
+            # start/stop animation with control button
             if self.args['is_running'] == True:
                 self.anim.event_source.stop()
                 self.args['is_running'] = False
@@ -340,8 +334,10 @@ class mplVisual:
     def start(self, **viewparams):
         tqdm.write('«mplVisual» → Starting Visual Environment')
         self.anim = animation.FuncAnimation(self.fig, func=self._animate, **self.anim_args) 
+        # change view point if viewparams specified
         if viewparams:
             self.ax.view_init(**viewparams)
+        # connect picking callback
         if self.do_pick:
             self.fig.canvas.mpl_connect('pick_event',self._on_pick)
         plt.show()
