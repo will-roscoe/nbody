@@ -1,9 +1,18 @@
 
-<h1 style="text-align: center;"><code>nBody</code> Scientific Modelling Project v1.4</h1>
+<h1 style="text-align: center;"><code>nBody</code> Scientific Modelling Project alpha-v2.0</h1>
 
-  By Will Roscoe -- 13th Nov 2023
+  By Will Roscoe -- 9th Dec 2023
 
-
+> TODO
+> - [ ] Tests for body and Engine including    
+>   - [ ] internal testing for collisions
+>   - [ ] internal testing for gravity
+>   - [ ] body update
+> - [ ] Update functions in line with new mpmath usages in
+>    - [ ] body.py
+>    - [ ] engine.py
+>    - [ ] visual.py
+> - [ ] Importing csvs per body (opt)
 ----
 
 The goal of this project is to efficiently simulate the gravitational and kinetic interactions between physical objects and display them in a user friendly interface. The usage of this project is Object Oriented and mean't to be flexible and easy to use.

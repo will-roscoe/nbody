@@ -1,11 +1,20 @@
 {
-    "python.testing.unittestEnabled": false,
+    "python.testing.unittestEnabled": true,
     "python.testing.pytestEnabled": true,
     "python.testing.unittestArgs": [
         "-v",
         "-s",
         ".",
         "-p",
-        "*_test.py"
+        "*_test.py",
+        "*test*.py"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.testing.pytestArgs": [
+        "*_test*.py",
+        "*test_*.py"
     ]
 }

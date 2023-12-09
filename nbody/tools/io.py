@@ -1,13 +1,20 @@
 from __future__ import annotations
 import os
 import pandas as pd
+from mpmath import mpf
 from tqdm import tqdm
 from . import errors as e
-from ..core.base import Vector, NumType
+from ..core.base import Vector, NumType, _O
 from ..core.body import Body
 from ..core.engine import Engine
 
-def obj_from(object, obj='engine'):   
+
+def tup(iterable):
+    tmp = _O(iterable)
+    return str(tuple(str(c) for c in tmp)).replace("'", "")
+
+
+def obj_from(object, obj='engine'):
     if isinstance(object, str):
         if os.path.isfile(object):
             with open(object, 'r') as f:
@@ -24,7 +31,7 @@ def obj_from(object, obj='engine'):
                             if key == 'dt':
                                 eng_params['dt'] = float(value)
                             elif key == 'checking_range':
-                                eng_params['checking_range'] = float(value)
+                                eng_params['checking_range'] = int(value)
                     # sorting special items
                     body_strings = dict()
                     func_strings,var_strings = [], []
@@ -44,7 +51,7 @@ def obj_from(object, obj='engine'):
                         # attribute definitions
                         elif line.startswith('~'):
                             val = [p.strip() for p in line.strip('~').strip('\n').split('=')]
-                            func_strings.append(val)
+                            var_strings.append(val)
                     bodies = dict()
                     # get body info and create each body
                     for key,value in body_strings.items():
@@ -55,18 +62,21 @@ def obj_from(object, obj='engine'):
                                 params['identity'] = p[1]
                             elif p[0] in ('color', 'colour'):
                                 params['color'] = p[1]
-                            elif p[0] in ('mass', 'radius', 'bounce'):
+                            elif p[0] in ('mass', 'radius'):
+                                params[p[0]] = mpf(p[1])
+                            elif p[0] == 'bounce':
                                 params[p[0]] = float(p[1])
-                            elif p[0] in ('pos', 'position'):
-                                tp = p[1].strip('()[]').split(',')
-                                params['init_pos'] = list(float(t) for t in tp)
-                            elif p[0] in ('vel', 'velocity'):
-                                tp = p[1].strip('()[]').split(',')
-                                params['init_vel'] = list(float(t) for t in tp)
+                            elif p[0] == 'position':
+                                tp = p[1].strip('()[]\'').split(',')
+                                params['init_pos'] = list(mpf(t) for t in tp)
+                            elif p[0] == 'velocity':
+                                tp = p[1].strip('()[]\'').split(',')
+                                params['init_vel'] = list(mpf(t) for t in tp)
                             elif '[' in p[0] or ']' in p[0] or '*' in p[0] or '#' in p[0]:
                                 pass
                             else:
                                 tqdm.write(f'«obj_from()» → [!] Couldn\'t parse "{line}" on line {i} so it has been skipped.')
+                        print(params)
                         bodies[key] = Body(**params)
                     # init engine and add bodies
                     engine = Engine(**eng_params)
@@ -74,7 +84,7 @@ def obj_from(object, obj='engine'):
                     # parse attributes
                     for var in var_strings:
                         if var[0] in ('do_collisions','do_bodygravity','do_fieldgravity'):
-                            setattr(object, val[0], eval())
+                            setattr(engine, val[0], eval(val[1]))
                         else:
                             tqdm.write(f'«obj_from()» → [!] Attempted to alter invalid attribute: {val[0]}.')
                     # parse callables
@@ -82,7 +92,7 @@ def obj_from(object, obj='engine'):
                         if val[0] == 'plane' and len(val) == 3:
                             engine.create_plane(str(val[1]), float(val[2]))
                         elif val[0] == 'field' and len(parts) == 2:
-                            vect = [float(v) for v in val[1].replace('(', '').replace(')', '').split(',')]
+                            vect = [mpf(v) for v in val[1].strip("'").replace('(', '').replace(')', '').split(',')]
                             engine.create_acceleration(vect)
                         elif val[0] == 'rel' and len(val) == 2:
                             engine.make_relative_to(bodies[val[1]])
@@ -100,18 +110,21 @@ def obj_from(object, obj='engine'):
                             params['identity'] = p[1]
                         elif p[0] in ('color', 'colour'):
                             params['color'] = p[1]
-                        elif p[0] in ('mass', 'radius', 'bounce'):
+                        elif p[0] in ('mass', 'radius'):
+                            params[p[0]] = mpf(p[1])
+                        elif p[0] == 'bounce':
                             params[p[0]] = float(p[1])
-                        elif 'pos' in p[0]:
-                            tp = p[1].strip('()[]').split(',')
-                            params['init_pos'] = list(float(t) for t in tp)
-                        elif 'vel' in p[0]:
-                            tp = p[1].strip('()[]').split(',')
-                            params['init_vel'] = list(float(t) for t in tp)
+                        elif p[0] == 'position':
+                            tp = p[1].strip('()[]\'').split(',')
+                            params['init_pos'] = list(mpf(t) for t in tp)
+                        elif p[0] == 'velocity':
+                            tp = p[1].strip('()[]\'').split(',')
+                            params['init_vel'] = list(mpf(t) for t in tp)
                         else:
                             tqdm.write(f'«obj_from()» → [!] Couldn\'t parse "{line}" so it has been skipped.')
                     return Body(**params)
                 elif obj == 'bodyext':
+                    parsing_position = False
                     found_dt = False
                     positions = []
                     dt = 0
@@ -126,7 +139,9 @@ def obj_from(object, obj='engine'):
                                 result['identity'] = value
                             elif key in ('color', 'colour'):
                                 result['color'] = value
-                            elif key in ('mass', 'radius', 'bounce'):
+                            elif key in ('mass', 'radius'):
+                                result[key] = mpf(value)
+                            elif key == 'bounce':
                                 result[key] = float(value)
                             elif key == 'position':
                                 parsing_position = True
@@ -134,36 +149,43 @@ def obj_from(object, obj='engine'):
                             elif key == 'dt':
                                 found_dt = True
                                 dt = float(value)
+                            elif key == 'velocity':
+                                pass
+                            else:
+                                tqdm.write(f'«obj_from()» → [!] Couldn\'t parse "{line}" so it has been skipped.')
                         # check if line is start of position, gets pos data
-                        if parsing_position:
+                        if parsing_position == True:
                             if line.strip() == ')':
                                 result['position'] = positions
                                 parsing_position = False
                             else:
-                                position_str = line.strip().replace('(', '').replace(')', '')
-                                position_tuple = tuple(map(int, position_str.split(',')))
+                                position_str = line.strip().replace('(', '').replace(')', '').replace("'", "")
+                                position_tuple = tuple(map(mpf, position_str.split(',')))
                                 positions.append(position_tuple)
-                # if dt specified, interpolate vel.
-                if found_dt == True:
-                    params = result
-                    params['init_pos'] = result['position'][0]
-                    body = Body(**params)
-                    for i,x in enumerate(result['position'][1:]):
-                        body.pos.next(x)
-                        body.vel.next((Vector(result['position'][i])-x)/dt)
-                        body.acc.next((0,0,0))
+                    # if dt specified, interpolate vel.
+                    if found_dt == True:
+                        params = {}
+                        params['init_pos'] = result['position'][0]
+                        posrec = result['position']
+                        result.pop('position')
+                        params.update(**result)
+                        body = Body(**params)
+                        for i,x in enumerate(posrec[1:]):
+                            body.pos.next(x)
+                            body.vel.next((Vector(posrec[i])-x)/dt)
+                            body.acc.next((0,0,0))
                     return body
         else:
             e.raise_fnf_error(object)
     else:
         e.raise_type_error('object', str, object)
 
-def export_obj(object, loc, overwrite=False, info_name=None, csvs=True):
+def export_obj(object, loc, overwritefile=True, info_name=None, csvs=True, direxists=True):
     # make file directory
     if isinstance(object,(Engine, Body)):
-        os.makedirs(loc, exist_ok=overwrite)
+        os.makedirs(loc, exist_ok=direxists)
     if isinstance(object, Engine):
-        if info_name != None:
+        if info_name == None:
             fname = 'eng_info'
         else:
             # create eng specific info string
@@ -188,17 +210,17 @@ def export_obj(object, loc, overwrite=False, info_name=None, csvs=True):
                          f'radius = {b.radius.c()}\n',
                          f'color = {b.color}\n',
                          f'bounce = {b.bounce}\n',
-                         f'position = {b.pos.c()}\n',
-                         f'velocity = {b.vel.c()}\n' 
+                         f'position = {tup(b.pos)}\n',
+                        f'velocity = {tup(b.vel)}\n' 
                          ']\n']:
                 eng_info.append(line)
         # add planes and fields
         for p in object.planes:
-            eng_info.append(f'-* plane = {p[0]} = {p[1]}')
+            eng_info.append(f'-* plane = {p[0]} = {p[1]}\n')
         for v in object.fields:
-            eng_info.append(f'-* field = {v.c()}')
+            eng_info.append(f'-* field = {tup(v)}\n')
         # write to file
-        with open(f'{loc}/{fname}.txt', ('w' if overwrite is True else 'x')) as eng:
+        with open(f'{loc}/{fname}.txt', ('w' if overwritefile is True else 'x')) as eng:
             eng.writelines(eng_info)
         # write csvs for each body
         if csvs == True:
@@ -215,25 +237,25 @@ def export_obj(object, loc, overwrite=False, info_name=None, csvs=True):
                                 'accZ':b.acc.Z.record
                                 }
                     d_df = pd.DataFrame.from_dict(info_dict, 'index').transpose()
-                    d_df.to_csv(f'{loc}/{ids[i]}.csv', sep=',',index=False, mode=('w' if overwrite is True else 'x'))
+                    d_df.to_csv(f'{loc}/{ids[i]}.csv', sep=',',index=False, mode=('w' if overwritefile is True else 'x'))
     if isinstance(object, Body):
-        if info_name != None:
+        if info_name == None:
             fname = 'body_info'
         else:
             fname = info_name
         # make body info string
-        obj_id = str(b.identity).replace(' ','_').split(':')[0].split('(Static)')[0]
+        obj_id = str(object.identity).replace(' ','_').split(':')[0].split('(Static)')[0]
         bod_info = [f'*{obj_id} [\n',
                     f'name = {object.identity}\n',
                     f'mass = {object.mass.c()}\n',
                     f'radius = {object.radius.c()}\n',
                     f'color = {object.color}\n',
                     f'bounce = {object.bounce}\n',
-                    f'position = {object.pos.c()}\n',
-                    f'velocity = {object.vel.c()}\n' 
+                    f'position = {tup(object.pos)}\n',
+                    f'velocity = {tup(object.vel)}\n' 
                     ']\n']
         # write to file
-        with open(f'{loc}/{fname}.txt', ('w' if overwrite is True else 'x')) as bod:
+        with open(f'{loc}/{fname}.txt', ('w' if overwritefile is True else 'x')) as bod:
             bod.writelines(bod_info)
         # make csv for body
         if csvs == True:
@@ -248,6 +270,6 @@ def export_obj(object, loc, overwrite=False, info_name=None, csvs=True):
                         'accZ':object.acc.Z.record
                         }
             d_df = pd.DataFrame.from_dict(info_dict, 'index').transpose()
-            d_df.to_csv(f'{loc}/{fname}.csv', sep=',',index=False, mode=('w' if overwrite is True else 'x'))
+            d_df.to_csv(f'{loc}/{fname}.csv', sep=',',index=False, mode=('w' if overwritefile is True else 'x'))
 
 
