@@ -2,25 +2,28 @@ from __future__ import annotations
 # Python Builtins
 import math
 from decimal import Decimal
-
+import mpmath as mp
 import numpy
 # Local error definitions.
 from ..tools import errors as e
 
+
 Any = object
 NoneType = type(None)
 DecType= type(Decimal())
-NumType = (DecType,int,float)
+NumType = (DecType,int,float, type(mp.mpf(1)), type(mp.mpi(1)), type(mp.mpc(1)))
 Iterable = (list,tuple,numpy.ndarray)
 
+
+
 def _O(obj):
-    if isinstance(obj,(*VectorType,*VarType)):
+    if isinstance(obj,(Vector, Variable, HistoricVariable, HistoricVector)):
         return obj.c()
     else:
         return obj
     
 def _V(obj):
-    if not isinstance(obj,VectorType):
+    if isinstance(obj, Iterable):
         if len(obj) == 3:
             return Vector(li=obj)
         else:
@@ -28,9 +31,20 @@ def _V(obj):
     
     else:
         return obj
-def _ntype(other):
-    return (type(_O(other)) if type(_O(other)) is not int else float)
-
+def _ntype(*objs):
+    types = [type(_O(obj)) for obj in objs]
+    for ntype in types:
+        if ntype not in (int, float, mp.mpf, mp.mpi, mp.mpc):
+            return ntype
+    if all(ntype == int for ntype in types):
+        return int
+    if any(ntype == mp.mpc for ntype in types):
+        return mp.mpc
+    if any(ntype == mp.mpi for ntype in types):
+        return mp.mpi
+    else:
+        return mp.mpf
+    
 def typecheck(argtype):
     if isinstance(argtype[0], Iterable):
         for arg in argtype:
@@ -46,15 +60,16 @@ def typecheck(argtype):
 
 
 
-
-
 class Variable:
     def __init__(self,init_var,identity='Variable',units=None):
-        (self.record,self.identity,self.units) = typecheck(((init_var,NumType),(identity,str),(units,(str,NoneType))))
+        (self.record,self.identity,self.units) = typecheck(((_ntype(init_var)(init_var),NumType),(identity,str),(units,(str,NoneType))))
         self.units = (units if units else '')
-    
+
     def c(self):
         return self.record
+    
+    def next(self, val):
+        self.record = _O(val)
 
     def __len__(self):
         return 1
@@ -63,69 +78,107 @@ class Variable:
         return item in self.record
 
     def __str__(self):
-        return f'{self.c()} {self.units}, len:{len(self)} id:"{self.identity}"'
+        if self.identity in ('Variable', 'HistoricVariable'):
+            return f'{str(self.c())} {self.units}, len:{len(self)}'
+        else:
+            return f'{str(self.c())} {self.units}, len:{len(self)} id:"{self.identity}"'
     
     def __repr__(self):
-        return f'VarType Object (current={self.c()} {self.units},\
-len={len(self)}, rec={self.record}, id={self.identity})'
+        if len(self) == 1:
+            if self.identity in ('Variable', 'HistoricVariable'):
+                return f'VarObj({str(self.c())} {self.units}, len={len(self)})'
+            else:
+                return f'VarObj({str(self.c())} {self.units}, len={len(self)}, id={self.identity})'
+        elif self.identity in ('Variable', 'HistoricVariable'):
+            return f'VarObj({str(self.c())} {self.units}, len={len(self)}, rec={self.record})'
+        else:
+            return f'VarObj({str(self.c())} {self.units}, len={len(self)}, rec={self.record}, id={self.identity})'
     
     def __add__(self,other):
-        num_type = _ntype(other)
-        return num_type(self.c()) + num_type(_O(other))
+        return Variable(mp.fadd(self.c(),_O(other)))
     
+    __radd__ = __add__
+
     def __sub__(self,other):
-        num_type = _ntype(other)
-        return num_type(self.c()) - num_type(_O(other))
+        return Variable(mp.fsub(self.c(),_O(other)))
     
     def __mul__(self,other):
-        num_type = _ntype(other)
-        return num_type(self.c()) * num_type(_O(other))
+        return Variable(mp.fmul(self.c(),_O(other)))
     
+    __rmul__ = __mul__
+
     def __truediv__(self,other):
-        num_type = _ntype(other)
-        return num_type(self.c()) / num_type(_O(other))
-    
-    def __floordiv__(self,other):
-        num_type = _ntype(other)
-        return num_type(self.c()) // num_type(_O(other))
+        return Variable(mp.fdiv(self.c(),_O(other)))
     
     def __iadd__(self,other):
-        num_type = _ntype(other)
-        self.next(num_type(self.c()) + num_type(_O(other)))   
+        self.next(mp.fadd(self.c(),_O(other)))
         return self
     
     def __isub__(self,other):
-        num_type = _ntype(other)
-        self.next(num_type(self.c()) - num_type(_O(other)))   
+        self.next(mp.fsub(self.c(),_O(other)))
         return self
     
     def __imul__(self,other):
-        num_type = _ntype(other)
-        self.next(num_type(self.c()) * num_type(_O(other)))   
+        self.next(mp.fmul(self.c(),_O(other)))
         return self
     
     def __itruediv__(self,other):
-        num_type = _ntype(other)
-        self.next(num_type(self.c()) / num_type(_O(other)))   
+        self.next(mp.fdiv(self.c(),_O(other)))
         return self
     
+    def __rsub__(self,other):
+        return Variable(mp.chop(mp.fsub(_O(other), self.c())))
+    
+    
+    def __rtruediv__(self,other):
+        return Variable(mp.fdiv(_O(other), self.c()))
 
-
-
-
-
-
+    def __pow__(self, other):
+        return Variable(mp.power(self.c(),_O(other)))
+    
+    def __rpow__(self, other):
+        return Variable(mp.power(_O(other), self.c()))
+    
+    def __eq__(self, other):
+        temp = _O(other)
+        nt =_ntype(self.c(), temp)
+        return str(nt(self.c())) == str(nt(temp)) or nt(self.c()) == nt(temp)
+    
+    def __lt__(self, other):
+        temp = _O(other)
+        nt =_ntype(self.c(), temp)
+        return nt(self.c()) < nt(temp)
+    
+    
+    def __le__(self, other):
+        return self.__eq__(other) or self.__le__(other)
+    
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    
+    def __gt__(self, other):
+        temp = _O(other)
+        nt =_ntype(self.c(), temp)
+        return nt(self.c()) > nt(temp)
+    
+    
+    def __ge__(self, other):
+        return self.__eq__(other) or self.__gt__(other)
+    
 class HistoricVariable(Variable):
-    def __init__(self,init_var,identity='HistoricVariable',units=None):
+    def __init__(self,init_var,identity='HistoricVariable',units=''):
         if isinstance(init_var,NumType):
-            self.record = [init_var]
+            self.record = [_ntype(init_var)(init_var)]
         
-        elif isinstance(init_var,list):
-            self.record = init_var
+        elif isinstance(init_var,Iterable):
+            self.record = [_ntype(*init_var)(val) for val in init_var]
         
         else: 
             e.raise_type_error('init_var',(*NumType,*Iterable),init_var)
         
+        self.type = type(self.record[0])
         (self.identity,self.units) = typecheck(((units,str),(identity,str)))
 
     
@@ -134,17 +187,19 @@ class HistoricVariable(Variable):
 
     
     def next(self,next_val):
-        if isinstance(next_val,NumType):
-            self.record.append(next_val)
+        temp = _O(next_val)
+        if isinstance(temp,NumType):
+            self.record.append(self.type(temp))
         
-        elif isinstance(next_val,Iterable):
-            for val in next_val:
+        elif isinstance(temp,Iterable):
+            for val in temp:
+                val = _O(val)
                 if isinstance(val,NumType):
-                    self.record.append(val)
+                    self.record.append(self.type(val))
                 else: 
-                    e.raise_list_type_error('next_val',NumType,val)
+                    e.raise_list_type_error('next_val, temp',self.type,val)
         else: 
-            e.raise_type_error('next_val',(*NumType,*Iterable),next_val)
+            e.raise_type_error('next_val, temp',(self.type,*Iterable),next_val)
 
     
     def __len__(self):
@@ -182,12 +237,11 @@ class HistoricVariable(Variable):
 class Vector:
     def __init__(self,li=None,x=None,y=None,z=None):
         if li:
-            (self.X,self.Y,self.Z) = _O(li)
+            (self.X,self.Y,self.Z) = [_ntype(*_O(li))(comp) for comp in _O(li)]
         elif all(isinstance(var, NumType) for var in (x,y,z)):
-            self.X,self.Y,self.Z = x,y,z
+            [self.X,self.Y,self.Z] = [_ntype(x,y,z)(comp) for comp in (x,y,z)]
         else:
             e.raise_list_type_error('l,x,y,z',(*Iterable,*NumType,*VectorType),(li,x,y,z))
-
     def c(self,usage=None):
         try:
             return {None:(self.X,self.Y,self.Z),0:self.X,1:self.Y,2:self.Z}[usage]
@@ -195,29 +249,13 @@ class Vector:
             e.raise_out_of_range('c()',usage)
 
     def magnitude(self):
-        num_type = _ntype(self.c(0))
-        return num_type(math.sqrt(sum([n**2 for n in self.c()])))
+        return mp.sqrt(mp.fsum([mp.power(n,2) for n in self.c()]))
     
     def unit(self):
         if float(self.magnitude()) == 0.:
-            return Vector(li=(0,0,0))
+            return NullVector()
         else:
-            num_type = _ntype(self.c(0))
-            return Vector(li=list((num_type(n)/self.magnitude()) for n in self.c()))
-    
-    def cross(self,other):
-        temp = _O(other)
-        if len(temp) == 3:
-            
-            e1 = self.Y * temp[2] - self.Z * temp[1]
-            e2 = self.Z * temp[0] - self.X * temp[2]
-            e3 = self.X * temp[1] - self.Y * temp[0]
-            
-            return Vector(e1,e2,e3)
-        
-        else:
-            e.raise_component_error('other',other)
-
+            return Vector(list((n/self.magnitude()) for n in self.c()))
 
     def __getitem__(self,ind):
         if isinstance(ind, str):
@@ -235,57 +273,65 @@ class Vector:
         return f'{self.c()}'
     
     def __repr__(self): 
-        return f'{self.c()}, len={len(self)}'
+        return f'{self.c()}'
     
     def __iter__(self):
         return iter((self.X,self.Y,self.Z))
     
     def __add__(self,other):
         temp = _O(other)
+        print(temp)
         if len(temp) == 3:
-            num_type = _ntype(temp[0])
-            return Vector(li=[num_type(val) + num_type(temp[i]) for i,val in enumerate(self['current'])])
-        
+            return Vector([mp.fadd(self.c(i),temp[i]) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
     
+    __radd__ = __add__
+
     def __sub__(self,other):
         temp = _O(other)
+        print(temp)
         if len(temp) == 3:
-            num_type = _ntype(temp[0])
-            return Vector(li=[num_type(val) - num_type(temp[i]) for i,val in enumerate(self['current'])])
-        
+            return Vector([mp.fsub(self.c(i),temp[i]) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
     
     def __mul__(self,other):
         temp = _O(other)
         if isinstance(temp,Iterable) and len(temp) == 3:
-            num_type = _ntype(temp[0])
-            return sum(([num_type(val) * num_type(temp[i]) for i, val in enumerate(self['current'])]))
-        
+            return Variable(mp.fsum([mp.fmul(val, temp[i]) for (i, val) in enumerate(self.c())]))
         elif isinstance(temp,NumType):
-            num_type = _ntype(temp)
-            return Vector(li=[(num_type(val)*num_type(temp)) for val in self['current']])
-        
+            return Vector([mp.fmul(val,temp) for val in self.c()])
         else:
             e.raise_component_error('other or temp',temp)
     
+    __rmul__ = __mul__
+
     def __truediv__(self,other):
         temp = _O(other)
-        num_type = _ntype(temp)
-        
         if isinstance(temp,NumType):
-            return Vector(li=[(num_type(val)/num_type(temp)) for val in self['current']])
-        
+            return Vector([mp.fdiv(val,temp) for val in self.c()])
         else:
             e.raise_type_error('other',NumType,other)
 
+    
+    def __rsub__(self,other):
+        temp = _O(other)
+        print(temp)
+        if len(temp) == 3:
+            return Vector([mp.fsub(temp[i], self.c(i)) for i in range(3)])
+        else:
+            e.raise_component_error('other or temp',temp)
 
-
-
-
-
+    def __eq__(self, other):
+        if other == None:
+            return False
+        else:
+            temp = _O(other)
+            nt = _ntype(*self.c(), *temp)
+            [ex, ey, ez] =[str(nt(self.c(n))) == str(nt(temp[n])) or nt(self.c(n)) == nt(temp[n]) for n in range(3)]
+            return ex and ey and ez
+    
 
 
 class HistoricVector(Vector):
@@ -294,12 +340,12 @@ class HistoricVector(Vector):
         self.units = (self.units if self.units is not None else '')
         self.identity =(self.identity if self.identity is not None else 'HistoricVector')
         li = ((x,y,z) if (isinstance(x,NumType) and isinstance(y,NumType) and isinstance(z,NumType)) else _O(li))
-        
+        nt = _ntype(*li)
         if isinstance(li,(tuple,list)) and len(li) == 3:
-            (self.X,self.Y,self.Z) = list(HistoricVariable(vl,f'{self.identity}_{i}',self.units) for (vl,i) in ((li[0],'x'),(li[1],'y'),(li[2],'z')))  
+            (self.X,self.Y,self.Z) = list(HistoricVariable(vl,f'{self.identity}_{i}',self.units) for (vl,i) in ((nt(li[0]),'x'),(nt(li[1]),'y'),(nt(li[2]),'z')))  
         else:
             e.raise_type_error('l,x,y,z',(*Iterable,*NumType),(li,x,y,z))
-
+        self.type = nt
     
     def x(self):
         return self.X.c()
@@ -319,7 +365,7 @@ class HistoricVector(Vector):
     def next(self,next_vals):
         temp = _O(next_vals)
         if isinstance(temp,Iterable):
-            
+    
             if len(temp) == 3:
                 for i,comp in enumerate((self.X,self.Y,self.Z)):
                     comp.next(temp[i]) 
@@ -372,6 +418,5 @@ class NullVector(Vector):
     def __init__(self):
         super().__init__(li=(0,0,0),x=None,y=None,z=None)
 
-VectorType = (Vector,HistoricVector)
-VarType = (Variable,HistoricVariable)
-
+VectorType = (type(Vector((0,0,0))),type(HistoricVector(0,0,0)), type(NullVector()))
+VarType = (type(Variable(0)),type(HistoricVariable(0)))
