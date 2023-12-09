@@ -165,3 +165,18 @@ class Engine:
             mass_dist += Vector(b.pos[index])*b.mass.c()
         total_mass =sum([b.mass.c() for b in self.bodies]) 
         return mass_dist/total_mass
+    
+    def __getitem__(self, ind):
+        if ind == '_data_':
+            return {
+                'dt':self.dt,
+                'chr':self._rangechk,
+                'docoll':self.do_collisions,
+                'dobg':self.do_bodygravity,
+                'dofg':self.do_fieldgravity,
+                'planes':self.planes,
+                'fields':self.fields,
+                'bodies':self.bodies
+            }
+            
+            

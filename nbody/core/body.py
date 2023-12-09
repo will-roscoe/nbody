@@ -53,7 +53,9 @@ v={self.vel.c()}), a={self.acc.c()})'
             return {'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'], 
             'current':list(d.c() for d in (self.pos, self.vel, self.acc)),'info':{'identity':self.identity, 'mass':self.mass, 
             'radius':self.radius, 'color':self.color, 'bounce':self.bounce},'x':list(d.X for d in (self.pos, self.vel, self.acc)),
-            'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc))}[ind]
+            'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc)),
+            '_data_':{'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'],'identity':self.identity, 'mass':self.mass, 
+            'radius':self.radius, 'color':self.color, 'bounce':self.bounce}}[ind]
 
     def update(self,dt=1,vel_change=None,acc_change=None,vel_next=None):
         if vel_next:
@@ -69,7 +71,7 @@ v={self.vel.c()}), a={self.acc.c()})'
         else:
             self.vel.next((Vector((self.acc*dt))+vel).c())
             self.acc.next((0,0,0))
-        
+    
         if vel_change is not None:
             vel_change = _O(vel_change)
             
@@ -77,7 +79,6 @@ v={self.vel.c()}), a={self.acc.c()})'
                 self.pos.next(self.pos + (Vector(vel) + vel_change)*dt)
             else:
                 raise RuntimeError
-        
         else:
             self.pos.next(self.pos + Vector(vel)*dt)
 
