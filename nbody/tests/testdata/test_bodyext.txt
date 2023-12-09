@@ -1,0 +1,11 @@
+*object_name [
+name = object_name
+mass = 1.4213
+radius = 23.124
+color = blue
+bounce = 0.5
+position = (
+(3.5,3.5,3.5)
+)
+]
+dt = 1

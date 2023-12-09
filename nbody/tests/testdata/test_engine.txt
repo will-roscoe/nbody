@@ -1,0 +1,26 @@
+dt = 1.0
+checking_range = 3
+~ do_collisions = True
+~ do_fieldgravity = False
+~ do_bodygravity = False
+*Obj_1 [
+name = object_name
+mass = 1.4213
+radius = 23.124
+color = None
+bounce = 0.999
+position = (0.0, 0.0, 0.0)
+velocity = (100.0, 100.0, 100.0)
+]
+*Obj_2 [
+name = object_name2
+mass = 2.0
+radius = 2.0
+color = None
+bounce = 0.999
+position = (3.0, 2.0, 1.0)
+velocity = (9.0, -1.0, 6.0)
+]
+-* plane = z = 0
+-* plane = x = 0
+-* field = (1,1,1)
