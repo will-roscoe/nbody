@@ -1,21 +1,20 @@
 
-name: Python Packager
-
+name: Python CI - pystest
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
+    paths: 
+      - '**.py'
+    paths-ignore:
+      - 'docs/**'
+      - 'dev/**'
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.12"]
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
