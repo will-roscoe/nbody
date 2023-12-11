@@ -1,5 +1,5 @@
 
-name: Python CI - pystest
+name: Python CI - pytest
 on:
   push:
     branches: [ "main" ]
@@ -13,7 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.12"]
+        module-name: ['base', 'core', 'tools']
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -23,8 +24,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest pytest-cov
+        python -m pip install flake8 pytest
         pip install -r requirements.txt
-    - name: Test with pytest
+    - name: Pytest -> ${{ matrix.module-name }}$
       run: |
-        pytest -p pytest_cov
+        pytest -v --disable-warnings -l test_${{ matrix.module-name }}$.py
