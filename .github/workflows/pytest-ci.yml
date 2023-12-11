@@ -6,6 +6,7 @@ on:
     paths: 
       - 'nbody/**.py'
       - '*.py'
+    
 jobs:
   build:
     runs-on: ubuntu-latest
