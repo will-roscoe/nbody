@@ -27,8 +27,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest pytest-cov
         pip install -r requirements.txt
-    - with:
-        test-file: ${{ matr.module-name }}
     - name: Pytest run
       run: |
         pytest -v --disable-warnings -l **/tests/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
