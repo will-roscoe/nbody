@@ -6,7 +6,7 @@ on:
     paths: 
       - 'nbody/**.py'
       - '*.py'
-    
+  workflow_run: 
 jobs:
   build:
     runs-on: ubuntu-latest
