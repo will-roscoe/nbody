@@ -29,4 +29,4 @@ jobs:
         pip install -r requirements.txt
     - name: Pytest -> ${{ matrix.module-name }}$
       run: |
-        pytest -v --disable-warnings -l tests/test_${{ matrix.module-name }}.py
+        pytest -v --disable-warnings -l ./tests/test_${{ matrix.module-name }}.py
