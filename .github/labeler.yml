@@ -1,0 +1,4 @@
+core: ['**/core/*.py']
+documentation: ['**/doc*']
+tests: ['**/tests/*test*.py']
+tools: ['**/tools/*.py']

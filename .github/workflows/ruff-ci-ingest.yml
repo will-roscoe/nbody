@@ -1,0 +1,36 @@
+
+name: CI (Ingest) - Ruff
+on:
+  push:
+    branches: [ "main" ]
+    paths: 
+      - 'nbody/**.py'
+      - '*.py'
+  workflow_dispatch: 
+jobs:
+  build-linter:
+    name: Ruff
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8","3.9", "3.12"]
+    steps:
+        - uses: actions/checkout@v4
+        - name: Set up Python ${{ matrix.python-version }}
+          uses: actions/setup-python@v4
+          with:
+            cache: pip
+            python-version: ${{ matrix.python-version }}
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install ruff
+            pip install -r requirements.txt
+        - name: Analysing the code with pylint
+          run: |
+            pip install ruff
+            ruff --output-format=github .
+            continue-on-error: true
+
+            
