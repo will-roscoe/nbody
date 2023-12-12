@@ -1,12 +1,10 @@
 
-name: Python CI - pytest
+name: 'pytest: base'
 on:
-  push:
-    branches: [ "main" ]
-    paths: 
-      - 'nbody/**.py'
-      - '*.py'
-  workflow_dispatch: 
+  workflow_run:
+    workflows: CI (Ingest) - Ruff
+  workflow_dispatch:
+  
 jobs:
   build-tests:
     name: Pytest
@@ -29,12 +27,12 @@ jobs:
         pip install -r requirements.txt
     - name: Pytest run
       run: |
-        pytest -v --disable-warnings -l **/tests/test_*.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+        pytest -v --disable-warnings -l **/tests/test_base.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
     - name: Upload pytest results
       uses: actions/upload-artifact@v3
       with:
-        name: pytest-results-${{ matrix.python-version }}
-        path: junit/test-results-${{ matrix.python-version }}.xml
+        name: pytest-results-${{ matrix.python-version }}-base
+        path: junit/test-results-${{ matrix.python-version }}-base.xml
       if: ${{ always() }}  
   
  
