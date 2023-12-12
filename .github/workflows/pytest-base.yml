@@ -1,5 +1,5 @@
 
-name: 'pytest: base'
+name: 'pytest'
 on:
   workflow_run:
     workflows: CI (Ingest) - Ruff
