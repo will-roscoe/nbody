@@ -1,0 +1,15 @@
+[tool.ruff]
+include = ["pyproject.toml", "nbody/**/*.py", "*.py"]
+
+[tool.ruff.lint]
+line-length = 120
+
+select = ["E4", "E7", "E9", "F"]
+ignore = [
+  "E711" # COMPARISON TO FALSE
+  "E712" # COMPARISON TO TRUE 
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"] # ignore module imports
+"**/tests/*" = ["E402"]
