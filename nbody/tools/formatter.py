@@ -1,6 +1,6 @@
 
 from pint import Quantity, UnitRegistry
-from ..core.base import Vector, Iterable, _V, _O
+from ..core.base import Vector, Iterable, _O
 ur = UnitRegistry()
 Q_ = ur.Quantity
 ur.define('light_year = 9460730472580800 * meter = ly = lightyear')
@@ -44,7 +44,8 @@ ur.default_format = '~P'
 
 class Formatter:
     def __init__(self, output_raw = False, items=('identity','mass','radius','energy',
-                  'period','pos','vel','acc','time'), vector_pos=True, vector_vel=False, vector_acc = False, engine=None, plotskip=0, c_mass=0):
+                  'period','pos','vel','acc','time'), 
+                  vector_pos=True, vector_vel=False, vector_acc = False, engine=None, plotskip=0, c_mass=0):
         # sort parameters into useful form
         self.par = {'raw':output_raw, 'ps': plotskip, 'cm': c_mass}
         self.items = items
@@ -58,21 +59,23 @@ class Formatter:
     
     def _lookup(self):
         # dict containing pint quantities of target
-        return {'identity' : self.target[0].identity,
-                    'mass'   : Q_(float(self.target[0].mass.c()), ur(self.target[0].mass.units)),
-                    'radius' : Q_(float(self.target[0].radius.c()), ur(self.target[0].radius.units)),
-                    'energy' :Q_(float(_O(self.target[0].get_('ke', self.target[1], self.par['ps'], self.par['cm']))), ur.joule),
-                    'period' : Q_(float(_O(self.target[0].get_('period', self.target[1], self.par['ps'], self.par['cm'], engine=self.engine))), ur.s),
-                    'pos' : ([Q_(float(self.target[0].pos[self.target[1]][n]),ur(self.target[0].pos.units))
-                            for n in range(3)] if self._m['pos']
-                            else Q_(float(_O(Vector(self.target[0].pos[self.target[1]]).magnitude())), ur(self.target[0].pos.units))),
-                    'vel' : ([Q_(float(self.target[0].vel[self.target[1]][n]), ur(self.target[0].vel.units))
-                            for n in range(3)] if self._m['vel'] 
-                            else Q_(_O(float(Vector(self.target[0].vel[self.target[1]]).magnitude())), ur(self.target[0].vel.units))),
-                    'acc' : ([Q_(float(self.target[0].acc[self.target[1]][n]), ur(self.target[0].acc.units)) 
-                            for n in range(3)] if self._m['acc'] 
-                            else Q_(float(_O(Vector(self.target[0].acc[self.target[1]]).magnitude())), ur(self.target[0].acc.units))),
-                    'time' : Q_(self.target[1]*self.engine.dt, ur.s),
+        return {
+    'identity' : self.target[0].identity,
+    'mass'   : Q_(float(self.target[0].mass.c()), ur(self.target[0].mass.units)),
+    'radius' : Q_(float(self.target[0].radius.c()), ur(self.target[0].radius.units)),
+    'energy' :Q_(float(_O(self.target[0].get_('ke', self.target[1], self.par['ps'], self.par['cm']))), ur.joule),
+    'period' : Q_(float(_O(self.target[0].get_('period', self.target[1], self.par['ps'], self.par['cm'], 
+                                               engine=self.engine))), ur.s),
+    'pos' : ([Q_(float(self.target[0].pos[self.target[1]][n]),ur(self.target[0].pos.units))
+            for n in range(3)] if self._m['pos']
+            else Q_(float(_O(Vector(self.target[0].pos[self.target[1]]).magnitude())), ur(self.target[0].pos.units))),
+    'vel' : ([Q_(float(self.target[0].vel[self.target[1]][n]), ur(self.target[0].vel.units))
+            for n in range(3)] if self._m['vel'] 
+            else Q_(_O(float(Vector(self.target[0].vel[self.target[1]]).magnitude())), ur(self.target[0].vel.units))),
+    'acc' : ([Q_(float(self.target[0].acc[self.target[1]][n]), ur(self.target[0].acc.units)) 
+            for n in range(3)] if self._m['acc'] 
+            else Q_(float(_O(Vector(self.target[0].acc[self.target[1]]).magnitude())), ur(self.target[0].acc.units))),
+    'time' : Q_(self.target[1]*self.engine.dt, ur.s),
     }
     
     def _basetemplate(self):
@@ -114,10 +117,7 @@ class Formatter:
     
     def convert(self, arg=None):
         conv = {}
-        if not arg:
-            args = self._quantities()
-        else:
-            args = arg
+        args = arg if arg else self._quantities()
         # get best units for each item we want
         for key,value in args.items():
             if not isinstance(value, Iterable): 
@@ -130,10 +130,7 @@ class Formatter:
     
     def _quantities_to_strings(self, arg=None):
         strings = {}
-        if arg == None:
-            args = self._quantities()
-        else:
-            args = arg
+        args = self._quantities() if arg == None else arg
         for key, value in args.items():
             try:    
                 if isinstance(value, Iterable):

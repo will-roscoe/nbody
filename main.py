@@ -1,14 +1,12 @@
 
-
-import cProfile
-import pstats
 import nbody as nb
-from line_profiler import profile
+
 LINE_PROFILE=1
 
 bodies = nb.horizons_batch(('10','199','299','399','499','599','699','799','899'))
 
-for i,color in enumerate(['#F28322','#BFBEBD', '#D9B391', '#63BAA6', '#F27A5E', '#BFAE99', '#D9B779', '#95BBBF', '#789EBF']):
+for i,color in enumerate(['#F28322','#BFBEBD', '#D9B391', '#63BAA6', '#F27A5E',
+                          '#BFAE99', '#D9B779', '#95BBBF', '#789EBF']):
     bodies[i].color = color
 phys = nb.Engine(dt=1000)
 phys.attach_bodies(bodies)
@@ -23,7 +21,8 @@ phys.simulate(20000)
 
 sim = nb.mplVisual(engine=phys, 
                 name='SS',
-                focus_body=phys.bodies[0], show_info=True, autoscale=False, step_skip_frames=100, step_skip_points=100, max_period=3, cache=False, do_picking=True)
+                focus_body=phys.bodies[0], show_info=True, autoscale=False,
+                step_skip_frames=100, step_skip_points=100, max_period=3, cache=False, do_picking=True)
 
 
 '''

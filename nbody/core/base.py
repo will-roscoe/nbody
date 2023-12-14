@@ -1,10 +1,10 @@
 from __future__ import annotations
 # Python Builtins
-from numpy import ndarray
+
 from numbers import Number
 from collections.abc import Iterable
 from mpmath import mp, fp
-import gmpy2 as g      
+   
 # Local error definitions.
 from ..tools import errors as e
 
@@ -16,13 +16,13 @@ NumType = (Number,type(mp.mpf(1)), type(fp.mpf(1)))
 mp.pretty, fp.pretty = True, True
 
 
-def _O(obj):
+def _O(obj):  # noqa: N802
     if isinstance(obj,(Vector, Variable, HistoricVariable, HistoricVector)):
         return obj.c()
     else:
         return obj
     
-def _V(obj):
+def _V(obj):  # noqa: N802
     if isinstance(obj, Iterable):
         if len(obj) == 3:
             return Vector(li=obj)
@@ -60,13 +60,14 @@ def typecheck(argtype):
 
 class Variable:
     def __init__(self,init_var,identity='Variable',units=None):
-        (self.record,self.identity,self.units) = typecheck(((_ntype(init_var)(init_var),NumType),(identity,str),(units,(str,NoneType))))
+        (self.record,self.identity,self.units) = typecheck(((_ntype(init_var)(init_var),NumType),
+                                                            (identity,str),(units,(str,NoneType))))
         self.units = (units if units else '')
 
     def c(self):
         return self.record
     
-    def next(self, val):
+    def next(self, val):  # noqa: A003
         self.record = _O(val)
 
     def __len__(self):
@@ -184,7 +185,7 @@ class HistoricVariable(Variable):
         return self.record[-1]
 
     
-    def next(self,next_val):
+    def next(self,next_val):  # noqa: A003
         temp = _O(next_val)
         if isinstance(temp,NumType):
             self.record.append(self.type(temp))
@@ -339,7 +340,8 @@ class HistoricVector(Vector):
         li = ((x,y,z) if (isinstance(x,NumType) and isinstance(y,NumType) and isinstance(z,NumType)) else _O(li))
         nt = _ntype(*li)
         if isinstance(li,(tuple,list)) and len(li) == 3:
-            (self.X,self.Y,self.Z) = list(HistoricVariable(vl,f'{self.identity}_{i}',self.units) for (vl,i) in ((nt(li[0]),'x'),(nt(li[1]),'y'),(nt(li[2]),'z')))  
+            (self.X,self.Y,self.Z) = list(HistoricVariable(vl,f'{self.identity}_{i}',self.units) for (vl,i) in 
+                                          ((nt(li[0]),'x'),(nt(li[1]),'y'),(nt(li[2]),'z')))  
         else:
             e.raise_type_error('l,x,y,z',(Iterable,*NumType),(li,x,y,z))
         self.type = nt
@@ -359,7 +361,7 @@ class HistoricVector(Vector):
         except KeyError: 
             e.raise_out_of_range('c()',usage)
     
-    def next(self,next_vals):
+    def next(self,next_vals):  # noqa: A003
         temp = _O(next_vals)
         if isinstance(temp,Iterable):
     

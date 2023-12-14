@@ -1,7 +1,11 @@
 import pytest
+
+import shutil
+import os
+
 from .. import export_obj, obj_from, Engine, Body, mplVisual
 from ..tools.horizons import horizons_batch, horizons_query
-import shutil, os
+
 def cleanup(folder):
     if os.path.exists(folder):
             shutil.rmtree(folder)
@@ -11,12 +15,12 @@ floc = {
     'body':'test_body.txt',
     'bodyext':'test_bodyext.txt',
     'eng':'test_engine.txt',
-    'engrun':'test_enginerun.txt'
+    'engrun':'test_enginerun.txt',
 }
 tloc = {
     'body':['tmp_body','.txt'],
     'bodyext':['tmp_bodyext','.txt'],
-    'eng':['tmp_engine','.txt']
+    'eng':['tmp_engine','.txt'],
 }
 queries = ('10','199','299','399','499','599','699','799','899')
 

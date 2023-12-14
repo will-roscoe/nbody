@@ -1,10 +1,12 @@
 import math
 from ..tools import errors as e
-from .base import NullVector, typecheck, _O, _V, Iterable, NumType, NoneType, HistoricVector, Variable, Vector, VectorType
+from .base import (typecheck, _O, _V, 
+                   Iterable, NumType, NoneType, VectorType,
+                   HistoricVector, Variable, Vector, NullVector)
 
 try:
     from scipy.constants import G
-except:
+except ModuleNotFoundError:
     G = 6.6743*10**(-11)
 
 class Body:
@@ -51,17 +53,15 @@ v={self.vel.c()}), a={self.acc.c()})'
             return (self.pos[ind], self.vel[ind], self.acc[ind])
         elif isinstance(ind, str):
             return {'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'], 
-            'current':list(d.c() for d in (self.pos, self.vel, self.acc)),'info':{'identity':self.identity, 'mass':self.mass, 
-            'radius':self.radius, 'color':self.color, 'bounce':self.bounce},'x':list(d.X for d in (self.pos, self.vel, self.acc)),
-            'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc)),
-            '_data_':{'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'],'identity':self.identity, 'mass':self.mass, 
-            'radius':self.radius, 'color':self.color, 'bounce':self.bounce}}[ind]
+    'current':list(d.c() for d in (self.pos, self.vel, self.acc)),'info':{'identity':self.identity, 'mass':self.mass, 
+    'radius':self.radius, 'color':self.color, 'bounce':self.bounce},'x':list(d.X for d in 
+                                                                             (self.pos, self.vel, self.acc)),
+    'y':list(d.Y for d in (self.pos, self.vel, self.acc)),'z':list(d.Z for d in (self.pos, self.vel, self.acc)),
+    '_data_':{'pos':self.pos['all'], 'vel': self.vel['all'], 'acc':self.acc['all'],'identity':self.identity, 
+    'mass':self.mass, 'radius':self.radius, 'color':self.color, 'bounce':self.bounce}}[ind]
     
     def update(self,dt=1,vel_change=None,acc_change=None,vel_next=None):
-        if vel_next:
-            vel = _V(vel_next)
-        else:
-            vel = self.vel
+        vel = _V(vel_next) if vel_next else self.vel
         
         if acc_change is not None:
             acc_change = _V(acc_change)

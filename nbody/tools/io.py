@@ -14,7 +14,7 @@ def tup(iterable):
     return str(tuple(str(c) for c in tmp)).replace("'", "")
 
 
-def obj_from(object, obj='engine'):
+def obj_from(object, obj='engine'):  # noqa: A002
     if isinstance(object, str):
         if os.path.isfile(object):
             with open(object, 'r') as f:
@@ -41,9 +41,8 @@ def obj_from(object, obj='engine'):
                             key = line.strip('[\n').strip(']').strip('*').strip()
                             body_strings[key] = i
                             for s_i,s_line in enumerate(_input):
-                                if s_i > i:
-                                    if ']' in s_line and isinstance(body_strings[key], NumType):
-                                        body_strings[key] = _input[i:s_i]
+                                if s_i > i and ']' in s_line and isinstance(body_strings[key], NumType):
+                                    body_strings[key] = _input[i:s_i]
                         # callables
                         elif line.startswith('-*'):
                             val = [p.strip() for p in line.strip('-*').strip('\n').split('=')]
@@ -57,7 +56,7 @@ def obj_from(object, obj='engine'):
                     for key,value in body_strings.items():
                         params = dict()
                         for line in value:
-                            p = list(l.strip() for l in line.strip().split('='))
+                            p = list(part.strip() for part in line.strip().split('='))
                             if p[0] in ('name', 'identity', 'id'):
                                 params['identity'] = p[1]
                             elif p[0] in ('color', 'colour'):
@@ -75,7 +74,9 @@ def obj_from(object, obj='engine'):
                             elif '[' in p[0] or ']' in p[0] or '*' in p[0] or '#' in p[0]:
                                 pass
                             else:
-                                tqdm.write(f'«obj_from()» → [!] Couldn\'t parse "{line}" on line {i} so it has been skipped.')
+                                tqdm.write(
+        f'«obj_from()» → [!] Couldn\'t parse "{line}" on line {i} so it has been skipped.',
+                )
                         print(params)
                         bodies[key] = Body(**params)
                     # init engine and add bodies
@@ -99,13 +100,15 @@ def obj_from(object, obj='engine'):
                         elif val[0] == 'sim' and len(val) == 2:
                                 engine.simulate(int(val[1]))
                         else:
-                            tqdm.write(f'«obj_from()» → [!] Couldn\'t parse function "{' '.join(val)}" so it has been skipped.')
+                            tqdm.write(
+        f'«obj_from()» → [!] Couldn\'t parse function "{' '.join(val)}" so it has been skipped.',
+                )
                     return engine
                 elif obj == 'body':
                     # get body info and init
                     params = {}
                     for line in _input:
-                        p = list(l.strip() for l in line.strip().split('='))
+                        p = list(part.strip() for part in line.strip().split('='))
                         if p[0] in ('name', 'identity', 'id'):
                             params['identity'] = p[1]
                         elif p[0] in ('color', 'colour'):
@@ -138,7 +141,7 @@ def obj_from(object, obj='engine'):
                             if key in ('name', 'identity', 'id'):
                                 result['identity'] = value
                             elif key in ('color', 'colour'):
-                                result['color'] = (value if value is not 'None' else None)
+                                result['color'] = (value if value != 'None' else None)
                             elif key in ('mass', 'radius'):
                                 result[key] = mpf(value)
                             elif key == 'bounce':
@@ -180,16 +183,12 @@ def obj_from(object, obj='engine'):
     else:
         e.raise_type_error('object', str, object)
 
-def export_obj(object, loc, overwritefile=True, info_name=None, csvs=True, direxists=True):
+def export_obj(object, loc, overwritefile=True, info_name=None, csvs=True, direxists=True):  # noqa: A002
     # make file directory
     if isinstance(object,(Engine, Body)):
         os.makedirs(loc, exist_ok=direxists)
     if isinstance(object, Engine):
-        if info_name == None:
-            fname = 'eng_info'
-        else:
-            # create eng specific info string
-            fname = info_name
+        fname = "eng_info" if info_name == None else info_name
         eng_info = [
             f'dt = {object.dt}\n',
             f'checking_range = {object._rangechk}\n',
@@ -197,7 +196,7 @@ def export_obj(object, loc, overwritefile=True, info_name=None, csvs=True, direx
             f'# bodies:({len(object.bodies)})\n',
             f'~ do_collisions = {object.do_collisions}\n',
             f'~ do_bodygravity = {object.do_bodygravity}\n',
-            f'~ do_fieldgravity = {object.do_fieldgravity}\n'
+            f'~ do_fieldgravity = {object.do_fieldgravity}\n',
         ]
         ids = []
         # append info for each object
@@ -234,15 +233,12 @@ def export_obj(object, loc, overwritefile=True, info_name=None, csvs=True, direx
                                 'velZ':b.vel.Z.record,
                                 'accX':b.acc.X.record,
                                 'accY':b.acc.Y.record,
-                                'accZ':b.acc.Z.record
+                                'accZ':b.acc.Z.record,
                                 }
                     d_df = pd.DataFrame.from_dict(info_dict, 'index').transpose()
-                    d_df.to_csv(f'{loc}/{ids[i]}.csv', sep=',',index=False, mode=('w' if overwritefile is True else 'x'))
+                    d_df.to_csv(f'{loc}/{ids[i]}.csv',sep=',',index=False, mode=('w' if overwritefile is True else 'x'))
     if isinstance(object, Body):
-        if info_name == None:
-            fname = 'body_info'
-        else:
-            fname = info_name
+        fname = "body_info" if info_name == None else info_name
         # make body info string
         obj_id = str(object.identity).replace(' ','_').split(':')[0].split('(Static)')[0]
         bod_info = [f'*{obj_id} [\n',
@@ -267,7 +263,7 @@ def export_obj(object, loc, overwritefile=True, info_name=None, csvs=True, direx
                         'velZ':object.vel.Z.record,
                         'accX':object.acc.X.record,
                         'accY':object.acc.Y.record,
-                        'accZ':object.acc.Z.record
+                        'accZ':object.acc.Z.record,
                         }
             d_df = pd.DataFrame.from_dict(info_dict, 'index').transpose()
             d_df.to_csv(f'{loc}/{fname}.csv', sep=',',index=False, mode=('w' if overwritefile is True else 'x'))

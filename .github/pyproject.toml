@@ -11,5 +11,5 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["E402"] # ignore module imports
-"**/tests/*" = ["E402"]
+"**__init__.py" = ["F401", "F402"] # ignore module imports
+"**/tests/*" = ["F401", "F402"]

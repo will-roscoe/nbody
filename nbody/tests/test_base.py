@@ -20,9 +20,9 @@ class TestBaseFuncs:
                 with pytest.raises(TypeError):
                         nb.typecheck(((123, str)))
                 assert nb.typecheck(((2, int))) == 2
-        def test_O(self):
+        def test_o(self):
                 assert nb._O(nb.Variable(1)) == 1 and nb._O(nb.NullVector()) == (0,0,0)
-        def test_V(self):
+        def test_v(self):
                 with pytest.raises((IndexError, TypeError)):
                         nb._V([0])
                 assert nb._V(0) == 0 and nb._V((0,0,0)).c() == nb.Vector((0,0,0)).c()
@@ -32,21 +32,21 @@ class TestVarVectorBasics:
         '''Testing __init__, length and type definitions
         '''
         def test_variable(self):
-                var = nb.Variable(0)
+                _var = nb.Variable(0)
         def test_histvariable(self):
-                hvar = nb.HistoricVariable(0)
+                _hvar = nb.HistoricVariable(0)
         def test_vector(self):
-                vect = nb.Vector((0,0,0))
-                vect2 = nb.Vector(x=0, y=0, z=0)
+                _vect = nb.Vector((0,0,0))
+                _vect2 = nb.Vector(x=0, y=0, z=0)
         def test_histvector(self):
-                hvect = nb.HistoricVector(0,0,0)
-                hvect2 = nb.HistoricVector(li=(0,0,0))
+                _hvect = nb.HistoricVector(0,0,0)
+                _hvect2 = nb.HistoricVector(li=(0,0,0))
         def test_len(self):
-                varL = len(nb.Variable(0))
-                hvarL = len(_hvar)
-                vectL = len(nb.Vector((0,0,0)))
-                hvectL = len(_hvect)
-                assert varL == vectL and hvarL == hvectL
+                var_l = len(nb.Variable(0))
+                hvar_l = len(_hvar)
+                vect_l = len(nb.Vector((0,0,0)))
+                hvect_l = len(_hvect)
+                assert var_l == vect_l and hvar_l == hvect_l
         def test_types(self):
                 assert (isinstance(nb.Variable(0), nb.VarType) and
                         isinstance(nb.HistoricVariable(0), nb.VarType) and
@@ -103,7 +103,9 @@ class TestInteroperability:
                         and hvar.record[1] == 0. 
                         and nb.HistoricVariable(1.) + nb.Variable(-1.) == 0.)
         def test_full(self):
-                n = {'p':nb.HistoricVector(0.,0.,0.), 'v':nb.HistoricVector(2.,-0.5,0.), 'a':nb.HistoricVector(0.01,-0.03,0.5)}
+                n = {'p':nb.HistoricVector(0.,0.,0.), 
+                     'v':nb.HistoricVector(2.,-0.5,0.), 
+                     'a':nb.HistoricVector(0.01,-0.03,0.5)}
                 time = nb.HistoricVariable(0.)
                 for i in range(1,10):
                         time.next(i*abs(n['v'].c(1))) 

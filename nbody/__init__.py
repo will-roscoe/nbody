@@ -1,5 +1,5 @@
 # NBody __init__.py
-'''
+"""
 File Structure:
 ⸺ nbody/
      ├── core/
@@ -43,10 +43,9 @@ Valid Import Sequence
      .core.visual
      .tools.io
      .tools.horizons
-'''
+"""
 from .core.body import Body
 from .core.engine import Engine
-from .core.visual import mplVisual
+from .core.visual import MPLVisual
 from .tools.horizons import horizons_batch, horizons_query
 from .tools.io import obj_from, export_obj
-

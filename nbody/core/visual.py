@@ -23,10 +23,10 @@ from ..tools.formatter import Formatter
 
 PICKRADIUS = 10
 
-def sphere(pos,radius,N=20):
+def sphere(pos,radius,n=20):
     (c,r) = (pos,radius)
     # get a cubic mesh of points
-    u,v = np.mgrid[0:2*np.pi:N*1j, 0:np.pi:N*1j]
+    u,v = np.mgrid[0:2*np.pi:n*1j, 0:np.pi:n*1j]
     # compute x,y,z values from spherical mesh
     x = r*np.cos(u)*np.sin(v)+c[0]
     y = r*np.sin(u)*np.sin(v)+c[1]
@@ -34,7 +34,7 @@ def sphere(pos,radius,N=20):
     return x,y,z
    
 
-class mplVisual:
+class MPLVisual:
     def __init__(self, 
                  engine,
                  name='NBody Simulation (Matplotib)',
@@ -56,12 +56,14 @@ class mplVisual:
             'labelling_type':'legend',
             'body_model':'dots',
             'info_body':focus_body,
-            'fmt_params':dict(),
+            'fmt_params':dict(output_raw=False,
+                              items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'],
+                              vector_pos=False, vector_vel=False, vector_acc=False),
             'file':None,
             'step_skip_frames':1,
             'step_skip_points':1,
             'max_period':2,
-            'fps':30
+            'fps':30,
             }
         self.files = dict()
         self.engine = engine
@@ -89,21 +91,27 @@ class mplVisual:
         # list of data intervals to create frames for
         flist = list(self.plt['frmstep']*x for x in range(int(len(self.engine)/self.plt['frmstep'])))
         # organise args for animation function.
-        self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/self.args['fps']), frames=flist, cache_frame_data=self.args['anim_cache'])
+        self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/self.args['fps']),
+                              frames=flist, cache_frame_data=self.args['anim_cache'])
         # build data for trails
         self.trail_data = dict()
-        with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Building Trails', unit='items') as tbar:
+        with tqdm(total = len(self.engine.bodies)*len(flist),
+                  desc='«mplVisual» → Building Trails', unit='items') as tbar:
             for b in self.engine.bodies:
                 body_data = dict()
                 for f in flist: 
                     try:
-                        tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'], self.plt['major_body'], engine=self.engine)/self.engine.dt))
+                        tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'],
+                                                             self.plt['major_body'],engine=self.engine)/self.engine.dt))
                         if tau > 0:
                             lower = math.ceil(tau)
-                        else: raise TypeError
+                        else: 
+                            raise TypeError
                     except TypeError:
                         lower = self.args['start_index']
-                    body_data_f = list(list(float(m) for m in _b.record[lower:f:self.plt['ptstep']]) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+                    body_data_f = list(list(float(m) for m in 
+                                            _b.record[lower:f:self.plt['ptstep']]) 
+                                            for _b in (b.pos.X,b.pos.Y,b.pos.Z))
                     if self.plt['maxpts'] is not None:
                         while any(len(i) > self.plt['maxpts'] for i in body_data_f):
                             for i in body_data_f:
@@ -113,11 +121,13 @@ class mplVisual:
                 self.trail_data[b] = body_data
         # init a formatter to manage the info readout
         if show_info == True:
-            self.fmt = Formatter(output_raw=False,items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'], vector_pos=False, vector_vel=False, vector_acc=False, engine=self.engine,plotskip=self.plt['ptstep'], c_mass=self.plt['major_body'])
+            self.fmt = Formatter(engine=self.engine,plotskip=self.plt['ptstep'],
+                                 c_mass=self.plt['major_body'], **self.args['fmt_params'])
         # if true precalculate all info readouts for each frame and body.
         if self.args['info_calc'] is True:
             self.info_data = dict()
-            with tqdm(total = len(self.engine.bodies)*len(flist), desc='«mplVisual» → Precomputing All Descriptions', unit='items') as pbar:
+            with tqdm(total = len(self.engine.bodies)*len(flist),
+                      desc='«mplVisual» → Precomputing All Descriptions', unit='items') as pbar:
                 for b in self.engine.bodies: 
                     body_data = dict()
                     for f in flist:
@@ -142,7 +152,8 @@ class mplVisual:
         # axes to contain speed control slider
         if self.args['speed_control'] == True:
             self.spd_ax = self.fig.add_axes((0.1,0.25,0.05,0.5))
-            self.speed_slider = Slider(self.spd_ax,valinit=1000/self.plt['interval'], valmax=1000/5,label='Target\nFPS',valmin=0.1,orientation='vertical')
+            self.speed_slider = Slider(self.spd_ax,valinit=1000/self.plt['interval'],
+                                       valmax=1000/5,label='Target\nFPS',valmin=0.1,orientation='vertical')
             self.speed_slider.label.set_color(self.args['color_dict']['text'])
             def _sp_ud(val):
                 self.plt['interval'] = 1000/val
@@ -175,7 +186,8 @@ class mplVisual:
         else:
             # or read from precalculated.
             inf_string = self.info_data[self.args['info_body']][ind]
-        self.ax.text2D(s=inf_string, transform=self.ax.transAxes, x=0.05, y=0.2, size='small', horizontalalignment='left',
+        self.ax.text2D(s=inf_string, transform=self.ax.transAxes,
+                       x=0.05, y=0.2, size='small', horizontalalignment='left',
                 verticalalignment='bottom', color=self.args['color_dict']['text'])  
     def _draw_legend(self):
         handles, labels = self.ax.get_legend_handles_labels()
@@ -185,7 +197,11 @@ class mplVisual:
             if label not in label_list:
                 handle_list.append(handle)
                 label_list.append(label)
-        self.leg = self.ax.legend(handle_list, label_list, draggable=True, facecolor=self.args['color_dict']['bkgd'], fancybox=True, loc=1, fontsize='small')
+        self.leg = self.ax.legend(handle_list,
+                                  label_list,
+                                  draggable=True,
+                                  facecolor=self.args['color_dict']['bkgd'],
+                                  fancybox=True, loc=1, fontsize='small')
         for text in self.leg.get_texts():
             text.set_picker(PICKRADIUS)
             text.set_color(self.args['color_dict']['text'])
@@ -213,7 +229,8 @@ class mplVisual:
             # set plot range to max distances from focus body
             (limx,limy,limz) = (float(m) for m in self.focus_body.pos[ind])
             if self.args['focus_range'] is None:
-                self.args['focus_range'] = float(max((max(abs(x) for x in (self.focus_body.pos - bod.pos)) for bod in self.engine.bodies)))
+                self.args['focus_range'] = float(max(
+                    (max(abs(x) for x in (self.focus_body.pos - bod.pos)) for bod in self.engine.bodies)))
         else:
             limx,limy,limz=0,0,0
             if self.args['focus_range'] is None:
