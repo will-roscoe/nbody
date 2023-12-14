@@ -1,10 +1,12 @@
 [tool.ruff]
-include = ["pyproject.toml", "nbody/**/*.py", "*.py"]
 line-length = 120
+
+[tool.ruff.lint]
+include = ["pyproject.toml", "nbody/**/*.py", "*.py"]
 select = ["A", "E", "F", "N", "COM", "SIM"]
 ignore = [
   "E711", # COMPARISON TO FALSE
-  "E712" # COMPARISON TO TRUE 
+  "E712", # COMPARISON TO TRUE 
   "N807"
 ]
 
