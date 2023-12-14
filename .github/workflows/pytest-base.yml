@@ -1,9 +1,13 @@
 
 name: 'pytest'
 on:
-  workflow_run:
-    workflows: CI (Ingest) - Ruff
-  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths: 
+      - '!**dev/**'
+      - '!**.trash/**'
+      - '**.py'
+  workflow_dispatch: 
   
 jobs:
   build-tests:
