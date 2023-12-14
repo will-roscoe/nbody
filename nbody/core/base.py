@@ -1,19 +1,19 @@
 from __future__ import annotations
 # Python Builtins
-import math
-from decimal import Decimal
-import mpmath as mp
-import numpy
+from numpy import ndarray
+from numbers import Number
+from collections.abc import Iterable
+from mpmath import mp, fp
+import gmpy2 as g      
 # Local error definitions.
 from ..tools import errors as e
 
 
+
 Any = object
 NoneType = type(None)
-DecType= type(Decimal())
-NumType = (DecType,int,float, type(mp.mpf(1)), type(mp.mpi(1)), type(mp.mpc(1)))
-Iterable = (list,tuple,numpy.ndarray)
-
+NumType = (Number,type(mp.mpf(1)), type(fp.mpf(1)))
+mp.pretty, fp.pretty = True, True
 
 
 def _O(obj):
@@ -31,19 +31,17 @@ def _V(obj):
     
     else:
         return obj
+
 def _ntype(*objs):
     types = [type(_O(obj)) for obj in objs]
     for ntype in types:
-        if ntype not in (int, float, mp.mpf, mp.mpi, mp.mpc):
+        if ntype not in NumType:
             return ntype
     if all(ntype == int for ntype in types):
         return int
-    if any(ntype == mp.mpc for ntype in types):
-        return mp.mpc
-    if any(ntype == mp.mpi for ntype in types):
-        return mp.mpi
     else:
-        return mp.mpf
+        return fp.mpf
+
     
 def typecheck(argtype):
     if isinstance(argtype[0], Iterable):
@@ -79,65 +77,65 @@ class Variable:
 
     def __str__(self):
         if self.identity in ('Variable', 'HistoricVariable'):
-            return f'{str(self.c())} {self.units}, len:{len(self)}'
+            return f'{self.c()} {self.units}, len:{len(self)}'
         else:
-            return f'{str(self.c())} {self.units}, len:{len(self)} id:"{self.identity}"'
+            return f'{self.c()} {self.units}, len:{len(self)} id:"{self.identity}"'
     
     def __repr__(self):
         if len(self) == 1:
             if self.identity in ('Variable', 'HistoricVariable'):
-                return f'VarObj({str(self.c())} {self.units}, len={len(self)})'
+                return f'VarObj({self.c()} {self.units}, len={len(self)})'
             else:
-                return f'VarObj({str(self.c())} {self.units}, len={len(self)}, id={self.identity})'
+                return f'VarObj({self.c()} {self.units}, len={len(self)}, id={self.identity})'
         elif self.identity in ('Variable', 'HistoricVariable'):
-            return f'VarObj({str(self.c())} {self.units}, len={len(self)}, rec={self.record})'
+            return f'VarObj({self.c()} {self.units}, len={len(self)}, rec={self.record})'
         else:
-            return f'VarObj({str(self.c())} {self.units}, len={len(self)}, rec={self.record}, id={self.identity})'
+            return f'VarObj({self.c()} {self.units}, len={len(self)}, rec={self.record}, id={self.identity})'
     
     def __add__(self,other):
-        return Variable(mp.fadd(self.c(),_O(other)))
+        return Variable(fp.fadd(self.c(),_O(other)))
     
     __radd__ = __add__
 
     def __sub__(self,other):
-        return Variable(mp.fsub(self.c(),_O(other)))
+        return Variable(fp.fsub(self.c(),_O(other)))
     
     def __mul__(self,other):
-        return Variable(mp.fmul(self.c(),_O(other)))
+        return Variable(fp.fmul(self.c(),_O(other)))
     
     __rmul__ = __mul__
 
     def __truediv__(self,other):
-        return Variable(mp.fdiv(self.c(),_O(other)))
+        return Variable(fp.fdiv(self.c(),_O(other)))
     
     def __iadd__(self,other):
-        self.next(mp.fadd(self.c(),_O(other)))
+        self.next(fp.fadd(self.c(),_O(other)))
         return self
     
     def __isub__(self,other):
-        self.next(mp.fsub(self.c(),_O(other)))
+        self.next(fp.fsub(self.c(),_O(other)))
         return self
     
     def __imul__(self,other):
-        self.next(mp.fmul(self.c(),_O(other)))
+        self.next(fp.fmul(self.c(),_O(other)))
         return self
     
     def __itruediv__(self,other):
-        self.next(mp.fdiv(self.c(),_O(other)))
+        self.next(fp.fdiv(self.c(),_O(other)))
         return self
     
     def __rsub__(self,other):
-        return Variable(mp.chop(mp.fsub(_O(other), self.c())))
+        return Variable(fp.chop(mp.fsub(_O(other), self.c())))
     
     
     def __rtruediv__(self,other):
-        return Variable(mp.fdiv(_O(other), self.c()))
+        return Variable(fp.fdiv(_O(other), self.c()))
 
     def __pow__(self, other):
-        return Variable(mp.power(self.c(),_O(other)))
+        return Variable(fp.power(self.c(),_O(other)))
     
     def __rpow__(self, other):
-        return Variable(mp.power(_O(other), self.c()))
+        return Variable(fp.power(_O(other), self.c()))
     
     def __eq__(self, other):
         temp = _O(other)
@@ -176,7 +174,7 @@ class HistoricVariable(Variable):
             self.record = [_ntype(*init_var)(val) for val in init_var]
         
         else: 
-            e.raise_type_error('init_var',(*NumType,*Iterable),init_var)
+            e.raise_type_error('init_var',(*NumType,Iterable),init_var)
         
         self.type = type(self.record[0])
         (self.identity,self.units) = typecheck(((units,str),(identity,str)))
@@ -199,7 +197,7 @@ class HistoricVariable(Variable):
                 else: 
                     e.raise_list_type_error('next_val, temp',self.type,val)
         else: 
-            e.raise_type_error('next_val, temp',(self.type,*Iterable),next_val)
+            e.raise_type_error('next_val, temp',(self.type,Iterable),next_val)
 
     
     def __len__(self):
@@ -235,13 +233,15 @@ class HistoricVariable(Variable):
 
 
 class Vector:
+    
     def __init__(self,li=None,x=None,y=None,z=None):
         if li:
             (self.X,self.Y,self.Z) = [_ntype(*_O(li))(comp) for comp in _O(li)]
         elif all(isinstance(var, NumType) for var in (x,y,z)):
             [self.X,self.Y,self.Z] = [_ntype(x,y,z)(comp) for comp in (x,y,z)]
         else:
-            e.raise_list_type_error('l,x,y,z',(*Iterable,*NumType,*VectorType),(li,x,y,z))
+            e.raise_list_type_error('l,x,y,z',(Iterable,*NumType,*VectorType),(li,x,y,z))
+    
     def c(self,usage=None):
         try:
             return {None:(self.X,self.Y,self.Z),0:self.X,1:self.Y,2:self.Z}[usage]
@@ -249,14 +249,14 @@ class Vector:
             e.raise_out_of_range('c()',usage)
 
     def magnitude(self):
-        return mp.sqrt(mp.fsum([mp.power(n,2) for n in self.c()]))
+        return fp.norm(fp.matrix(self.c()))
     
     def unit(self):
         if float(self.magnitude()) == 0.:
             return NullVector()
         else:
-            return Vector(list((n/self.magnitude()) for n in self.c()))
-
+            return Vector(self/self.magnitude())
+    
     def __getitem__(self,ind):
         if isinstance(ind, str):
             try:
@@ -267,7 +267,7 @@ class Vector:
             e.raise_type_error('ind',str,ind)
     
     def __len__(self):
-        return 1
+        return 3
     
     def __str__(self): 
         return f'{self.c()}'
@@ -277,31 +277,28 @@ class Vector:
     
     def __iter__(self):
         return iter((self.X,self.Y,self.Z))
-    
     def __add__(self,other):
         temp = _O(other)
-        print(temp)
         if len(temp) == 3:
-            return Vector([mp.fadd(self.c(i),temp[i]) for i in range(3)])
+            return Vector([fp.fadd(self.c(i),temp[i]) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
     
     __radd__ = __add__
-
+    
     def __sub__(self,other):
         temp = _O(other)
-        print(temp)
         if len(temp) == 3:
-            return Vector([mp.fsub(self.c(i),temp[i]) for i in range(3)])
+            return Vector([fp.fsub(self.c(i),temp[i]) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
     
     def __mul__(self,other):
         temp = _O(other)
         if isinstance(temp,Iterable) and len(temp) == 3:
-            return Variable(mp.fsum([mp.fmul(val, temp[i]) for (i, val) in enumerate(self.c())]))
+            return Variable(mp.fsum([fp.fmul(val, temp[i]) for (i, val) in enumerate(self.c())]))
         elif isinstance(temp,NumType):
-            return Vector([mp.fmul(val,temp) for val in self.c()])
+            return Vector([fp.fmul(val,temp) for val in self.c()])
         else:
             e.raise_component_error('other or temp',temp)
     
@@ -310,16 +307,15 @@ class Vector:
     def __truediv__(self,other):
         temp = _O(other)
         if isinstance(temp,NumType):
-            return Vector([mp.fdiv(val,temp) for val in self.c()])
+            return Vector([fp.fdiv(val,temp) for val in self.c()])
         else:
             e.raise_type_error('other',NumType,other)
 
     
     def __rsub__(self,other):
         temp = _O(other)
-        print(temp)
         if len(temp) == 3:
-            return Vector([mp.fsub(temp[i], self.c(i)) for i in range(3)])
+            return Vector([fp.fsub(temp[i], self.c(i)) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
 
@@ -335,6 +331,7 @@ class Vector:
 
 
 class HistoricVector(Vector):
+    
     def __init__(self,x=None,y=None,z=None,li=None,identity=None,units_v=None):
         (self.identity,self.units) = typecheck(((identity,(NoneType,str)),(units_v,(NoneType,str))))
         self.units = (self.units if self.units is not None else '')
@@ -344,7 +341,7 @@ class HistoricVector(Vector):
         if isinstance(li,(tuple,list)) and len(li) == 3:
             (self.X,self.Y,self.Z) = list(HistoricVariable(vl,f'{self.identity}_{i}',self.units) for (vl,i) in ((nt(li[0]),'x'),(nt(li[1]),'y'),(nt(li[2]),'z')))  
         else:
-            e.raise_type_error('l,x,y,z',(*Iterable,*NumType),(li,x,y,z))
+            e.raise_type_error('l,x,y,z',(Iterable,*NumType),(li,x,y,z))
         self.type = nt
     
     def x(self):
@@ -355,13 +352,13 @@ class HistoricVector(Vector):
 
     def z(self):
         return self.Z.c()
-
+    
     def c(self, usage=None):
         try:
             return {None:(self.x(),self.y(),self.z()),0:self.x(),1:self.y(),2:self.z()}[usage]
         except KeyError: 
             e.raise_out_of_range('c()',usage)
-
+    
     def next(self,next_vals):
         temp = _O(next_vals)
         if isinstance(temp,Iterable):
@@ -405,11 +402,7 @@ class HistoricVector(Vector):
                     e.raise_value_error('ind',str,ind)
         
         elif isinstance(ind,int):
-            try:
-                return (self.X[ind],self.Y[ind],self.Z[ind])
-            except IndexError:
-                print(ind)
-                print(len(self))
+            return (self.X[ind],self.Y[ind],self.Z[ind])
         else:
             e.raise_type_error('ind',(str,int),ind)
 

@@ -4,6 +4,6 @@ mass = 1.4213
 radius = 23.124
 color = green
 bounce = 0.7
-position = (0, 0, 0)
+position = (1.0, 6.0, 7.0)
 velocity = (0.1, 3, 0)
 ]

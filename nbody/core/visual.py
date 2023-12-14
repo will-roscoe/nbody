@@ -3,22 +3,17 @@
 
 import math
 from time import sleep
-from matplotlib.lines import Line2D
 from tqdm import tqdm
 import numpy as np
-
-
-# Plotting and animation Packages
 import matplotlib as mpl
-#mpl.use('QT5Agg')
+# Plotting and animation Packages
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Button, Slider
-from cycler import cycler
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.lines import Line2D
 from mpl_toolkits.mplot3d.art3d import Line3D
 from matplotlib.text import Text
-from matplotlib.patches import Circle
+
 
 
 from ..tools.formatter import Formatter
@@ -168,11 +163,10 @@ class mplVisual:
         if show_grid == False:
             self.ax.grid(False)
         self.ax.set_autoscale_on(False)
-        if self.args['save_to'] is not None:
+        if self.args['file'] is not None:
             with open(f'{self.args['save_to']}.npz', 'wb') as file:
                 np.savez(file, mplVisual=self)
                 tqdm.write(f'«mplVisual» → Saved instance to {self.args['save_to']}.npz')
-    
     def _draw_info(self, ind):
         if self.info_data is None:
             # get info from formatter live
@@ -224,7 +218,7 @@ class mplVisual:
             limx,limy,limz=0,0,0
             if self.args['focus_range'] is None:
                 # find body furthest from origin and centre plot on origine.
-                self.args['focus_range'] = max(max(*bod.pos[ind]) for bod in self.engine.bodies)
+                self.args['focus_range'] = float(max(max(*bod.pos[ind]) for bod in self.engine.bodies))
         rng = self.args['focus_range']
         self.ax.set(xlim=((limx-rng),(limx+rng)),
                 ylim=((limy-rng),(limy+rng)),
@@ -249,9 +243,10 @@ class mplVisual:
             
         # plot bodies
 
-        for b in self.engine.bodies:
+        for i,b in enumerate(self.engine.bodies):
             _poshist = self.trail_data[b][ind]
             _pos = [float(m) for m in b.pos[ind]]
+            _color = (b.color if all((b.color == n for n in (None,'None'))) else f'C{i}')
             # draw vectors
             if self.args['vect_params']['vel'] == True:
                 self._draw_vectors(_pos,
@@ -262,9 +257,10 @@ class mplVisual:
                                    [float(m) for m in b.acc[ind]],
                                    'g')
             # draw trail
+            
             self.ax.plot(*_poshist,
                          label=f'{b.identity}',
-                         color=b.color,
+                         color=_color,
                          zorder=7,
                          clip_on=False,
                          picker=True,
@@ -273,7 +269,7 @@ class mplVisual:
             if self.args['body_model'] == 'dots':
                 self.ax.plot(*_pos,
                              label=f'{b.identity}',
-                             color=b.color,
+                             color=_color,
                              zorder=4,
                              clip_on=False,
                              picker=True,
@@ -283,7 +279,7 @@ class mplVisual:
                 _sf = {'wireframe':self.ax.plot_wireframe, 'surface':self.ax.plot_surface}
                 _sf[self.args['body_model']](*sphere(_pos,b.radius.c()),
                                    label=f'{b.identity}',
-                                   color=b.color,
+                                   color=_color,
                                    zorder=2,
                                    clip_on=False,
                                    pickradius=PICKRADIUS)
@@ -291,7 +287,7 @@ class mplVisual:
         if self.args['labelling_type'] == 'label':
             for b in self.engine.bodies:
                 self.ax.text(*[float(m) for m in b.pos[ind]],b.identity,
-                            color=b.color,
+                            color=_color,
                             zorder=10,
                             clip_on=False)
         else:
@@ -330,7 +326,6 @@ class mplVisual:
                 self.args['is_running'] = True        
     
 
-    
     def start(self, **viewparams):
         tqdm.write('«mplVisual» → Starting Visual Environment')
         self.anim = animation.FuncAnimation(self.fig, func=self._animate, **self.anim_args) 

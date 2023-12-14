@@ -138,7 +138,7 @@ def obj_from(object, obj='engine'):
                             if key in ('name', 'identity', 'id'):
                                 result['identity'] = value
                             elif key in ('color', 'colour'):
-                                result['color'] = value
+                                result['color'] = (value if value is not 'None' else None)
                             elif key in ('mass', 'radius'):
                                 result[key] = mpf(value)
                             elif key == 'bounce':

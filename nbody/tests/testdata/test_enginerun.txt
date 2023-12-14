@@ -9,12 +9,12 @@ mass = 1.4213
 radius = 23.124
 color = None
 bounce = 0.999
-position = (0.0, 0.0, 0.0)
+position = (6.0, 1.0, 2.0)
 velocity = (100.0, 100.0, 100.0)
 ]
 *Obj_2 [
 name = object_name2
-mass = 2.0
+mass = 20000
 radius = 2.0
 color = None
 bounce = 0.999
@@ -25,7 +25,7 @@ velocity = (9.0, -1.0, 6.0)
 -* plane = x = 0
 -* field = (1,1,1)
 
--* rel = Obj_1
+#-* rel = Obj_1
 
 -* sim = 99
 

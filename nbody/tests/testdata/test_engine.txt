@@ -9,7 +9,7 @@ mass = 1.4213
 radius = 23.124
 color = None
 bounce = 0.999
-position = (0.0, 0.0, 0.0)
+position = (6.0, 1.0, 2.0)
 velocity = (100.0, 100.0, 100.0)
 ]
 *Obj_2 [

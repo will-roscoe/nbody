@@ -2,24 +2,36 @@
 '''
 File Structure:
 ⸺ nbody/
-     ├── tests/
-     |   └── base_test.py 
-     ├── examples/
-     |   └── data/
-     |       └── eng_info.txt
-     ├── tools/
-     |   ├── __init__.py 
-     |   ├── errors.py 
-     |   ├── formatter.py 
-     |   ├── horizons.py 
-     |   └── io.py
      ├── core/
      |   ├── __init__.py 
      |   ├── base.py 
      |   ├── body.py 
      |   ├── engine.py 
      |   └── visual.py
-     └── __init__.py
+     |   
+     ├── examples/
+     |   └── data/
+     |  
+     ├── tests/
+     |   ├── testdata/
+     |   |   ├── test_body.txt
+     |   |   ├── test_bodyext.txt
+     |   |   ├── test_engine.txt
+     |   |   └── test_enginerun.txt
+     |   ├── __init__.py 
+     |   ├── test_base.py 
+     |   ├── test_core.py 
+     |   └── test_tools.py 
+     |
+     ├── tools/
+     |   ├── __init__.py 
+     |   ├── errors.py 
+     |   ├── formatter.py 
+     |   ├── horizons.py 
+     |   └── io.py
+     |
+     ├── __init__.py
+     └── config.py
    
 
 Valid Import Sequence

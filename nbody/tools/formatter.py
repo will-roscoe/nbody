@@ -1,7 +1,8 @@
 
 from pint import Quantity, UnitRegistry
-from ..core.base import Vector, Iterable
+from ..core.base import Vector, Iterable, _V, _O
 ur = UnitRegistry()
+Q_ = ur.Quantity
 ur.define('light_year = 9460730472580800 * meter = ly = lightyear')
 ur.define('jupiter_mass = 1.89818*10**27 * kg = $M_J$ = jmass')
 ur.define('solar_mass = 1.9885*10**30 * kg = $M_O$ = smass')
@@ -54,29 +55,29 @@ class Formatter:
         # base quantity dict
         self.q = {'identity':'','mass':0*ur.kg,'radius':0*ur.m,'energy':0*ur.joule,
                   'period':0*ur.s,'pos':0*ur.m,'vel':0*ur.m/ur.s,'acc':0*ur.m/ur.s**2}
+    
     def _lookup(self):
         # dict containing pint quantities of target
         return {'identity' : self.target[0].identity,
-                    'mass'   : self.target[0].mass.c()*ur(self.target[0].mass.units),
-                    'radius' : self.target[0].radius.c()*ur(self.target[0].radius.units),
-                    'energy' : self.target[0].get_('ke', self.target[1], self.par['ps'], self.par['cm']) * ur.joule,
-                    'period' : self.target[0].get_('period', self.target[1], self.par['ps'], self.par['cm'], engine=self.engine) * ur.s,
-                    'pos' : ([self.target[0].pos[self.target[1]][n]*ur(self.target[0].pos.units)
+                    'mass'   : Q_(float(self.target[0].mass.c()), ur(self.target[0].mass.units)),
+                    'radius' : Q_(float(self.target[0].radius.c()), ur(self.target[0].radius.units)),
+                    'energy' :Q_(float(_O(self.target[0].get_('ke', self.target[1], self.par['ps'], self.par['cm']))), ur.joule),
+                    'period' : Q_(float(_O(self.target[0].get_('period', self.target[1], self.par['ps'], self.par['cm'], engine=self.engine))), ur.s),
+                    'pos' : ([Q_(float(self.target[0].pos[self.target[1]][n]),ur(self.target[0].pos.units))
                             for n in range(3)] if self._m['pos']
-                            else Vector(self.target[0].pos[self.target[1]]).magnitude()*ur(self.target[0].pos.units)),
-                    'vel' : ([self.target[0].vel[self.target[1]][n]*ur(self.target[0].vel.units)
+                            else Q_(float(_O(Vector(self.target[0].pos[self.target[1]]).magnitude())), ur(self.target[0].pos.units))),
+                    'vel' : ([Q_(float(self.target[0].vel[self.target[1]][n]), ur(self.target[0].vel.units))
                             for n in range(3)] if self._m['vel'] 
-                            else Vector(self.target[0].vel[self.target[1]]).magnitude()*ur(self.target[0].vel.units)),
-                    'acc' : ([self.target[0].acc[self.target[1]][n]*ur(self.target[0].acc.units) 
+                            else Q_(_O(float(Vector(self.target[0].vel[self.target[1]]).magnitude())), ur(self.target[0].vel.units))),
+                    'acc' : ([Q_(float(self.target[0].acc[self.target[1]][n]), ur(self.target[0].acc.units)) 
                             for n in range(3)] if self._m['acc'] 
-                            else Vector(self.target[0].acc[self.target[1]]).magnitude()*ur(self.target[0].acc.units)),
-                    'time' : self.target[1]*self.engine.dt * ur.s,
+                            else Q_(float(_O(Vector(self.target[0].acc[self.target[1]]).magnitude())), ur(self.target[0].acc.units))),
+                    'time' : Q_(self.target[1]*self.engine.dt, ur.s),
     }
-   
+    
     def _basetemplate(self):
         # template string with formattable entries
-        ret = ''
-        for key,st in {'identity':"{identity}",
+        return ''.join([{'identity':"{identity}",
                        'mass': "\nMass: {mass}",
                        'radius':"\nRadius: {radius}",
                        'energy':"\nKE: {energy}",
@@ -84,20 +85,18 @@ class Formatter:
                        'pos':"\nPOS: {pos}",
                        'vel':"\nVEL: {vel}",
                        'acc':"\nACC: {acc}",
-                       'time': "\nT: {time}"}:
-            if key in self.items:
-                ret+=st
+                       'time': "\nT: {time}"}[i] for i in self.items])
     
     def _quantities(self, body=None):
-        if body != None: self.target[0] = body
+        if body != None: 
+            self.target[0] = body
         q = {}
         for key in self.items:
-            self.q[key] = self._lookup()[key]
-        return self.q
+            q[key] = self._lookup()[key]
+        return q
     
-   
+    
     def _get_best_unit(self, quant, units):
-        
         if units is None or (isinstance(quant, Quantity) and quant.m=='NaN'):
             return quant
         # if we want to leave as is if object is small enough
@@ -128,8 +127,9 @@ class Formatter:
                 # vectors : find best for each.
                 conv[key] = [self._get_best_unit(v, _units[key]) for v in value]
         return conv
+    
     def _quantities_to_strings(self, arg=None):
-        strings = []
+        strings = {}
         if arg == None:
             args = self._quantities()
         else:
@@ -138,24 +138,24 @@ class Formatter:
             try:    
                 if isinstance(value, Iterable):
                     # vectors
-                    strings.append('('+''.join((f'{q:.4f~P}' for q in value))+')') #q.to_compact()
+                    strings[key] = ('('+''.join((f'{q:.4f~P}' for q in value))+')') #q.to_compact()
                 elif isinstance(value, Quantity) and value.m != 'NaN':
                     # scalars
-                    strings.append(f'{value:.4f~P}') #value.to_compact()
+                    strings[key] = (f'{value:.4f~P}') #value.to_compact()
                 elif isinstance(value, Quantity) and value.m == 'NaN':
                     # NaN values (not neccesarily a str)
-                    strings.append('NaN')
+                    strings[key] = ('NaN')
                 else:
                     # string values
-                    strings.append(value)
+                    strings[key] = (value)
             except ValueError:
-                strings.append('NaN')
+                strings[key] = ('NaN')
         return strings
     
     def __str__(self):
         if self.par['raw'] == False:
             # if called as a string, return _basetemplate with the correct items inserted.
-            return self._basetemplate().format(*self._quantities_to_strings(self.convert()))
+            return self._basetemplate().format(**self._quantities_to_strings(self.convert()))
         else:
             return self._basetemplate().format(*self._quantities_to_strings())
         
