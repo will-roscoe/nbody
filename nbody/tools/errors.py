@@ -1,33 +1,33 @@
-def raise_type_error(obj:str, typ: tuple|object, invalid_obj:object):
+def raise_type_error(obj, typ, invalid_obj):
     '''raises the TypeError:
 {invalid_obj} is not a valid {typ} instance for {str(obj)}, type given was {type(invalid_obj)}.'''
     raise TypeError(f'{invalid_obj} is not a valid {typ} instance for {str(obj)},\
 type given was {type(invalid_obj)}.')
 
-def raise_len_error(obj:str, correct_len:int, invalid_obj:object):
+def raise_len_error(obj, correct_len, invalid_obj):
     '''raises the IndexError: {invalid_obj} of length {len(invalid_obj)} was given for {str(obj)},
 which should have length of {correct_len}.'''
     raise IndexError(f'{invalid_obj} of length {len(invalid_obj)} was given for {str(obj)}, \
 which should have length of {correct_len}.')
 
-def raise_value_error(obj:str, typ: tuple|object, invalid_obj:object):
+def raise_value_error(obj, typ, invalid_obj):
     '''raises the ValueError:
 {obj} of type {typ} was passed a invalid value of {invalid_obj}.'''
     raise ValueError(f'{obj} of type {typ} was passed a invalid value of {invalid_obj}.')
 
-def raise_component_error(obj:str, invalid_obj:tuple|list):
+def raise_component_error(obj, invalid_obj):
     '''raises the IndexError:
 input tuple for {obj} does not have 3 components, length was {len(invalid_obj)}.'''
     raise IndexError(f'input tuple for {obj} does not have 3 components, \
 length was {len(invalid_obj)}.')
 
-def raise_list_type_error(obj:str, typ: tuple|object, invalid_component:object):
+def raise_list_type_error(obj, typ, invalid_component):
     '''raises the TypeError: one or more iems in {str(obj)} is not a valid {typ}
 instance for {str(obj)}, part raised was {invalid_component}.'''
     raise TypeError(f'one or more iems in {str(obj)} is not a valid {typ} \
 instance for {str(obj)}, part raised was {invalid_component}.')
 
-def raise_out_of_range(obj:str, arg):
+def raise_out_of_range(obj, arg):
     '''raises the IndexError: Index of {arg} is out of range for object {obj}.'''
     raise IndexError(f'Index of {arg} is out of range for object {obj}.')
 
