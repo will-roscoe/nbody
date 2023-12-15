@@ -86,16 +86,21 @@ class Engine:
         if self.do_collisions == True:
             # has it found a collision?
             returned_coll = False
-            for bod in self.bodies:
-                if body != bod: 
+            for body2 in self.bodies:
+                if body != body2: 
                     # get distance between bodies
-                    body_dist = (bod.pos - body.pos).magnitude()             
+                    body_dist = (body2.pos - body.pos).magnitude()             
                     # check if distance is less than radii
-                    if body_dist < (bod.radius + body.radius).c():
-                        (returned_coll,n,meff) = (True,(bod.pos-body.pos)/body_dist,1/((1/bod.mass)+(1/body.mass)))
+                    if body_dist < (body2.radius + body.radius).c():
+                        returned_coll = True
+                        n = (body2.pos-body.pos).unit()
+                        meff = 1/((1/body2.mass)+(1/body.mass))
+                        rel_v = body2.vel - body.vel
+                        impulse =  n *(n*rel_v)*(1 + co_restitution) * meff
+                        dv = impulse/body.mass
                         # calc vel change: dv = n^ * [n^*[v2 -v1]*[1+e]*m"]/m1, n^ is normal unit vector,
                         # m" is effective mass as above.
-                        dv = n*(-1*((n*(body.vel - bod.vel))*(1+co_restitution)*meff)/body.mass)
+                        #dv = n * -1*(( (  n   *(body.vel-body2.vel) )*(   1+co_restitution)*meff     )/body.mass.c())
                         return (dv+body.vel), False
             
             unitcomps = {'x':Vector((1,0,0)),'y':Vector((0,1,0)),'z':Vector((0,0,1))}
@@ -103,9 +108,9 @@ class Engine:
                 # check for plane collision. we estimate a range of times as the plane has no thickness,
                 # and time interval would have to be extremely miniscule compared to velocity to always catch.
                 body_dists = list(abs(((body.pos + body.vel*m*self.dt)[pl[0]] - pl[1])) for m in range(self._rangechk))
-                if any([(body_dists[i] < body.radius) for i in range(self._rangechk)]) or\
-                body_dists[0] < body.radius:
-                    on_plane = (body_dists[0]/body.radius <= 1.01 and body_dists[-1]/body.radius <= 1.01)
+                if any([(body_dists[i] < body.radius) for i in range(self._rangechk)]):
+                    on_plane = ((body_dists[0]/body.radius <= 1.01) if len(body_dists) == 1 
+                                else (body_dists[0]/body.radius <= 1.01 and body_dists[-1]/body.radius <= 1.01))
                     returned_coll = True
                     # similar to above, but normals are precalculated.
                     return (unitcomps[pl[0]]*(-2*(body.vel*unitcomps[pl[0]])) + body.vel)*co_restitution, on_plane
@@ -132,17 +137,19 @@ class Engine:
         
         return res/body.mass
     
-    def _gen_sim(self):
-        for i,body in enumerate(self.bodies):
-            yield [body, *self._check_collision(body, body.bounce),self._find_gravity(body)]
+    
+        
     
     def simulate(self,intervals):
         if isinstance(intervals, int) and len(self.bodies) > 0:
             for _ in trange(intervals, 
                             desc=f'«Engine» → Evaluating motion for each interval of {self.dt} seconds', unit='ints'):
+                _temp = [[0,0,0] for _ in self.bodies]
+                for i,body in enumerate(self.bodies):
+                    _temp[i] = [*self._check_collision(body, body.bounce),self._find_gravity(body)]
                 
-                
-                for body, col_vel, on_plane, acc_g in self._gen_sim():
+                for i,body in enumerate(self.bodies):
+                    col_vel, on_plane, acc_g = _temp[i]
                     if not on_plane and self.do_fieldgravity:
                         fieldvel = list(sum(v.c(i) for v in self.fields) for i in range(3))
                     else:

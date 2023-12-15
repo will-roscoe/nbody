@@ -3,7 +3,7 @@ import pytest
 import shutil
 import os
 
-from .. import export_obj, obj_from, Engine, Body, mplVisual
+from .. import export_obj, obj_from, Engine, Body, MPLVisual
 from ..tools.horizons import horizons_batch, horizons_query
 
 def cleanup(folder):

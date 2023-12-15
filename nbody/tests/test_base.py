@@ -11,6 +11,8 @@ _hvect = nb.HistoricVector(0,0,0)
 for i in range(1,10):
         _hvect.next((i,i,i))
 
+
+
 class TestBaseFuncs:
         '''Testing class independent functions
         '''
@@ -42,11 +44,11 @@ class TestVarVectorBasics:
                 _hvect = nb.HistoricVector(0,0,0)
                 _hvect2 = nb.HistoricVector(li=(0,0,0))
         def test_len(self):
-                var_l = len(nb.Variable(0))
-                hvar_l = len(_hvar)
-                vect_l = len(nb.Vector((0,0,0)))
-                hvect_l = len(_hvect)
-                assert var_l == vect_l and hvar_l == hvect_l
+                varl = len(nb.Variable(0)) == 1
+                vectl = len(_hvar) == 10
+                hvarl = len(nb.Vector((0,0,0))) == 3
+                hvectl = len(_hvect) == 10
+                assert varl and vectl and hvarl and hvectl
         def test_types(self):
                 assert (isinstance(nb.Variable(0), nb.VarType) and
                         isinstance(nb.HistoricVariable(0), nb.VarType) and

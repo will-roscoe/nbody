@@ -1,21 +1,25 @@
 from __future__ import annotations
 # Python Builtins
 
+
 from numbers import Number
-from collections.abc import Iterable
 from mpmath import mp, fp
    
 # Local error definitions.
 from ..tools import errors as e
 
+# CONFIGURE GLOBAL MATH FUNCTIONS
+from ..tools import _config as conf
+math_conf = conf.MathContext(use=mp)
 
-
+Iterable = (list, tuple)
 Any = object
 NoneType = type(None)
-NumType = (Number,type(mp.mpf(1)), type(fp.mpf(1)))
+NumType = (Number, int, float ,type(mp.mpf(1)),type(fp.mpf(1)))
 mp.pretty, fp.pretty = True, True
 
 
+    
 def _O(obj):  # noqa: N802
     if isinstance(obj,(Vector, Variable, HistoricVariable, HistoricVector)):
         return obj.c()
@@ -34,13 +38,13 @@ def _V(obj):  # noqa: N802
 
 def _ntype(*objs):
     types = [type(_O(obj)) for obj in objs]
-    for ntype in types:
-        if ntype not in NumType:
-            return ntype
+    for i,obj in enumerate(objs):
+        if not isinstance(obj, NumType):
+            return types[i]
     if all(ntype == int for ntype in types):
         return int
     else:
-        return fp.mpf
+        return math_conf.type
 
     
 def typecheck(argtype):
@@ -94,49 +98,49 @@ class Variable:
             return f'VarObj({self.c()} {self.units}, len={len(self)}, rec={self.record}, id={self.identity})'
     
     def __add__(self,other):
-        return Variable(fp.fadd(self.c(),_O(other)))
+        return Variable(math_conf.add(self.c(),_O(other)))
     
     __radd__ = __add__
 
     def __sub__(self,other):
-        return Variable(fp.fsub(self.c(),_O(other)))
+        return Variable(math_conf.chop(math_conf.sub(self.c(),_O(other))))
     
     def __mul__(self,other):
-        return Variable(fp.fmul(self.c(),_O(other)))
+        return Variable(math_conf.mul(self.c(),_O(other)))
     
     __rmul__ = __mul__
 
     def __truediv__(self,other):
-        return Variable(fp.fdiv(self.c(),_O(other)))
+        return Variable(math_conf.div(self.c(),_O(other)))
     
     def __iadd__(self,other):
-        self.next(fp.fadd(self.c(),_O(other)))
+        self.next(math_conf.add(self.c(),_O(other)))
         return self
     
     def __isub__(self,other):
-        self.next(fp.fsub(self.c(),_O(other)))
+        self.next(math_conf.chop(math_conf.sub(self.c(),_O(other))))
         return self
     
     def __imul__(self,other):
-        self.next(fp.fmul(self.c(),_O(other)))
+        self.next(math_conf.mul(self.c(),_O(other)))
         return self
     
     def __itruediv__(self,other):
-        self.next(fp.fdiv(self.c(),_O(other)))
+        self.next(math_conf.div(self.c(),_O(other)))
         return self
     
     def __rsub__(self,other):
-        return Variable(fp.chop(mp.fsub(_O(other), self.c())))
+        return Variable(math_conf.chop(mp.fsub(_O(other), self.c())))
     
     
     def __rtruediv__(self,other):
-        return Variable(fp.fdiv(_O(other), self.c()))
+        return Variable(math_conf.div(_O(other), self.c()))
 
     def __pow__(self, other):
-        return Variable(fp.power(self.c(),_O(other)))
+        return Variable(math_conf.pow(self.c(),_O(other)))
     
     def __rpow__(self, other):
-        return Variable(fp.power(_O(other), self.c()))
+        return Variable(math_conf.pow(_O(other), self.c()))
     
     def __eq__(self, other):
         temp = _O(other)
@@ -150,7 +154,7 @@ class Variable:
     
     
     def __le__(self, other):
-        return self.__eq__(other) or self.__le__(other)
+        return (self.__eq__(other) or self.__lt__(other))
     
     
     def __ne__(self, other):
@@ -164,7 +168,7 @@ class Variable:
     
     
     def __ge__(self, other):
-        return self.__eq__(other) or self.__gt__(other)
+        return (self.__eq__(other) or self.__gt__(other))
     
 class HistoricVariable(Variable):
     def __init__(self,init_var,identity='HistoricVariable',units=''):
@@ -250,7 +254,7 @@ class Vector:
             e.raise_out_of_range('c()',usage)
 
     def magnitude(self):
-        return fp.norm(fp.matrix(self.c()))
+        return math_conf.norm(math_conf.matrix(self.c()))
     
     def unit(self):
         if float(self.magnitude()) == 0.:
@@ -281,7 +285,7 @@ class Vector:
     def __add__(self,other):
         temp = _O(other)
         if len(temp) == 3:
-            return Vector([fp.fadd(self.c(i),temp[i]) for i in range(3)])
+            return Vector([math_conf.add(self.c(i),temp[i]) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
     
@@ -290,16 +294,16 @@ class Vector:
     def __sub__(self,other):
         temp = _O(other)
         if len(temp) == 3:
-            return Vector([fp.fsub(self.c(i),temp[i]) for i in range(3)])
+            return Vector([math_conf.sub(self.c(i),temp[i]) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
     
     def __mul__(self,other):
         temp = _O(other)
         if isinstance(temp,Iterable) and len(temp) == 3:
-            return Variable(mp.fsum([fp.fmul(val, temp[i]) for (i, val) in enumerate(self.c())]))
+            return Variable(math_conf.sum([math_conf.mul(val, temp[i]) for (i, val) in enumerate(self.c())]))
         elif isinstance(temp,NumType):
-            return Vector([fp.fmul(val,temp) for val in self.c()])
+            return Vector([math_conf.mul(val,temp) for val in self.c()])
         else:
             e.raise_component_error('other or temp',temp)
     
@@ -308,7 +312,7 @@ class Vector:
     def __truediv__(self,other):
         temp = _O(other)
         if isinstance(temp,NumType):
-            return Vector([fp.fdiv(val,temp) for val in self.c()])
+            return Vector([math_conf.div(val,temp) for val in self.c()])
         else:
             e.raise_type_error('other',NumType,other)
 
@@ -316,7 +320,7 @@ class Vector:
     def __rsub__(self,other):
         temp = _O(other)
         if len(temp) == 3:
-            return Vector([fp.fsub(temp[i], self.c(i)) for i in range(3)])
+            return Vector([math_conf.sub(temp[i], self.c(i)) for i in range(3)])
         else:
             e.raise_component_error('other or temp',temp)
 

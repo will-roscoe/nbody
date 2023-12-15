@@ -92,7 +92,7 @@ def obj_from(object, obj='engine'):  # noqa: A002
                     for val in func_strings:
                         if val[0] == 'plane' and len(val) == 3:
                             engine.create_plane(str(val[1]), float(val[2]))
-                        elif val[0] == 'field' and len(parts) == 2:
+                        elif val[0] == 'field' and len(val) == 2:
                             vect = [mpf(v) for v in val[1].strip("'").replace('(', '').replace(')', '').split(',')]
                             engine.create_acceleration(vect)
                         elif val[0] == 'rel' and len(val) == 2:
@@ -101,7 +101,7 @@ def obj_from(object, obj='engine'):  # noqa: A002
                                 engine.simulate(int(val[1]))
                         else:
                             tqdm.write(
-        f'«obj_from()» → [!] Couldn\'t parse function "{' '.join(val)}" so it has been skipped.',
+        f'«obj_from()» → [!] Couldn\'t parse function "{'|'.join(val)}" so it has been skipped.',
                 )
                     return engine
                 elif obj == 'body':

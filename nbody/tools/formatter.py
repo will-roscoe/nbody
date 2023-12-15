@@ -120,7 +120,7 @@ class Formatter:
         args = arg if arg else self._quantities()
         # get best units for each item we want
         for key,value in args.items():
-            if not isinstance(value, Iterable): 
+            if not isinstance(value, (list, tuple)): 
                 # scalars
                 conv[key] = self._get_best_unit(value, _units[key])
             else:
@@ -150,10 +150,12 @@ class Formatter:
         return strings
     
     def __str__(self):
-        if self.par['raw'] == False:
-            # if called as a string, return _basetemplate with the correct items inserted.
-            return self._basetemplate().format(**self._quantities_to_strings(self.convert()))
+        if self.target[0] is not None:
+            if self.par['raw'] == False:
+                # if called as a string, return _basetemplate with the correct items inserted.
+                return self._basetemplate().format(**self._quantities_to_strings(self.convert()))
+            else:
+                return self._basetemplate().format(*self._quantities_to_strings())
         else:
-            return self._basetemplate().format(*self._quantities_to_strings())
-        
+            return ''
 

@@ -44,6 +44,7 @@ Valid Import Sequence
      .tools.io
      .tools.horizons
 """
+from .core.base import math_conf as CONFIG #noqa
 from .core.body import Body
 from .core.engine import Engine
 from .core.visual import MPLVisual

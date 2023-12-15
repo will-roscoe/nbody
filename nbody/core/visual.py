@@ -49,6 +49,7 @@ class MPLVisual:
             'vect_params': dict(vel=False, acc=False, size=1),
             'start_index':0,
             'info_calc':False,
+            'prebuild':False,
             'focus_range':None,
             'anim_cache':False,
             'max_pts':None,
@@ -59,11 +60,11 @@ class MPLVisual:
             'fmt_params':dict(output_raw=False,
                               items=['identity','mass','radius','energy','period','pos','vel','acc', 'time'],
                               vector_pos=False, vector_vel=False, vector_acc=False),
-            'file':None,
             'step_skip_frames':1,
             'step_skip_points':1,
             'max_period':2,
             'fps':30,
+            'file':None,
             }
         self.files = dict()
         self.engine = engine
@@ -78,7 +79,7 @@ class MPLVisual:
             self.args['color_dict']['line'] = (0,0,0,0)
             self.args['color_dict']['face'] = (0,0,0,0)
         
-        
+    
         
         
         # plotting values
@@ -94,31 +95,18 @@ class MPLVisual:
         self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/self.args['fps']),
                               frames=flist, cache_frame_data=self.args['anim_cache'])
         # build data for trails
-        self.trail_data = dict()
-        with tqdm(total = len(self.engine.bodies)*len(flist),
-                  desc='«mplVisual» → Building Trails', unit='items') as tbar:
-            for b in self.engine.bodies:
-                body_data = dict()
-                for f in flist: 
-                    try:
-                        tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'],
-                                                             self.plt['major_body'],engine=self.engine)/self.engine.dt))
-                        if tau > 0:
-                            lower = math.ceil(tau)
-                        else: 
-                            raise TypeError
-                    except TypeError:
-                        lower = self.args['start_index']
-                    body_data_f = list(list(float(m) for m in 
-                                            _b.record[lower:f:self.plt['ptstep']]) 
-                                            for _b in (b.pos.X,b.pos.Y,b.pos.Z))
-                    if self.plt['maxpts'] is not None:
-                        while any(len(i) > self.plt['maxpts'] for i in body_data_f):
-                            for i in body_data_f:
-                                i.pop(0)
-                    body_data[f] = body_data_f
-                    tbar.update(1)
-                self.trail_data[b] = body_data
+        if self.args['prebuild']:
+            self.trail_data = dict()
+            with tqdm(total = len(self.engine.bodies)*len(flist),
+                    desc='«mplVisual» → Building Trails', unit='items') as tbar:
+                for b in self.engine.bodies:
+                    body_data = dict()
+                    for f in flist: 
+                        body_data[f] = self.gen_trail(f,b)
+                        tbar.update(1)
+                    self.trail_data[b] = body_data
+        else:
+            self.trail_data = None
         # init a formatter to manage the info readout
         if show_info == True:
             self.fmt = Formatter(engine=self.engine,plotskip=self.plt['ptstep'],
@@ -208,7 +196,25 @@ class MPLVisual:
 
     def _draw_vectors(self,pos,other,c):
         self.ax.quiver(*pos,*other,length=self.args['vect_params']['size'],color=c,zorder=8, clip_on=False)
-
+    
+    def gen_trail(self, f, b):
+        try:
+            tau = (f-(self.plt['frmstep']*b.get_('period', f, self.plt['ptstep'],
+                    self.plt['major_body'],engine=self.engine)/self.engine.dt))
+            if tau > 0:
+                lower = math.ceil(tau)
+            else: 
+                raise TypeError
+        except TypeError:
+            lower = self.args['start_index']
+        body_data_f = list(list(float(m) for m in 
+                _b.record[lower:f:self.plt['ptstep']]) 
+                for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+        if self.plt['maxpts'] is not None:
+            while any(len(i) > self.plt['maxpts'] for i in body_data_f):
+                for i in body_data_f:
+                    i.pop(0)
+        return body_data_f
 
     
     def _animate(self,ind):
@@ -261,7 +267,7 @@ class MPLVisual:
         # plot bodies
 
         for i,b in enumerate(self.engine.bodies):
-            _poshist = self.trail_data[b][ind]
+            _poshist = (self.gen_trail(ind,b) if self.args['prebuild'] is False else self.trail_data[b][ind])
             _pos = [float(m) for m in b.pos[ind]]
             _color = (b.color if all((b.color == n for n in (None,'None'))) else f'C{i}')
             # draw vectors

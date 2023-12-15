@@ -74,10 +74,7 @@ v={self.vel.c()}), a={self.acc.c()})'
     
         if vel_change is not None:
             vel_change = _V(vel_change)
-            if isinstance(vel_change,Iterable) and len(vel_change.c()) == 3:
-                self.pos.next(self.pos + (vel + vel_change)*dt)
-            else:
-                raise RuntimeError
+            self.pos.next(self.pos + (vel + vel_change)*dt)
         else:
             self.pos.next(self.pos + vel*dt)
 
@@ -114,7 +111,7 @@ v={self.vel.c()}), a={self.acc.c()})'
                 else:
                     return a
             def ke():
-                return (Vector(self.vel[ind])*(self.vel[ind])*(1/2)*self.mass).c()
+                return ((Vector(self.vel[ind]).magnitude()**2)*(1/2)*self.mass).c()
             
             _get_lookup = {**dict.fromkeys(['sma', 'semi_major_axis'],sma),
                        **dict.fromkeys(['per', 'period'],per),
