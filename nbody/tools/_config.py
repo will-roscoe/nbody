@@ -2,22 +2,31 @@ from mpmath import fp, mp
 from math import sqrt
 def fltmat(obj):
     return obj
-def fltnorm(*obj):
+def fltnorm(obj):
     return sqrt(sum(x**2 for x in obj))
+def fs(a,b):
+    return a-b
+def fa(a,b):
+    return a+b
+def fd(a,b):
+    return a/b
+def fm(a,b):
+    return a*b
+def fpo(a,b):
+    return a**b
 class MathContext:
     def __init__(self,use=None):
-        with open('MATHTYPE', 'r') as file:
+        with open('nbody\MATHTYPE', 'r') as file:
             lines = file.readlines()
             use = eval(lines[0])
-        print(f'{use}')
         if use == float:
             self.type = use       
-            self.add = float.__add__
-            self.sub = float.__sub__
+            self.add = fa
+            self.sub = fs
             self.sum = sum
-            self.div = float.__truediv__
-            self.mul = float.__mul__
-            self.pow = float.__pow__
+            self.div = fd
+            self.mul = fm
+            self.pow = pow
             self.norm = fltnorm
             self.matrix = fltmat
             self.chop = float

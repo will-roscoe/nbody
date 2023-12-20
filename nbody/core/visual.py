@@ -1,24 +1,26 @@
 
 
-
+#### Python Builtins
 import math
+# ⤤ efficient ceil function
 from time import sleep
+# ⤤ used when speed_control is True to change interval
+#### 3rd Party Libs/Packages
 from tqdm import tqdm
+# ⤤ progress bars
 import numpy as np
+# ⤤ mgrid used to create surfaces for spheres
 import matplotlib as mpl
-# Plotting and animation Packages
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Button, Slider
 from matplotlib.lines import Line2D
 from mpl_toolkits.mplot3d.art3d import Line3D
 from matplotlib.text import Text
-
-
-
+# ⤤ visual library, importing multiple classes mainly for type checks on user clicks 
+#### Local Imports
 from ..tools.formatter import Formatter
-
-
+# ⤤ used to parse output for info display when show_info is enabled
 
 
 PICKRADIUS = 10
@@ -35,6 +37,62 @@ def sphere(pos,radius,n=20):
    
 
 class MPLVisual:
+    '''Object that outputs a visual, animated plot of an `core.Engine` instance, and can be customized to users\
+        preferences.
+
+>[!NOTE]
+The `core.Engine` instance should already have computed a simulation before insterting into a `mplVisual` instance. 
+
+### Parameters
+|Parameter| Required |Type| Description|
+|---|---|---| ---|
+|`engine` | ✓ | `core.Engine` | engine containing the system that is to be visualized |
+|`name` | ✕ | `str` | identifying name of the visual instance. |
+|`show_info` | ✕ | `bool` | whether to show a description of live information of the `info_body`\
+    (Default: `focus_body`).Default: `False`.|
+|`show_grid` | ✕ | `bool` | whether to draw the grid and grid faces of the plot. Default:`True`.|
+|`focus_body` | ✕ | `core.Body` | body to keep in the center of the plot. If left as `None`, the plot will not center\
+      on a body. Default:`None`|
+|`do_picking` | ✕ | `bool` | whether to enable object picking, allowing a user to choose a `focus_body` by clicking on \
+    the object, or `info_body` by clicking on the label or legend item.|
+### `kwargs`
+|Parameter|Type|Default| Description|
+|---|---|---|---|
+|`step_skip_frames` | `int` |`1` | the step to iterate over of frames. reduces the amount of frames in the final\
+      visual, but speeds up the animation. |
+|`step_skip_points` | `int` | `1`| the step to iterate over of points. reduces the amount of points in each trail. \
+    eg: if `step_skip_frames=10`, and `step_skip_points=5`, each frame would contain 2 more points.| 
+|`fps` | `int` | `30`|framerate of the animation.|
+|`max_pts` | `int` |`None` |maximum amount of points in each trail to plot. will remove oldest points if `max_pts` \
+    is exceeded.|
+|`max_period` | `int` |`2` |maximum amount of periods for an object to draw until points are cut.|
+|||||
+|`vect_params` | `dict` |`{vel:False, acc:False, size:1}` | parameters to show acceleration and velocity vectors and\
+      a size scaling factor.|
+|`speed_control` | `bool` |`False` |whether to enable a slider in the visual to control the speed.|
+|`color_dict` | `dict` |`{line:'black', face:(0,0,0,0), bkgd:'white', text:'black'}` | color pallette used by the \
+    visual.|
+|`focus_range` | `base.Numtype` | `None`|range to plot the grid around, given `focus_body` is not `None`. if `None`,\
+      the visual will autoscale, based on the furthest object.|
+|`labelling_type` | `str` | `'legend'`|whether to use labels on objects or a legend. either `legend` or `labels`.|
+|`body_model` | `str` |`'dots'` |how to draw the objects. can be `surface` or `wireframe` for spherical surface or \
+    `dots` as markers.|
+|||||
+|`info_body` | `core.Body` |`focus_body` |initial object to show information for.|
+|`info_calc` | `bool` |`False` |whether to compute all info strings for objects for all frames prior to animation.|
+|`anim_cache` | `bool` |`False` |see `matplotlib.animation.FuncAnimation` parameter `cache`.|
+|||||
+|`is_running` | `bool` |`True` |value used to toggle animation using play/pause button in visual.|
+|||||
+|`fmt_params` | `dict` | see docstring|dictionary sent to the `Formatter` object to deal with the info output.|
+|`file` | `str` |`None` |where to save the `mplVisual` object. if `None` then the object is not saved.|
+|`start_index` | `int` |`0` |index of bodies' data to begin animation at.|
+
+### Usage
+#### `start(**viewparams)`
+   - function to start instances output window and animation. 
+   - `viewparams`: parameters to pass to `axes.view_init()`. initial viewing parameters as `elev`, `azim`, `roll`.
+    '''
     def __init__(self, 
                  engine,
                  name='NBody Simulation (Matplotib)',
@@ -95,6 +153,9 @@ class MPLVisual:
         self.anim_args = dict(interval=(5 if self.args['speed_control'] is True else 1000/self.args['fps']),
                               frames=flist, cache_frame_data=self.args['anim_cache'])
         # build data for trails
+        self.data = {}
+        for b in self.engine.bodies:
+            self.data[b] = list(list(float(m) for m in _b.record) for _b in (b.pos.X,b.pos.Y,b.pos.Z))
         if self.args['prebuild']:
             self.trail_data = dict()
             with tqdm(total = len(self.engine.bodies)*len(flist),
@@ -163,8 +224,8 @@ class MPLVisual:
             self.ax.grid(False)
         self.ax.set_autoscale_on(False)
         if self.args['file'] is not None:
-            with open(f'{self.args['save_to']}.npz', 'wb') as file:
-                np.savez(file, mplVisual=self)
+            with open(f'{self.args['file']}.npz', 'wb') as file:
+                np.save(file, MPLVisual=self)
                 tqdm.write(f'«mplVisual» → Saved instance to {self.args['save_to']}.npz')
     def _draw_info(self, ind):
         if self.info_data is None:
@@ -207,9 +268,9 @@ class MPLVisual:
                 raise TypeError
         except TypeError:
             lower = self.args['start_index']
-        body_data_f = list(list(float(m) for m in 
-                _b.record[lower:f:self.plt['ptstep']]) 
-                for _b in (b.pos.X,b.pos.Y,b.pos.Z))
+        body_data_f = list(list(m for m in 
+                _b[lower:f:self.plt['ptstep']]) 
+                for _b in self.data[b])
         if self.plt['maxpts'] is not None:
             while any(len(i) > self.plt['maxpts'] for i in body_data_f):
                 for i in body_data_f:
@@ -350,6 +411,9 @@ class MPLVisual:
     
 
     def start(self, **viewparams):
+        ''' 
+    - function to start instances output window and animation. 
+   - `viewparams`: parameters to pass to `axes.view_init()`. initial viewing parameters as `elev`, `azim`, `roll`.'''
         tqdm.write('«mplVisual» → Starting Visual Environment')
         self.anim = animation.FuncAnimation(self.fig, func=self._animate, **self.anim_args) 
         # change view point if viewparams specified

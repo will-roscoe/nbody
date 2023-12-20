@@ -1,9 +1,18 @@
 from __future__ import annotations
+# ⤤ allows imports and references in a non chronological order.
+#### Python Builtins
 import os
+# ⤤ checking if file exists and directory management
+#### 3rd Party Libs/Packages
 import pandas as pd
+# ⤤ efficient way to parse a dictionary to a csv.
 from mpmath import mpf
+# change to mathcontext.type
 from tqdm import tqdm
+# ⤤ progress bars
 from . import errors as e
+# ⤤ standard error messages
+#### Local Imports
 from ..core.base import Vector, NumType, _O
 from ..core.body import Body
 from ..core.engine import Engine

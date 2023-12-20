@@ -1,10 +1,14 @@
 import re
+# ⤤ input string parsing
 from astroquery.jplhorizons import Horizons
 import astropy.units as ast
 from datetime import datetime, timedelta
+# ⤤ collectively get data from jpl horizons
 
 from tqdm import tqdm
+# ⤤ progress bars
 from . import errors as e
+# ⤤ standard error messages
 
 def horizons_query(searchquery,observer='0',time='2023-11-03',num_type=float,return_type='body'):
     from ..core.body import typecheck, Body

@@ -1,12 +1,74 @@
+#### 3rd Party Libs/Packages
 import numpy as np
+# ⤤ for saving engine as binary
 from tqdm import tqdm, trange
+# ⤤ for progress bars so then user has expected time to completion per part
+#### Local imports
 from ..tools import errors as e
+# ⤤ standardized error messages
 from .base import typecheck, _O, Iterable, NumType, Vector, VectorType, NullVector
 from .body import Body, G
+# ⤤ neccesary imports for engine
 
 
 
 class Engine:
+    '''This object acts as the physics engine, and simulates the gravitational effects of bodies, and can also\
+        simulate collisions as well.
+### Parameters
+|Parameter| Required |Type| Description|
+|---|---|---| ---|
+|`dt` | ✕ | `base.NumType` | interval in seconds between each datapoint in the simulation.\
+    Lowest will produce most accurate results. Default is `1`(second). |
+|`checking_range` | ✕ | `int` | range of points to check for collisions over for each point. Default is `3`.|
+
+### Attributes
+|Attribute| Type| Description|
+|---|---|---|
+| `self.bodies` |`list`  | internal collection of bodies that have been attached. |
+| `self.planes` |`list`  | internal collection of planes that have been defined. |
+| `self.fields` |`list`  | internal collection of fields that have been defined. |
+| `self.dt` |`base.NumType`  | see `dt` above |
+| `self.do_collisions` |`bool`  | whether to calculate the effect of collisions with planes or other bodies when\
+    simulating the trajectories. Default=`True`. |
+| `self.do_bodygravity` |`bool`  | whether to calculate the effect of gravity due to other bodies when simulating the\
+    trajectories. Default=`True`.|
+| `self.do_fieldgravity` |`bool`  | whether to calculate the effect of fields when simulating the trajectories.\
+    Default=`True`.|
+
+### Usage
+#### `attach_bodies(new_bodies)`
+   - attaches `core.Body` objects to the `Engine` instance. `new_bodies` must be passed as a `base.Iterable`.
+
+#### `save_as(dump='engine',file_name='nbody_data')`
+   - saves the current state and all child objects as an .npz file.
+        * `dump` = either  `engine` or `bodies`, choosing to save engine with all children or just the\
+              `core.Bodies` objects.
+#### `load_as(objects='engine',file_name='nbody_data')`
+   - loads the chosen file data into the `Engine` instance. `objects` = either `engine` or `bodies` and this specifies\
+      the target object(s) to load.
+#### `make_relative_to(target_body)`
+   - reinitialises all bodies in the instance, changing the initial conditions so that `target_body` is located at\
+    (0,0,0) and the rest of the objects have the same initial conditions relative to `target_body`.
+#### `create_acceleration(accel_vector)`
+   - creates a constant field of acceleration that can affect the simulated trajectories of bodies.
+     * `accel_vector` must be an iterable or `base.VectorType` instance.
+>[!WARNING]
+> if the value of an acceleration field or a body's velocity is sufficiently high, a body may fail to register\
+      a collision with a plane or another body.
+>
+> In these instances, it is neccesary to reduce `dt`. *(and increase `checking_range`, which will sample more \
+    points resulting in an earlier check collision being registered.)*
+#### `create_plane(const_axis= 'z', const_val= 0)`
+   - creates an infinite plane with 0 thickness, parallel to a chosen euclidean plane. `const_axis` specifies\
+    the plane orientation, e.g, `'z'` would return a plane parallel to the x-y plane. `const_val` specifies\
+        the coordinate value it should be locked to.
+#### `simulate(self,intervals)`
+  - runs a simulation over a specified amount of `intervals` (must be `int`). does not return anything,\
+    but each of the bodies will contain the new data, and the `Engine` instance can now be passed on to a \
+        `Visual` object to create an output.
+
+    '''
     def __init__(self,dt=1,checking_range=3):
         self.bodies, self.planes, self.fields= [], [], []
         (self.dt,self._rangechk) = typecheck(((dt,NumType),(checking_range,NumType)))
@@ -20,6 +82,8 @@ class Engine:
             return 0
     
     def attach_bodies(self, new_bodies):
+        '''attaches `core.Body` objects to the `Engine` instance. `new_bodies` must be passed as a `base.Iterable`.
+        '''
         if isinstance(new_bodies,Iterable):
             for new_body in new_bodies:
                 typecheck((new_body, Body))
@@ -33,27 +97,32 @@ class Engine:
     
     
     def save_as(self,dump='engine',file_name='nbody_data'):
+        '''saves the current state and all child objects as an .npz file.
+        * `dump` = either  `engine` or `bodies`, choosing to save engine
+        with all children or just the `core.Bodies` objects.'''
         _saveobjs = {'bodies':{'bodies':self.bodies},'engine':{'engine':self}}
         # saving object as npz file
-        with open(f'{file_name}.npz','wb') as file:
-            np.savez(file, **_saveobjs[dump])
+        np.savez(f'{file_name}.npz', **_saveobjs[dump])
 
     
-    def load_as(self,objects='engine',file_name='nbody_data'):   
-        _loadobjs = {'bodies':("self.attach_bodies(_objs['bodies'])",),
-                     'engine':("self._loadeng(_objs['engine'])",)}
+    def load_as(self,objects='engine',file_name='nbody_data'):
+        '''loads the chosen file data into the `Engine` instance. `objects` = either
+        `engine` or `bodies` and this specifies the target object(s) to load.'''  
+        _loadobjs = {'bodies':("self.attach_bodies(objs['bodies'])",),
+                     'engine':("self._loadeng(objs['engine'])",)}
         
-        with open(f'{file_name}.npz','rb') as file:
-            _objs = np.load(file,allow_pickle=True)
-            for func in _loadobjs[objects]:
-                try:
-                    # usage limited to values in dict above.
-                    eval(func)
-                except KeyError:
-                    raise LookupError(f'cannot find {objects} value in "{file}"')
-
+        objs = np.load(f'{file_name}.npz',allow_pickle=True) #noqa
+        if objects == 'engine':
+            self = objs['engine']
+        elif objects == 'bodies':
+            self.bodies = objs['bodies']
+        else:
+            raise ValueError
+        objs.close()
     
     def make_relative_to(self,target_body):
+        '''reinitialises all bodies in the instance, changing the initial conditions so that `target_body` is located
+        at (0,0,0) and the rest of the objects have the same initial conditions relative to `target_body`.'''
         for body in self.bodies:
             if body != target_body:
                 body._reinitialise((body.pos-target_body.pos), (body.vel-target_body.vel))
@@ -66,6 +135,8 @@ class Engine:
 
     
     def create_acceleration(self, accel_vector):
+        '''creates a constant field of acceleration that can affect the simulated trajectories of bodies.
+     * `accel_vector` must be an iterable or `base.VectorType` instance.'''
         _acc = _O(accel_vector)
         if len(_acc) == 3 and isinstance(_acc[0], NumType):
             # adding a vector instance to the fields list
@@ -75,6 +146,9 @@ class Engine:
             e.raise_type_error('accel_vector', (Iterable, *VectorType), accel_vector)
     
     def create_plane(self, const_axis ='z', const_val  = 0):
+        '''creates an infinite plane with 0 thickness, parallel to a chosen euclidean plane. `const_axis` specifies the
+        plane orientation, e.g, `'z'` would return a plane parallel to the x-y plane. `const_val`
+        specifies the coordinate value it should be locked to.'''
         if const_axis in ('x', 'y', 'z') and isinstance(const_val, NumType):
             self.planes.append([const_axis, const_val])
             tqdm.write(f'«Engine» → constant plane {const_axis}={const_val} has been initialized.')
@@ -141,6 +215,9 @@ class Engine:
         
     
     def simulate(self,intervals):
+        '''runs a simulation over a specified amount of `intervals` (must be `int`). does not return anything, but each
+          of the bodies will contain the new data, and the `Engine` instance can now be passed 
+          on to a `Visual` object to create an output.'''
         if isinstance(intervals, int) and len(self.bodies) > 0:
             for _ in trange(intervals, 
                             desc=f'«Engine» → Evaluating motion for each interval of {self.dt} seconds', unit='ints'):
@@ -162,11 +239,12 @@ class Engine:
                 )
     
     def barycenter(self, index):
+        '''gets the position of the center of mass of the engine'''
         mass_dist = NullVector()
         for b in self.bodies:
-            mass_dist += Vector(b.pos[index])*b.mass
+            mass_dist += Vector(b.pos[index])*b.mass # add up all mass*pos
         total_mass =sum([b.mass.c() for b in self.bodies]) 
-        return mass_dist/total_mass
+        return mass_dist/total_mass # divide by mass
     
     def __getitem__(self, ind):
         if ind == '_data_':

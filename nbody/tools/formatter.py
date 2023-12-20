@@ -1,5 +1,6 @@
 
 from pint import Quantity, UnitRegistry
+# ⤤ unit parsing
 from ..core.base import Vector, Iterable, _O
 ur = UnitRegistry()
 Q_ = ur.Quantity
@@ -159,3 +160,4 @@ class Formatter:
         else:
             return ''
 
+globals

@@ -1,15 +1,29 @@
+'''`nbody.base`
+This library forms the internals of the structures and functioning of the rest of the objects users interact with.
+
+Each `base.HistoricVector` instance is effectively comprised of 3 `base.HistoricVariable` instances, representing the
+components of the vector. The classes have solely been built for use in a 3D instance,
+but you may be able to use 2 dimensions inefficiently.
+
+Arithmetic Functions for each of the object types all produce instances of `Variable` or `Vector` as the output,
+except for magnitude.
+'''
+
 from __future__ import annotations
-# Python Builtins
+# ⤤ allows imports and references in a non chronological order.
 
-
+#### Python Builtins
 from numbers import Number
+# ⤤ for type checking
+#### 3rd Party Libs/Packages
 from mpmath import mp, fp
-   
-# Local error definitions.
+# ⤤ for high prescision arithmetic
+#### Local imports
 from ..tools import errors as e
-
-# CONFIGURE GLOBAL MATH FUNCTIONS
+# ⤤ contains standardized error codes
 from ..tools import _config as conf
+# ⤤ MathContext object
+
 math_conf = conf.MathContext(use=mp)
 
 Iterable = (list, tuple)
@@ -303,6 +317,7 @@ class Vector:
         if isinstance(temp,Iterable) and len(temp) == 3:
             return Variable(math_conf.sum([math_conf.mul(val, temp[i]) for (i, val) in enumerate(self.c())]))
         elif isinstance(temp,NumType):
+            _nt = math_conf.type
             return Vector([math_conf.mul(val,temp) for val in self.c()])
         else:
             e.raise_component_error('other or temp',temp)
