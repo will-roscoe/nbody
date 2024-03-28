@@ -224,9 +224,9 @@ The `core.Engine` instance should already have computed a simulation before inst
             self.ax.grid(False)
         self.ax.set_autoscale_on(False)
         if self.args['file'] is not None:
-            with open(f'{self.args['file']}.npz', 'wb') as file:
+            with open(f'{self.args["file"]}.npz', 'wb') as file:
                 np.save(file, MPLVisual=self)
-                tqdm.write(f'«mplVisual» → Saved instance to {self.args['save_to']}.npz')
+                tqdm.write(f'«mplVisual» → Saved instance to {self.args["save_to"]}.npz')
     def _draw_info(self, ind):
         if self.info_data is None:
             # get info from formatter live

@@ -110,7 +110,7 @@ def obj_from(object, obj='engine'):  # noqa: A002
                                 engine.simulate(int(val[1]))
                         else:
                             tqdm.write(
-        f'«obj_from()» → [!] Couldn\'t parse function "{'|'.join(val)}" so it has been skipped.',
+        f'«obj_from()» → [!] Couldn\'t parse function \"{"|".join(val)}\" so it has been skipped.',
                 )
                     return engine
                 elif obj == 'body':
