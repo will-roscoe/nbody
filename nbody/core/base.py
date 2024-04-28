@@ -13,34 +13,34 @@ from __future__ import annotations
 # ⤤ allows imports and references in a non chronological order.
 
 #### Python Builtins
-from numbers import Number
+from numbers import Number #!1 v3.0 Number-Type Culling
 # ⤤ for type checking
 #### 3rd Party Libs/Packages
-from mpmath import mp, fp
+from mpmath import mp, fp #!1 v3.0 Number-Type Culling
 # ⤤ for high prescision arithmetic
 #### Local imports
 from ..tools import errors as e
 # ⤤ contains standardized error codes
-from ..tools import _config as conf
+from ..tools import _config as conf #!1 v3.0 Number-Type Culling
 # ⤤ MathContext object
 
-math_conf = conf.MathContext(use=mp)
+math_conf = conf.MathContext(use=mp) #!1 v3.0 Number-Type Culling
 
 Iterable = (list, tuple)
 Any = object
 NoneType = type(None)
-NumType = (Number, int, float ,type(mp.mpf(1)),type(fp.mpf(1)))
-mp.pretty, fp.pretty = True, True
+NumType = (Number, int, float ,type(mp.mpf(1)),type(fp.mpf(1))) #!1 v3.0 Number-Type Culling
+mp.pretty, fp.pretty = True, True #!1 v3.0 Number-Type Culling
 
 
     
-def _O(obj):  # noqa: N802
+def _O(obj):  # noqa: N802 #! v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     if isinstance(obj,(Vector, Variable, HistoricVariable, HistoricVector)):
         return obj.c()
     else:
         return obj
     
-def _V(obj):  # noqa: N802
+def _V(obj):  # noqa: N802 #! v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     if isinstance(obj, Iterable):
         if len(obj) == 3:
             return Vector(li=obj)
@@ -50,7 +50,7 @@ def _V(obj):  # noqa: N802
     else:
         return obj
 
-def _ntype(*objs):
+def _ntype(*objs): #! v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     types = [type(_O(obj)) for obj in objs]
     for i,obj in enumerate(objs):
         if not isinstance(obj, NumType):
@@ -61,7 +61,7 @@ def _ntype(*objs):
         return math_conf.type
 
     
-def typecheck(argtype):
+def typecheck(argtype): #! v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     if isinstance(argtype[0], Iterable):
         for arg in argtype:
             if not isinstance(arg[0],arg[1]):
@@ -79,14 +79,14 @@ def typecheck(argtype):
 class Variable:
     def __init__(self,init_var,identity='Variable',units=None):
         (self.record,self.identity,self.units) = typecheck(((_ntype(init_var)(init_var),NumType),
-                                                            (identity,str),(units,(str,NoneType))))
+                                                            (identity,str),(units,(str,NoneType)))) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         self.units = (units if units else '')
 
     def c(self):
         return self.record
     
     def next(self, val):  # noqa: A003
-        self.record = _O(val)
+        self.record = _O(val) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
 
     def __len__(self):
         return 1
@@ -112,60 +112,60 @@ class Variable:
             return f'VarObj({self.c()} {self.units}, len={len(self)}, rec={self.record}, id={self.identity})'
     
     def __add__(self,other):
-        return Variable(math_conf.add(self.c(),_O(other)))
-    
+        return Variable(math_conf.add(self.c(),_O(other))) #!1 v3.0 Number-Type Culling 
+                                                            #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     __radd__ = __add__
 
     def __sub__(self,other):
-        return Variable(math_conf.chop(math_conf.sub(self.c(),_O(other))))
-    
+        return Variable(math_conf.chop(math_conf.sub(self.c(),_O(other)))) #!1 v3.0 Number-Type Culling
+                                                                            #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     def __mul__(self,other):
-        return Variable(math_conf.mul(self.c(),_O(other)))
-    
+        return Variable(math_conf.mul(self.c(),_O(other))) #!1 v3.0 Number-Type Culling
+                                                                    #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     __rmul__ = __mul__
 
     def __truediv__(self,other):
-        return Variable(math_conf.div(self.c(),_O(other)))
-    
+        return Variable(math_conf.div(self.c(),_O(other))) #!1 v3.0 Number-Type Culling
+                                                            #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     def __iadd__(self,other):
-        self.next(math_conf.add(self.c(),_O(other)))
-        return self
+        self.next(math_conf.add(self.c(),_O(other))) #!1 v3.0 Number-Type Culling
+        return self                                 #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __isub__(self,other):
-        self.next(math_conf.chop(math_conf.sub(self.c(),_O(other))))
-        return self
+        self.next(math_conf.chop(math_conf.sub(self.c(),_O(other)))) #!1 v3.0 Number-Type Culling
+        return self                                     #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __imul__(self,other):
-        self.next(math_conf.mul(self.c(),_O(other)))
-        return self
+        self.next(math_conf.mul(self.c(),_O(other))) #!1 v3.0 Number-Type Culling
+        return self                                 #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __itruediv__(self,other):
-        self.next(math_conf.div(self.c(),_O(other)))
-        return self
+        self.next(math_conf.div(self.c(),_O(other))) #!1 v3.0 Number-Type Culling
+        return self                                     #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __rsub__(self,other):
-        return Variable(math_conf.chop(mp.fsub(_O(other), self.c())))
-    
+        return Variable(math_conf.chop(mp.fsub(_O(other), self.c()))) #!1 v3.0 Number-Type Culling
+                                                #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __rtruediv__(self,other):
-        return Variable(math_conf.div(_O(other), self.c()))
-
+        return Variable(math_conf.div(_O(other), self.c())) #!1 v3.0 Number-Type Culling
+                                                            #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     def __pow__(self, other):
-        return Variable(math_conf.pow(self.c(),_O(other)))
-    
+        return Variable(math_conf.pow(self.c(),_O(other))) #!1 v3.0 Number-Type Culling
+                                                #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     def __rpow__(self, other):
-        return Variable(math_conf.pow(_O(other), self.c()))
-    
+        return Variable(math_conf.pow(_O(other), self.c())) #!1 v3.0 Number-Type Culling
+                                                            #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     def __eq__(self, other):
-        temp = _O(other)
-        nt =_ntype(self.c(), temp)
-        return str(nt(self.c())) == str(nt(temp)) or nt(self.c()) == nt(temp)
-    
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
+        nt =_ntype(self.c(), temp) #!1 v3.0 Number-Type Culling
+        return str(nt(self.c())) == str(nt(temp)) or nt(self.c()) == nt(temp) #!1 v3.0 Number-Type Culling
+
     def __lt__(self, other):
-        temp = _O(other)
-        nt =_ntype(self.c(), temp)
-        return nt(self.c()) < nt(temp)
-    
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
+        nt =_ntype(self.c(), temp) #!1 v3.0 Number-Type Culling
+        return nt(self.c()) < nt(temp) #!1 v3.0 Number-Type Culling 
+                                        #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __le__(self, other):
         return (self.__eq__(other) or self.__lt__(other))
@@ -176,10 +176,10 @@ class Variable:
     
     
     def __gt__(self, other):
-        temp = _O(other)
-        nt =_ntype(self.c(), temp)
-        return nt(self.c()) > nt(temp)
-    
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
+        nt =_ntype(self.c(), temp) #!1 v3.0 Number-Type Culling
+        return nt(self.c()) > nt(temp) #!1 v3.0 Number-Type Culling
+                        #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def __ge__(self, other):
         return (self.__eq__(other) or self.__gt__(other))
@@ -187,16 +187,16 @@ class Variable:
 class HistoricVariable(Variable):
     def __init__(self,init_var,identity='HistoricVariable',units=''):
         if isinstance(init_var,NumType):
-            self.record = [_ntype(init_var)(init_var)]
-        
+            self.record = [_ntype(init_var)(init_var)] #!1 v3.0 Number-Type Culling
+                                #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         elif isinstance(init_var,Iterable):
-            self.record = [_ntype(*init_var)(val) for val in init_var]
-        
+            self.record = [_ntype(*init_var)(val) for val in init_var] #!1 v3.0 Number-Type Culling
+                                    #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         else: 
             e.raise_type_error('init_var',(*NumType,Iterable),init_var)
         
-        self.type = type(self.record[0])
-        (self.identity,self.units) = typecheck(((units,str),(identity,str)))
+        self.type = type(self.record[0]) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
+        (self.identity,self.units) = typecheck(((units,str),(identity,str))) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
 
     
     def c(self):
@@ -204,19 +204,19 @@ class HistoricVariable(Variable):
 
     
     def next(self,next_val):  # noqa: A003
-        temp = _O(next_val)
+        temp = _O(next_val) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         if isinstance(temp,NumType):
             self.record.append(self.type(temp))
         
         elif isinstance(temp,Iterable):
             for val in temp:
-                val = _O(val)
+                val = _O(val) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
                 if isinstance(val,NumType):
-                    self.record.append(self.type(val))
+                    self.record.append(self.type(val)) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
                 else: 
-                    e.raise_list_type_error('next_val, temp',self.type,val)
+                    e.raise_list_type_error('next_val, temp',self.type,val) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         else: 
-            e.raise_type_error('next_val, temp',(self.type,Iterable),next_val)
+            e.raise_type_error('next_val, temp',(self.type,Iterable),next_val) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
 
     
     def __len__(self):
@@ -254,11 +254,11 @@ class HistoricVariable(Variable):
 class Vector:
     
     def __init__(self,li=None,x=None,y=None,z=None):
-        if li:
-            (self.X,self.Y,self.Z) = [_ntype(*_O(li))(comp) for comp in _O(li)]
+        if li:                                #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
+            (self.X,self.Y,self.Z) = [_ntype(*_O(li))(comp) for comp in _O(li)] #!1 v3.0 Number-Type Culling
         elif all(isinstance(var, NumType) for var in (x,y,z)):
-            [self.X,self.Y,self.Z] = [_ntype(x,y,z)(comp) for comp in (x,y,z)]
-        else:
+            [self.X,self.Y,self.Z] = [_ntype(x,y,z)(comp) for comp in (x,y,z)] #!1 v3.0 Number-Type Culling
+        else:                                                               #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
             e.raise_list_type_error('l,x,y,z',(Iterable,*NumType,*VectorType),(li,x,y,z))
     
     def c(self,usage=None):
@@ -268,13 +268,13 @@ class Vector:
             e.raise_out_of_range('c()',usage)
 
     def magnitude(self):
-        return math_conf.norm(math_conf.matrix(self.c()))
+        return math_conf.norm(math_conf.matrix(self.c())) #!1 v3.0 Number-Type Culling
     
     def unit(self):
-        if float(self.magnitude()) == 0.:
+        if float(self.magnitude()) == 0.: #!1 v3.0 Number-Type Culling
             return NullVector()
         else:
-            return Vector(self/self.magnitude())
+            return Vector(self / self.magnitude())
     
     def __getitem__(self,ind):
         if isinstance(ind, str):
@@ -297,28 +297,28 @@ class Vector:
     def __iter__(self):
         return iter((self.X,self.Y,self.Z))
     def __add__(self,other):
-        temp = _O(other)
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         if len(temp) == 3:
-            return Vector([math_conf.add(self.c(i),temp[i]) for i in range(3)])
+            return Vector([math_conf.add(self.c(i),temp[i]) for i in range(3)]) #!1 v3.0 Number-Type Culling
         else:
             e.raise_component_error('other or temp',temp)
     
     __radd__ = __add__
     
     def __sub__(self,other):
-        temp = _O(other)
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         if len(temp) == 3:
-            return Vector([math_conf.sub(self.c(i),temp[i]) for i in range(3)])
+            return Vector([math_conf.sub(self.c(i),temp[i]) for i in range(3)]) #!1 v3.0 Number-Type Culling
         else:
             e.raise_component_error('other or temp',temp)
     
     def __mul__(self,other):
-        temp = _O(other)
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         if isinstance(temp,Iterable) and len(temp) == 3:
-            return Variable(math_conf.sum([math_conf.mul(val, temp[i]) for (i, val) in enumerate(self.c())]))
+            return Variable(math_conf.sum([math_conf.mul(val, temp[i]) for (i, val) in enumerate(self.c())])) #!1 v3.0 Number-Type Culling
         elif isinstance(temp,NumType):
-            _nt = math_conf.type
-            return Vector([math_conf.mul(val,temp) for val in self.c()])
+            _nt = math_conf.type #!1 v3.0 Number-Type Culling
+            return Vector([math_conf.mul(val,temp) for val in self.c()]) #!1 v3.0 Number-Type Culling
         else:
             e.raise_component_error('other or temp',temp)
     
@@ -327,15 +327,15 @@ class Vector:
     def __truediv__(self,other):
         temp = _O(other)
         if isinstance(temp,NumType):
-            return Vector([math_conf.div(val,temp) for val in self.c()])
+            return Vector([math_conf.div(val,temp) for val in self.c()]) #!1 v3.0 Number-Type Culling
         else:
             e.raise_type_error('other',NumType,other)
 
     
     def __rsub__(self,other):
-        temp = _O(other)
+        temp = _O(other) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         if len(temp) == 3:
-            return Vector([math_conf.sub(temp[i], self.c(i)) for i in range(3)])
+            return Vector([math_conf.sub(temp[i], self.c(i)) for i in range(3)]) #!1 v3.0 Number-Type Culling
         else:
             e.raise_component_error('other or temp',temp)
 
@@ -344,8 +344,8 @@ class Vector:
             return False
         else:
             temp = _O(other)
-            nt = _ntype(*self.c(), *temp)
-            [ex, ey, ez] =[str(nt(self.c(n))) == str(nt(temp[n])) or nt(self.c(n)) == nt(temp[n]) for n in range(3)]
+            nt = _ntype(*self.c(), *temp) #!1 v3.0 Number-Type Culling
+            [ex, ey, ez] =[str(nt(self.c(n))) == str(nt(temp[n])) or nt(self.c(n)) == nt(temp[n]) for n in range(3)] #!1 v3.0 Number-Type Culling
             return ex and ey and ez
     
 
@@ -353,17 +353,17 @@ class Vector:
 class HistoricVector(Vector):
     
     def __init__(self,x=None,y=None,z=None,li=None,identity=None,units_v=None):
-        (self.identity,self.units) = typecheck(((identity,(NoneType,str)),(units_v,(NoneType,str))))
+        (self.identity,self.units) = typecheck(((identity,(NoneType,str)),(units_v,(NoneType,str)))) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         self.units = (self.units if self.units is not None else '')
         self.identity =(self.identity if self.identity is not None else 'HistoricVector')
-        li = ((x,y,z) if (isinstance(x,NumType) and isinstance(y,NumType) and isinstance(z,NumType)) else _O(li))
-        nt = _ntype(*li)
-        if isinstance(li,(tuple,list)) and len(li) == 3:
+        li = ((x,y,z) if (isinstance(x,NumType) and isinstance(y,NumType) and isinstance(z,NumType)) else _O(li)) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
+        nt = _ntype(*li) #!1 v3.0 Number-Type Culling
+        if isinstance(li,(tuple,list)) and len(li) == 3: #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour ^^^^^^^
             (self.X,self.Y,self.Z) = list(HistoricVariable(vl,f'{self.identity}_{i}',self.units) for (vl,i) in 
-                                          ((nt(li[0]),'x'),(nt(li[1]),'y'),(nt(li[2]),'z')))  
-        else:
+                                          ((nt(li[0]),'x'),(nt(li[1]),'y'),(nt(li[2]),'z')))  #!1 v3.0 Number-Type Culling
+        else:                                                               #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
             e.raise_type_error('l,x,y,z',(Iterable,*NumType),(li,x,y,z))
-        self.type = nt
+        self.type = nt #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
     
     def x(self):
         return self.X.c()
@@ -381,7 +381,7 @@ class HistoricVector(Vector):
             e.raise_out_of_range('c()',usage)
     
     def next(self,next_vals):  # noqa: A003
-        temp = _O(next_vals)
+        temp = _O(next_vals) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour
         if isinstance(temp,Iterable):
     
             if len(temp) == 3:
@@ -433,4 +433,4 @@ class NullVector(Vector):
         super().__init__(li=(0,0,0),x=None,y=None,z=None)
 
 VectorType = (type(Vector((0,0,0))),type(HistoricVector(0,0,0)), type(NullVector()))
-VarType = (type(Variable(0)),type(HistoricVariable(0)))
+VarType = (type(Variable(0)),type(HistoricVariable(0))) #!2 v3.0 Possible Arbitrary _0/_V/typecheck behaviour

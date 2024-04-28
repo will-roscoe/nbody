@@ -1,3 +1,5 @@
+ #!1 v3.0 Number-Type Culling
+ #!1 need to slimline this code, likely remove this file and move updates to main file.
 from mpmath import fp, mp
 from math import sqrt
 def fltmat(obj):
