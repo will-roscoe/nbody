@@ -149,9 +149,76 @@ class BHTree:
             self.root.insert(particle) # insert particles into root node 
         self.root.split() # begin recursive splitting of nodes
 
+    def node_of_particle(self, particle:Particle) -> Node:
+        '''find the node containing a particle recursively'''
+        found_part = False 
+        trials = [self.root]
+        while not found_part:
+            trial = trials.pop(0)
+            if trial.contains(particle):
+                if trial.is_end:
+                    found_part = True
+                    return trial
+                else:
+                    trials.extend(trial.children)
+            elif not trials:
+                raise ValueError(f"particle not found in any node: {particle}")
 
+
+    def force_ab(self, target:Node, trial:Node) -> np.ndarray:
+        '''calculate force on target node due to trial node using Newton's law of gravitation'''
+        return G*target.mass*trial.mass/(target.dist(trial)**3)*(target.cmass-trial.cmass)
+    
+    #?####################################################################################
+    #?                               Barnes-Hut algorithm part                          ##
+    #?####################################################################################
+    def choose_nodes(self, target: Node, trial: Node) -> int:
+        """chooses whether to:
+        [0]:add children to trials or
+        [1]:calculate force AB or
+        [2]:do nothing"""
+        if target == trial: # if target is trial, then throw away
+            return 2
+        if trial.is_end: # if it is leaf node, calculate force
+            return 1
+        elif not trial.is_end:
+            if  trial.size/trial.dist(target) < self.theta: # if condition is met for branch node, calculate force
+                return 1 
+            else: # otherwise add children to trials
+                return 0
+        else: # throw away if none of the above conditions are met
+            return 2
+     
+
+    def force_on(self, target_particle:Particle) ->np.ndarray:
+        target = self.node_of_particle(target_particle)
+            # picking relevant nodes by recursively checking conditions of self.choose_nodes on each node
+        trials = [self.root]
+        candidates = []
+        while trials:
+            trial = trials.pop(0)
+            action = self.choose_nodes(target, trial)
+            if action == 0:
+                trials.extend(trial.children)
+            elif action == 1:
+                candidates.append(trial)
+            elif action != 2:
+                raise ValueError(f"invalid action: {action}")
         
         
+        ''' may not be worth it to parallelize this part, had problems with is returning as nonetype parralelized again.
+            might work with an approach using a pipe between processes but might not be worth it here
+            https://shorturl.at/9bGZt Pipes Docs
+
+        if __name__ == '__main__':
+            pool = mproc.Pool(4)
+            results = pool.starmap(self.force_ab, [(target, trial) for trial in candidates])
+            pool.close()
+            pool.join()
+            return np.sum(results, axis=0)
+        '''
+        return np.sum([self.force_ab(target, trial) for trial in candidates], axis=0) #quick and dirty non-parallelized version
+    
 
     #?####################################################################################    
 
