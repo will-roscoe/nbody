@@ -112,6 +112,8 @@ children({len(self.children)}): {[child for child in self.children]}
 particles({len(self.particles)}): {[particle for particle in self.particles]}""")
 
 
+    def __str__(self) -> str: # human readable representation of the node
+        return (f"""d{self.depth}Node: pos={self.pos} size={self.size} mass={self.mass} [{len(self.children)}ch,{len(self.particles)}p]""")
     
 
     def treeview(self) -> str: # recursive representation of the tree
