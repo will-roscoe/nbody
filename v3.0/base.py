@@ -4,14 +4,18 @@
 # record vectors need to have variable length, but numpy won't allow this with np.array .
 # we could use a list of numpy arrays but it may be slow to access elements.
 # we need to be able to acess elements quickly within a numpy system with variable length, so 
+G = 6.67430e-11  # gravitational constant
+k = 8.9875517923e9  # Coulomb's constant  # permeability of free space
 
-import re
+
 from typing import List, Union
+from matplotlib.pylab import f
 import numpy as np
 import random
 
 from vispy import scene
 from vispy.scene import visuals
+import multiprocessing as mproc
 ##########################################################################################
 #                                       Particle class                                   #
 ##########################################################################################
