@@ -34,33 +34,7 @@ class Particle:
     def __repr__(self) -> str:
         return f"\nParticle(p={self.pos},v={self.vel},m={self.mass},r={self.radius},c={self.charge})"
 
-class Engine:
-    G = 6.67430e-11  # gravitational constant
-    k = 8.9875517923e9  # Coulomb's constant
-    mu0 = 4*np.pi*1e-7  # permeability of free space
 
-    def __init__(self, particles: List[Particle], dt: float = 1e-3):
-        self.particles = particles
-        self.dt = dt
-    def update(self):
-        for p in self.particles:
-            p.pos += p.vel * self.dt
-            p.vel += self.force(p, self.dt) * self.dt / p.mass
-
-    def resultantforce_nbody(self, p: Particle) -> np.ndarray: # slow method to calcluate resultant force on a particle
-        force = np.zeros(3)
-        for other in self.particles:
-            if other is not p:
-                r = other.pos - p.pos
-                r_mag = np.linalg.norm(r)
-                # gravitational force
-                force += self.G * p.mass * other.mass / r_mag**3 * r
-                # electric force
-                force += self.k * p.charge * other.charge / r_mag**3 * r
-                # magnetic force due to moving charges
-                dB = self.mu0/(4*np.pi) * (other.charge * other.vel * self.dt * np.cross(r, other.vel)) / r_mag**3
-                force += p.charge * np.cross(p.vel, dB)
-        return force
 
 ##########################################################################################
 #                                       Node class                                       #
@@ -179,8 +153,34 @@ class BHTree:
 #                                      Engine class                                      #
 ########################################################################################## 
 
+class Engine:
+    def __init__(self, particles: List[Particle], dt: float = 1e-3):
+        self.particles = particles
+        self.dt = dt
+        self.tree = BHTree(particles)
+    
 
+    def updater_worker(self, particles:mproc.Queue) -> None:
+        while not particles.empty(): 
+            particle = particles.get(timeout=1)
+            particle.pos += particle.vel * self.dt
+            particle.vel += self.tree.force_on(particle) * self.dt / particle.mass
+        particles.close()
+    
 
+    def update(self) -> None:
+        if __name__ == '__main__':   
+            awaiting_update = mproc.Queue()
+            for particle in self.particles:
+                awaiting_update.put(particle)
+            for _ in range(mproc.cpu_count()):
+                proc = mproc.Process(target=self.updater_worker, args=(awaiting_update,))
+                proc.start()
+            for proc in mproc.active_children():
+                proc.join()
+
+        self.tree = BHTree(self.particles)
+    
 
 ##########################################################################################
 #                                           Main                                         #
