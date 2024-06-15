@@ -261,6 +261,7 @@ class Engine:
 
 
 # create some particles
+random.seed(0)
 particles = [
     Particle(
         pos=[random.uniform(-100, 100) for _ in range(3)],  # random position
@@ -273,9 +274,12 @@ particles = [
     for _ in range(10000)
 ]
 
-tree = BHTree(particles)
-tree.root.treeview()
-
+if __name__ == '__main__':
+    particles = particles[:1000]
+    print('particles created')
+    engine = Engine(particles)
+    print('built')
+    engine.update()
 
 
 
