@@ -1,15 +1,22 @@
 from __future__ import annotations
-# numpy based vector objects, fixed dtype float64
+import cProfile
+from calendar import c
+import math
 
-# record vectors need to have variable length, but numpy won't allow this with np.array .
-# we could use a list of numpy arrays but it may be slow to access elements.
-# we need to be able to acess elements quickly within a numpy system with variable length, so 
+import itertools
+
+
+# Same as add_hook(always=True)
+import colored_traceback.always
+
+
+
+
+
 G = 6.67430e-11  # gravitational constant
-k = 8.9875517923e9  # Coulomb's constant  # permeability of free space
-
 
 import sys
-from typing import List, Union
+from typing import Iterable, List, Union, Any
 import numpy as np
 import random
 
@@ -17,21 +24,43 @@ from vispy import scene
 from vispy.scene import visuals
 from vispy.color import Color
 
-import tqdm as tq
 
 import multiprocessing as mproc
-mproc.set_start_method('spawn', force=True)
+
+from queue import Queue
 
 from pympler.asizeof import asizeof
 
 from time import perf_counter as perftime
-
+from time import time
+import gc
+import concurrent.futures 
 update_time = perftime()
 def ptime(start=update_time): return round(perftime()-start, 5)
 
+DEBUG_PRINTING = True
+LOG_MSG = True
+DISPLAY_TIME = True
+logging_cache = []
+log_dir = 'logs'
+log_file = f'{log_dir}/log{int(time())}.txt'
+open(log_file, 'w').close()
 
+def msg(message: 'str', obj: Any = None) -> None: 
+    time = (f'{round(ptime(),4)}s:'if DISPLAY_TIME else '')
+    fmtmsg = f'{str(time) : >8}{" "+str(id(obj)): <20}{str(message): <100}'
+    if DEBUG_PRINTING: print(fmtmsg)
+    if LOG_MSG:
+        with open(log_file, 'a') as f:
+            f.write(fmtmsg+'\n')
 
-
+def err(errtype=ValueError, message: str = 'An Error Has occurred', reporter: Any = None, target: Any = None) -> None:
+    if reporter is None:
+        reporter = 'Not Specified'
+    if target is None:
+        target = 'Not Specified'
+    msg(f'{str(errtype)}: {message}, Rep:{repr(reporter)}, Tar:{repr(target)}', reporter)
+    raise errtype(f'{message}\nRaised by: {repr(reporter)}\nTargeting: {repr(target)}')
 ##########################################################################################
 #                                       Particle class                                   #
 ##########################################################################################
@@ -55,23 +84,32 @@ class Particle:
         self._pos = np.array(pos, dtype=float) # next position, where the mproc worker will put it.
         self._vel = np.array(vel, dtype=float)
         self.has_updates = False # flag for whether the particles _pos, _vel has been updated by the worker yet. assuming faster than checking if _pos == pos
-    
-    def update_changes(self):
+    def check_pos_vel_changes(self) -> None:
+        '''checks if there are changes to the position and velocity of the particle'''
+        return f'P=_P:{np.all(self._pos == self.pos)}, V=_V:{np.all(self._vel == self.vel)}'
+        
+    def update_changes(self,keeprefs=False) -> None:
+        '''changes pending values to current values, and resets the flag'''
         if self.has_updates:
             self.pos = self._pos
             self.vel = self._vel
+            if not keeprefs:
+                self.node.particles = []
+                self.node = None
             self.has_updates = False
         else:
-            raise ValueError(f"particle {self.p_id} has no updates to apply, but update_changes was called.")
+            err(ValueError, f"No updates to apply, but update_changes was called.", self, self)
+    
     def __repr__(self) -> str:
-        return f"Particle(p={self.pos},v={self.vel},m={self.mass},r={self.radius},c={self.charge})\n"
-    def dist(self, other) -> np.ndarray: 
+        return f"Particle[{self.p_id}](position={self.pos}, velocity={self.vel},mass={self.mass}), has_updates={self.has_updates}, {self.check_pos_vel_changes()}"
+    
+    def dist_p2p(self, other: Particle) -> np.ndarray: 
         """calculate distance between center of masses of two nodes"""
         return np.linalg.norm(self.pos - other.pos)
-    def force_ab(self, trial) -> np.ndarray:
+    
+    def force_ab(self, trial: Union[Particle, Node]) -> np.ndarray:
         '''calculate force on target node due to trial node using Newton's law of gravitation'''
         return G*self.mass*trial.mass/(self.dist(trial)**3)*(self.pos-trial.pos)
-
 
 
 
@@ -82,100 +120,133 @@ class Particle:
 
 
 class Node:
-    def __init__(self, pos: np.ndarray, size: float, mass: float=0., depth=0, parent_tree: BHTree = None) -> None:
-        self.pos = pos # center of node
-        self.size = size # each node is cubic so only need one size value
-        self.mass = mass # total mass of node, including children
-        self.children = []  # child nodes
+    def __init__(self, region:np.ndarray[np.ndarray] , mass: float=0., depth=0, parent_tree: BHTree = None) -> None:
         self.particles = []  # particles directly in this node
         self.is_end = False # is this a leaf node
         self.depth = depth # depth of node in tree
-        self.cmass = pos # center of mass of node (start at center of node for now)
         self.parent_tree = parent_tree
-        #debug print(f"d{depth} Node: pos={self.pos}, size={self.size}, mass={self.mass}")
+        self.children = []
+        
+        self.region = region # minimum and maximum coordinates of node, defining its volume.
+        self.pos =  np.mean(self.region, axis=0) # center of node
+        self.lengths = self.region[1]-self.region[0] # each node is cubic so only need one size value
+        self.cmass = self.pos # center of mass of node (start at center of node for now)
+        self.mass = mass # total mass of node, including children
+        msg(f"{self.desc()}: created with depth {depth}: {str(self)}")
     
     
     def insert(self, particle: Particle) -> None:
         '''insert particle into node and update mass of node'''
+        
+        msg(f'{self.desc()}: inserting particle {particle.p_id} into this node',self)
         self.particles.append(particle) 
         self.mass += particle.mass
-        #debug print(f"inserted particle with mass {particle.mass} into node with mass {self.mass}")
+        msg(f'{self.desc()}: particle {particle.p_id} inserted into node',self)
 
     
     def split(self) -> None:
         '''split node into 8 octants and redistribute particles to children nodes'''
-        if not self.is_end: # if it is already a leaf node, don't split
+        msg(f'{self.desc()}: node split start',self)
+        self.fast_cmass()
+        
+        if not self.is_end:
+            child_lengths = self.lengths/2 # if it is already a leaf node, don't split
+            msg(f'{self.desc()}: splitting node...',self)
             #debug print(f"splitting a d{self.depth} Node: pos={self.pos}, size={self.size}, mass={self.mass}")
             #split into 8 octants
-            for i in [1,-1]:  # bisecting in each dimension
-                for j in [1,-1]:
-                    for k in [1,-1]:
-                        pos = self.pos + np.array([i, j, k]) * self.size / 2 # calculate child node position
-                        self.children.append(Node(pos, self.size/2, depth=self.depth+1, parent_tree=self.parent_tree))  # add as child node
-            
+            child_lengths = self.lengths / 2
+            half_child_lengths = child_lengths / 2
+            child_positions = self.pos + half_child_lengths * np.array(list(itertools.product([-1, 1], repeat=3)))
+            children_regions = np.array([child_positions + offset * child_lengths for offset in itertools.product([0, 1], repeat=3)])
+            # Create child nodes
+            for region in children_regions:
+                self.children.append(Node(region=region, depth=self.depth + 1, parent_tree=self.parent_tree))
+           
+            msg(f'{self.desc()}: all children created, beginning redistribution...',self)
             for particle in self.particles: # redistribute particles to children nodes
+                
+                msg(f'{self.desc()}: searching for node to insert particle {particle.p_id} at {np.round(particle.pos,4)}',self)
                 for child in self.children:  
-                    if child.contains(particle): # if particle is within child node, insert
-                        child.insert(particle)
-                        break
-                else:
-                    raise ValueError(f"particle not in any child node: \n{particle}")
+                    msg(f'{self.desc()}: testing child node {str(child)}',self)
                     
+                    if child.contains(particle): # if particle is within child node, insert
+                        msg(f'{self.desc()}: child node found. inserting particle {particle.p_id} into child node {str(child)}',self)
+                        child.insert(particle)
+                        msg(f'{self.desc()}: inserted particle {particle.p_id} into node',self)
+                        break        
+                else:
+                    err(ValueError, f'{particle.p_id} is not within any child node.', self, particle)
+                
+            msg(f'{self.desc()}: particles redistributed, clearing lists',self)        
             self.children = [child for child in self.children if child.mass > 0] # get rid of empty nodes
             self.particles = []  # clear particles list after redistribution, since they are now in children
+            msg(f'{self.desc()}: lists cleared, starting child splits',self)
+            
             for child in self.children:
+                msg(f'{self.desc()}: querying child node {child.desc()} or further splitting: ',self)
+                 # update center of mass of this node
                 if len(child.particles) > 1: # if child has more than one particle, split again
+                    msg(f'{self.desc()}: child node {child.desc()} has more than one particle, asking it to split',self)    
                     child.split()
+                    msg(f'{self.desc()}: child node {str(child)} finished splitting',self)
                 else:
+                    msg(f'{self.desc()}: node {str(child)} is a leaf, updating its attributes',self)
                     child.is_end = True # if child has only one particle, it is a leaf node
                     child.particles[0].node = child
+                    child.cmass = child.particles[0].pos
+                    msg(f'{self.desc()}: node {str(child)} is updated',self)
+                msg(f'{self.desc()}: adding child node {str(child)} to tree\'s list',self)
                 self.parent_tree.nodes.append(child)
-            self.fast_cmass() # update center of mass of this node
+
+            
+            msg(f'{self.desc()}: node split end',self)
         
 
     def contains(self, particle: Particle) -> bool:
         """check if particle is within node's volume"""
-        return np.all(np.abs(particle.pos - self.pos) <= self.size)  # check if particle is within node's volume by comparing each dimension 
+        msg(f'{self.desc()}: checking if particle {particle.p_id} is within node',self)
+        return np.all(np.logical_and(self.region[0] <= particle.pos, particle.pos <= self.region[1]))
+    # check if particle is within node's volume by comparing each dimension 
     
     
     def fast_cmass(self) -> np.ndarray:
         """calculate center of mass of node using fast method"""
-        self.cmass = np.sum([p.mass*p.pos for p in [*self.particles,*self.children]], axis=0) / self.mass # sum of mass*position / total mass. faster because we remove most children before using it.
+        #debug msg(f'{self.desc()}: calculating center of mass of node',self)
+        self.cmass = np.sum([*[p.mass*p.pos for p in self.particles],*[p.cmass*p.mass for p in self.children]], axis=0) / self.mass # sum of mass*position / total mass. faster because we remove most children before using it.
         return self.cmass
     
     
     def __repr__(self) -> str: # a debug representation of the node containing its children's and particles' info recursively
-        return (f"""
-d{self.depth}Node: pos={self.pos} size={self.size} mass={self.mass} 
-children({len(self.children)}): {[child for child in self.children]}
-particles({len(self.particles)}): {[particle for particle in self.particles]}""")
+        return (f"""d{self.depth}Node: region={self.region}, lengths={self.lengths}, mass={self.mass}, 
+children({len(self.children)}): \n {[child for child in self.children]}
+particles({len(self.particles)}): \n {[particle for particle in self.particles]}""")
 
 
     def __str__(self) -> str: # human readable representation of the node
-        return (f"""d{self.depth}Node: pos={self.pos} size={self.size} mass={self.mass} [{len(self.children)}ch,{len(self.particles)}p]""")
+        return (f"""d{self.depth}Node: region={np.round(self.region, 3)} lengths={np.round(self.lengths,3)} mass={round(self.mass,4)} [{len(self.children)}ch,{len(self.particles)}p], Leaf={self.is_end}""")
     
-
+    def desc(self):
+        return f'd{self.depth}NODE[{len(self.particles)}p,{len(self.children)}ch]'
+    
     def treeview(self) -> str: # recursive representation of the tree
         """print tree structure of node and children recursively"""
         bars = "   ⎸"*self.depth
-        info = f"⟶  d{self.depth} Node[{len(self.children)}ch,{len(self.particles)}p], cmass {self.cmass}, Mass:{self.mass}"
+        info = f"⟶  d{self.depth} Node[{len(self.children)}ch,{len(self.particles)}p], Region:{np.round(self.region,3)}, Mass:{round(self.mass,4)}"
         if not self.is_end:
             info = "\u001b[37m\u001b[1m" + info + "\u001b[37m\u001b[0m"
         print(bars + info)
         for c in self.children:
             c.treeview()
-
     
-    def dist(self, other) -> np.ndarray: 
+    
+    def dist(self, other: Node) -> np.ndarray: 
         """calculate distance between center of masses of two nodes"""
-        return np.linalg.norm(self.cmass - other.cmass)
+        #debug msg(f'{self.desc()}: calculating distance between this node and {str(other)}',self)   
+        return np.linalg.vector_norm(self.cmass - other.cmass)
     
-    def force_ab(self, trial) -> np.ndarray:
+    def force_ab(self, trial: Node) -> np.ndarray:
         '''calculate force on target node due to trial node using Newton's law of gravitation'''
         return G*self.mass*trial.mass/(self.dist(trial)**3)*(self.cmass-trial.cmass)
-
-
-
 
 
 ##########################################################################################
@@ -183,23 +254,49 @@ particles({len(self.particles)}): {[particle for particle in self.particles]}"""
 ##########################################################################################
 
 class BHTree:
-    def __init__(self, particles, theta:float=0.5, origin:np.ndarray=np.zeros(3), size:float=100.) -> None:
-        self.theta = theta
-        #debug [np.mean(comp) for comp in zip(*[p.pos for p in particles])]
-        #debug initpos = np.array([np.mean(comp) for comp in zip(*[p.pos for p in particles])])
-        self.root = Node(
-            pos= origin, size = size,    #commented out bits are for a case where we might not know the size of the system initially
-            #debug pos = initpos,
-            #debug size = np.max([np.max([np.abs(particle.pos - initpos)]) for particle in particles])
-            parent_tree=self)
+    def __init__(self, particles=None) -> None:
+        msg('BHT: init start',self)
+        self.nodes = self.update(particles)
+        msg('BHT: init',self)
+        self.root = self.nodes[0]
+
+
+    def begin_cull(self) -> None:
+        '''clears all particles from nodes and sets mass to 0'''
+        msg('BHT: culling nodes start',self)
+        msg(f'BHT: currently referenced by:{[id(n) for n in gc.get_referrers(*self.nodes)]}')
+        while self.nodes:
+            node = self.nodes.pop(0)
+            node.mass = 0
+            node.particles = []
+            node.children = []
+            del node
+        msg(f'BHT: currently referenced by:{[id(n) for n in gc.get_referrers(*self.nodes)]}')
+        msg('BHT: culled',self)
+        
+        
+    def get_new_root(self, particles) -> Node:
+        #pos_ = np.array([np.mean(comp) for comp in zip(*[p.pos for p in particles])])
+        positions = np.array([p.pos for p in particles])
+        new_region = np.array((np.min(positions, axis=0),np.max(positions, axis=0)))
+        new_root = Node(region=new_region, parent_tree=self) 
+        msg(f'BHT: root node created: {str(new_root)}, sending to update',self)
+        return new_root, new_region
+    
+    def update(self, particles) -> None:
+        msg('BHT: tree update start',self)
+        self.root, root_region = self.get_new_root(particles)
         for particle in particles:
+            msg(f'BHT: inserting particle [{particle.p_id}] into root node',self)
+            if not self.root.contains(particle):
+                err(ValueError, f"particle is not within root node region before tree initialization.", self, particle)
             self.root.insert(particle) # insert particles into root node 
-        self.nodes = [self.root] # nodes list contains list of nodes at each depth level 
+        self.nodes = [self.root] # nodes list contains list of nodes
         self.root.split() # begin recursive splitting of nodes
-        #print(f"tree initialized with {len(self.nodes)} total nodes")
-    
-    
-    def vispy_draw(self):
+        msg(f"BHT: tree updated with {len(self.nodes)} total nodes",self)
+        msg(f"{self.root.treeview()}...",self)
+        return self.nodes
+    def vispy_draw(self) -> None:
         canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
 
         # Set up a viewbox to display the cube with interactive arcball
@@ -220,161 +317,60 @@ class BHTree:
         if __name__ == '__main__' and sys.flags.interactive == 0:
             canvas.app.run()
 
-
     
-    
-    #?####################################################################################
-    #?                               Barnes-Hut algorithm part                          ##
-    #?####################################################################################
-    def choose_nodes(self, target: Node, trial: Node) -> int:
-        """chooses whether to:
-        [0]:add children to trials or
-        [1]:calculate force AB or
-        [2]:do nothing"""
-        if target == trial: # if target is trial, then throw away
-            return 2
-        if trial.is_end: # if it is leaf node, calculate force
-            return 1
-        elif not trial.is_end:
-            if  trial.size/trial.dist(target) < self.theta: # if condition is met for branch node, calculate force
-                return 1 
-            else: # otherwise add children to trials
-                return 0
-        else: # throw away if none of the above conditions are met
-            return 2
-    
-
-    def force_on(self, target_particle:Particle) ->np.ndarray:
-        target = target_particle.node
-            # picking relevant nodes by recursively checking conditions of self.choose_nodes on each node
-        trials = [self.root]
-        candidates = []
-        while trials:
-            trial = trials.pop(0)
-            action = self.choose_nodes(target, trial)
-            if action == 0:
-                trials.extend(trial.children)
-            elif action == 1:
-                candidates.append(trial)
-            elif action != 2:
-                raise ValueError(f"invalid action: {action}")
-        
-        
-        ''' may not be worth it to parallelize this part, had problems with is returning as nonetype parralelized again.
-            might work with an approach using a pipe between processes but might not be worth it here
-            https://shorturl.at/9bGZt Pipes Docs
-
-        if __name__ == '__main__':
-            pool = mproc.Pool(4)
-            results = pool.starmap(self.force_ab, [(target, trial) for trial in candidates])
-            pool.close()
-            pool.join()
-            return np.sum(results, axis=0)
-        '''
-        return np.sum([target.force_ab(trial) for trial in candidates], axis=0) #quick and dirty non-parallelized version
-    
-
-    #?####################################################################################    
-
 ##########################################################################################
 #                                      Engine class                                      #
 ########################################################################################## 
 
 class Engine:
-    def __init__(self, particles: List[Particle], dt: float = 1e-3, tree=True):
+    def __init__(self, particles: List[Particle], dt: float = 1e-3, theta: float=0.5) -> None:
+        msg('ENG: init start',self)
         for i, particle in enumerate(particles):
             particle.p_id = i
         self.particles = particles
         self.dt = dt
-        self.tree = [BHTree(particles) if tree else None][0]
-
-    def force_on_old(self, target_particle:Particle) ->np.ndarray:
-        candidates = [p for p in self.particles if p != target_particle]     
-        return np.sum([target_particle.force_ab(trial) for trial in candidates], axis=0)
-
-    def update_old(self) -> None:
-        for particle in self.particles:
-            particle._pos = particle.pos + particle.vel * self.dt
-            particle._vel = particle.vel + self.force_on_old(particle) * self.dt / particle.mass
-            particle.has_updates = True
-            #print(f'particle {particle.p_id} updated')
-        for particle in self.particles:
-            particle.update_changes()
-
-
-    def update(self) -> None:
-        for particle in self.particles:
-            particle._pos = particle.pos + particle.vel * self.dt
-            particle._vel = particle.vel + self.tree.force_on(particle) * self.dt / particle.mass
-            particle.has_updates = True
-            #print(f'particle {particle.p_id} updated')
-        for particle in self.particles:
-            particle.update_changes()
-
-    def update_particle(self, particle: Particle, tree: BHTree) -> None:
-        particle._pos = particle.pos + particle.vel * self.dt
-        particle._vel = particle.vel + tree.force_on(particle) * self.dt / particle.mass
-        particle.has_updates = True
-        #print(f'particle {particle.p_id} ready to be updated')
-    
-    
-    def pool_update(self) -> None:
-        pool = mproc.Pool(4)
-        results = pool.starmap(self.update_particle, [(particle, self.tree) for particle in self.particles])
-        pool.close()
-        pool.join()
-        for particle in self.particles:
-            particle.update_changes()
-    '''
-    def updater_worker(self, old_particles:mproc.Queue, new_particles:mproc.Queue) -> None:
-        pid = mproc.current_process().pid
-        new_values = []
-        print(f'worker {pid} started, waiting for new particles...')
-        while not old_particles.empty(): 
-            print(f'{pid}: awaiting particle')
-            particle = old_particles.get(timeout=1)
-            p_id = particle.p_id
-            print(f'{pid}: got particle {p_id}')
-            _pos = particle.pos + particle.vel * self.dt
-            _vel = particle.vel + self.tree.force_on(particle) * self.dt / particle.mass
-            has_updates = True
-            new_values.append((particle,p_id, _pos, _vel, has_updates))
-            print(f'{pid}: finished with particle {p_id}')
-            #new_particles.put(particle, timeout=1)
-            #print(f'{pid}: returned particle {p_id}')
-            #job_count += 1
-        old_particles.close()
-        #new_particles.close()
-        job_count = len(new_values)
-        print(f'{pid}: finished updating {job_count} particles, closed, exiting...')
-
-    def update(self) -> None:
-        awaiting_update = mproc.Queue()
-        finished_update = mproc.Queue()
-        workers = []
-        for particle in self.particles:
-            awaiting_update.put(particle)
+        self.tree = BHTree(particles)
+        self.theta = theta
+        msg('ENG: init',self)
         
-        for _ in range(1):#mproc.cpu_count()//2):
-            proc = mproc.Process(target=self.updater_worker, args=(awaiting_update, finished_update))
-            workers.append(proc)
-        print(f'MAIN: created {len(workers)} worker instances')
-        for proc in workers:
-            proc.start()
-            print(f'MAIN: started worker {proc.pid}')
-        print(f'MAIN: {len(mproc.active_children())} worker instances are active.')
+    def update(self) -> None:
+        msg('ENG: update start',self)
         
-        for proc in mproc.active_children():
-            print(f'MAIN: waiting for worker {proc.pid}')
-            proc.join()
-            print(f'MAIN: worker {proc.pid} joined')
-        print(f'MAIN: all workers joined, replacing self.particles')
-        for _ in range(len(self.particles)):
-            p = finished_update.get()
-            p.update_changes()
-        self.tree = BHTree(self.particles)
-        print(f'MAIN: updated particles and tree')
-    '''
+        for particle in self.particles:
+            msg(f'ENG: updating particle {particle.p_id}',self)
+            particle._pos += particle.vel * self.dt
+            particle._vel +=  self.force_on(particle) * self.dt / particle.mass
+            particle.has_updates = True
+        self.tree.begin_cull()
+        for particle in self.particles:
+            msg(f'ENG: updating live values of {particle.p_id}',self)
+            particle.update_changes()
+        self.tree.update(self.particles)
+        msg('ENG: update success',self)
+    
+    #?####################################################################################
+    #?                               Barnes-Hut algorithm part                          ##
+    #?####################################################################################
+    
+    def force_on(self, target_particle:Particle) -> np.ndarray:
+        '''get the force on a target particle from the tree using the Barnes-Hut algorithm'''
+        target = target_particle.node
+        trials = [self.tree.root] 
+        candidates = []
+        while trials:
+            trial = trials.pop(0)
+            if target != trial: # if target is trial, then throw away
+                if trial.is_end: # if it is leaf node, calculate force
+                    candidates.append(trial)
+                else:
+                    if  trial.size/trial.dist(target) < self.theta: # if condition is met for branch node, add to list
+                        candidates.append(trial)
+                    else: # otherwise add children to trials
+                        trials.extend(trial.children)
+            else: # throw away if none of the above conditions are met
+                pass       
+        return np.sum([target.force_ab(trial) for trial in candidates], axis=0)
+
 
 ##########################################################################################
 #                                           Main                                         #
@@ -382,7 +378,8 @@ class Engine:
 
 
 # create some particles
-random.seed(0)
+msg('initializing particles')
+random.seed(10000)
 particles_ = [
     Particle(
         pos=[random.uniform(-100, 100) for _ in range(3)],  # random position
@@ -392,15 +389,31 @@ particles_ = [
         charge=random.uniform(-1, 1),  # random charge
         color=(random.random(), random.random(), random.random())  # random color
     ) 
-    for _ in range(10000)
+    for _ in range(10)
 ]
-
+msg('particles initialized')
 
 
 
 
 
 if __name__ == '__main__':
+    particles = particles_[:]
+    msg('initializing engine')
+    eng = Engine(particles)
+    msg('starting update loop')
+    p1 = ptime()
+    def pitime(start=p1): print(f'T={round(ptime()-start, 5)}s')
+    for _ in range(100):
+        eng.update()
+        pitime()
+
+
+
+    
+    
+    
+def test():   
     runs = []
     for y in range(1,11):
         print(f"running test with {y} particles")
@@ -433,8 +446,6 @@ if __name__ == '__main__':
         with open('output.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(runs)
-
-
 
 
 

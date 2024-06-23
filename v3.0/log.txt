@@ -1,0 +1,992 @@
+0.6639s: 486793552          d3NODE[0p,0ch]: inserting particle 2 into this node
+ 0.664s: 486793552          d3NODE[1p,0ch]: particle 2 inserted into node
+0.6641s: 486791568          d2NODE[2p,8ch]: inserting particle 2 into node
+0.6642s: 486791568          d2NODE[2p,8ch]: particles redistributed, clearing lists
+0.6643s: 486791568          d2NODE[0p,2ch]: lists cleared, starting child splits
+0.6646s: 486791568          d2NODE[0p,2ch]: querying child node for further splitting: d3Node: pos=[ 28.41258815  63.90857873 105.11981381] size=25.159089093893606 mass=628.3496236167598 [0ch,1p], Leaf=False       
+0.6648s: 486791568          d2NODE[0p,2ch]: node d3Node: pos=[ 28.41258815  63.90857873 105.11981381] size=25.159089093893606 mass=628.3496236167598 [0ch,1p], Leaf=False is a leaf, updating its attributes
+ 0.665s: 486791568          d2NODE[0p,2ch]: node d3Node: pos=[ 28.41258815  63.90857873 105.11981381] size=25.159089093893606 mass=628.3496236167598 [0ch,1p], Leaf=True is updated
+0.6652s: 486791568          d2NODE[0p,2ch]: adding child node d3Node: pos=[ 28.41258815  63.90857873 105.11981381] size=25.159089093893606 mass=628.3496236167598 [0ch,1p], Leaf=True to tree's list
+0.6654s: 486791568          d2NODE[0p,2ch]: querying child node for further splitting: d3Node: pos=[28.41258815 63.90857873 54.80163562] size=25.159089093893606 mass=156.714106171315 [0ch,1p], Leaf=False
+0.6657s: 486791568          d2NODE[0p,2ch]: node d3Node: pos=[28.41258815 63.90857873 54.80163562] size=25.159089093893606 mass=156.714106171315 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.6659s: 486791568          d2NODE[0p,2ch]: node d3Node: pos=[28.41258815 63.90857873 54.80163562] size=25.159089093893606 mass=156.714106171315 [0ch,1p], Leaf=True is updated
+0.6661s: 486791568          d2NODE[0p,2ch]: adding child node d3Node: pos=[28.41258815 63.90857873 54.80163562] size=25.159089093893606 mass=156.714106171315 [0ch,1p], Leaf=True to tree's list
+0.6663s: 486791568          d2NODE[0p,2ch]: node split end
+0.6665s: 57896208           d1NODE[0p,1ch]: child node d2Node: pos=[53.57167724 38.74948964 79.96072472] size=50.31817818778721 mass=785.0637297880749 [2ch,0p], Leaf=False finished splitting
+0.6667s: 57896208           d1NODE[0p,1ch]: adding child node d2Node: pos=[53.57167724 38.74948964 79.96072472] size=50.31817818778721 mass=785.0637297880749 [2ch,0p], Leaf=False to tree's list
+0.6669s: 57896208           d1NODE[0p,1ch]: node split end
+0.6671s: 17279952           d0NODE[0p,7ch]: child node d1Node: pos=[103.88985543  89.06766782 130.2789029 ] size=100.63635637557442 mass=785.0637297880749 [1ch,0p], Leaf=False finished splitting
+0.6673s: 17279952           d0NODE[0p,7ch]: adding child node d1Node: pos=[103.88985543  89.06766782 130.2789029 ] size=100.63635637557442 mass=785.0637297880749 [1ch,0p], Leaf=False to tree's list
+0.6676s: 17279952           d0NODE[0p,7ch]: querying child node for further splitting: d1Node: pos=[ 103.88985543 -112.20504493  130.2789029 ] size=100.63635637557442 mass=666.5384072566744 [0ch,2p], Leaf=False    
+0.6677s: 17279952           d0NODE[0p,7ch]: child node d1NODE[2p,0ch] has more than one particle, asking it to split
+0.6679s: 486658064          d1NODE[2p,0ch]: node split start
+ 0.668s: 486658064          d1NODE[2p,0ch]: splitting node...
+0.6683s: 486658064          d1NODE[2p,0ch]: creating child node at [154.20803362 -61.88686674 180.59708109] with size 50.31817818778721
+0.6686s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.20803362 -61.88686674 180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6688s: 486658064          d1NODE[2p,1ch]: child node created.
+ 0.669s: 486658064          d1NODE[2p,1ch]: creating child node at [154.20803362 -61.88686674  79.96072472] with size 50.31817818778721
+0.6692s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.20803362 -61.88686674  79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6693s: 486658064          d1NODE[2p,2ch]: child node created.
+0.6695s: 486658064          d1NODE[2p,2ch]: creating child node at [ 154.20803362 -162.52322311  180.59708109] with size 50.31817818778721
+0.6697s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 154.20803362 -162.52322311  180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6698s: 486658064          d1NODE[2p,3ch]: child node created.
+  0.67s: 486658064          d1NODE[2p,3ch]: creating child node at [ 154.20803362 -162.52322311   79.96072472] with size 50.31817818778721
+0.6703s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 154.20803362 -162.52322311   79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6703s: 486658064          d1NODE[2p,4ch]: child node created.
+0.6705s: 486658064          d1NODE[2p,4ch]: creating child node at [ 53.57167724 -61.88686674 180.59708109] with size 50.31817818778721
+0.6708s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57167724 -61.88686674 180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6708s: 486658064          d1NODE[2p,5ch]: child node created.
+0.6712s: 486658064          d1NODE[2p,5ch]: creating child node at [ 53.57167724 -61.88686674  79.96072472] with size 50.31817818778721
+0.6714s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6715s: 486658064          d1NODE[2p,6ch]: child node created.
+0.6717s: 486658064          d1NODE[2p,6ch]: creating child node at [  53.57167724 -162.52322311  180.59708109] with size 50.31817818778721
+ 0.672s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[  53.57167724 -162.52322311  180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6721s: 486658064          d1NODE[2p,7ch]: child node created.
+0.6723s: 486658064          d1NODE[2p,7ch]: creating child node at [  53.57167724 -162.52322311   79.96072472] with size 50.31817818778721
+0.6725s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[  53.57167724 -162.52322311   79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6727s: 486658064          d1NODE[2p,8ch]: child node created.
+ 0.673s: 486658064          d1NODE[2p,8ch]: all children created, beginning redistribution...
+0.6735s: 486658064          d1NODE[2p,8ch]: searching for node to insert particle 1 at [ 94.28438232 -79.06358482  69.32640198]
+ 0.674s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.20803362 -61.88686674 180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6741s: 486372304          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.6744s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.20803362 -61.88686674  79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6745s: 486658256          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.6747s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.20803362 -162.52322311  180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6748s: 486682384          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.6751s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.20803362 -162.52322311   79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6752s: 486796304          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.6755s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57167724 -61.88686674 180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6756s: 486796624          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.6758s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6759s: 486796688          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.6764s: 486658064          d1NODE[2p,8ch]: child node found. inserting particle 1 into child node d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6766s: 486796688          d2NODE[0p,0ch]: inserting particle 1 into this node
+0.6767s: 486796688          d2NODE[1p,0ch]: particle 1 inserted into node
+0.6768s: 486658064          d1NODE[2p,8ch]: inserting particle 1 into node
+0.6772s: 486658064          d1NODE[2p,8ch]: searching for node to insert particle 8 at [ 92.47419077 -33.76414497  41.95223244]
+0.6774s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.20803362 -61.88686674 180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6776s: 486372304          d2NODE[0p,0ch]: checking if particle 8 is within node
+ 0.678s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.20803362 -61.88686674  79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6781s: 486658256          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.6784s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.20803362 -162.52322311  180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6785s: 486682384          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.6787s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.20803362 -162.52322311   79.96072472] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6788s: 486796304          d2NODE[0p,0ch]: checking if particle 8 is within node
+ 0.679s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57167724 -61.88686674 180.59708109] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6791s: 486796624          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.6794s: 486658064          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.6795s: 486796688          d2NODE[1p,0ch]: checking if particle 8 is within node
+0.6798s: 486658064          d1NODE[2p,8ch]: child node found. inserting particle 8 into child node d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=574.9758826856136 [0ch,1p], Leaf=False
+  0.68s: 486796688          d2NODE[1p,0ch]: inserting particle 8 into this node
+0.6801s: 486796688          d2NODE[2p,0ch]: particle 8 inserted into node
+0.6803s: 486658064          d1NODE[2p,8ch]: inserting particle 8 into node
+0.6804s: 486658064          d1NODE[2p,8ch]: particles redistributed, clearing lists
+0.6805s: 486658064          d1NODE[0p,1ch]: lists cleared, starting child splits
+0.6808s: 486658064          d1NODE[0p,1ch]: querying child node for further splitting: d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=666.5384072566744 [0ch,2p], Leaf=False        
+0.6809s: 486658064          d1NODE[0p,1ch]: child node d2NODE[2p,0ch] has more than one particle, asking it to split
+ 0.681s: 486796688          d2NODE[2p,0ch]: node split start
+0.6811s: 486796688          d2NODE[2p,0ch]: splitting node...
+0.6813s: 486796688          d2NODE[2p,0ch]: creating child node at [ 78.73076633 -36.72777765 105.11981381] with size 25.159089093893606
+0.6815s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73076633 -36.72777765 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6816s: 486796688          d2NODE[2p,1ch]: child node created.
+0.6818s: 486796688          d2NODE[2p,1ch]: creating child node at [ 78.73076633 -36.72777765  54.80163562] with size 25.159089093893606
+ 0.682s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6821s: 486796688          d2NODE[2p,2ch]: child node created.
+0.6823s: 486796688          d2NODE[2p,2ch]: creating child node at [ 78.73076633 -87.04595583 105.11981381] with size 25.159089093893606
+0.6825s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73076633 -87.04595583 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6826s: 486796688          d2NODE[2p,3ch]: child node created.
+0.6829s: 486796688          d2NODE[2p,3ch]: creating child node at [ 78.73076633 -87.04595583  54.80163562] with size 25.159089093893606
+0.6832s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6833s: 486796688          d2NODE[2p,4ch]: child node created.
+0.6835s: 486796688          d2NODE[2p,4ch]: creating child node at [ 28.41258815 -36.72777765 105.11981381] with size 25.159089093893606
+0.6837s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41258815 -36.72777765 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6838s: 486796688          d2NODE[2p,5ch]: child node created.
+0.6841s: 486796688          d2NODE[2p,5ch]: creating child node at [ 28.41258815 -36.72777765  54.80163562] with size 25.159089093893606
+0.6843s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41258815 -36.72777765  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6844s: 486796688          d2NODE[2p,6ch]: child node created.
+0.6846s: 486796688          d2NODE[2p,6ch]: creating child node at [ 28.41258815 -87.04595583 105.11981381] with size 25.159089093893606
+ 0.685s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41258815 -87.04595583 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6852s: 486796688          d2NODE[2p,7ch]: child node created.
+0.6854s: 486796688          d2NODE[2p,7ch]: creating child node at [ 28.41258815 -87.04595583  54.80163562] with size 25.159089093893606
+0.6856s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41258815 -87.04595583  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6856s: 486796688          d2NODE[2p,8ch]: child node created.
+0.6857s: 486796688          d2NODE[2p,8ch]: all children created, beginning redistribution...
+0.6859s: 486796688          d2NODE[2p,8ch]: searching for node to insert particle 1 at [ 94.28438232 -79.06358482  69.32640198]
+0.6862s: 486796688          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73076633 -36.72777765 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6862s: 486730512          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.6865s: 486796688          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6866s: 486695376          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.6868s: 486796688          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73076633 -87.04595583 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6869s: 486627152          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.6871s: 486796688          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6872s: 486682384          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.6874s: 486796688          d2NODE[2p,8ch]: child node found. inserting particle 1 into child node d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6875s: 486682384          d3NODE[0p,0ch]: inserting particle 1 into this node
+0.6876s: 486682384          d3NODE[1p,0ch]: particle 1 inserted into node
+0.6877s: 486796688          d2NODE[2p,8ch]: inserting particle 1 into node
+ 0.688s: 486796688          d2NODE[2p,8ch]: searching for node to insert particle 8 at [ 92.47419077 -33.76414497  41.95223244]
+0.6883s: 486796688          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73076633 -36.72777765 105.11981381] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6885s: 486730512          d3NODE[0p,0ch]: checking if particle 8 is within node
+0.6888s: 486796688          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6889s: 486695376          d3NODE[0p,0ch]: checking if particle 8 is within node
+0.6892s: 486796688          d2NODE[2p,8ch]: child node found. inserting particle 8 into child node d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.6894s: 486695376          d3NODE[0p,0ch]: inserting particle 8 into this node
+0.6895s: 486695376          d3NODE[1p,0ch]: particle 8 inserted into node
+0.6896s: 486796688          d2NODE[2p,8ch]: inserting particle 8 into node
+0.6897s: 486796688          d2NODE[2p,8ch]: particles redistributed, clearing lists
+0.6898s: 486796688          d2NODE[0p,2ch]: lists cleared, starting child splits
+  0.69s: 486796688          d2NODE[0p,2ch]: querying child node for further splitting: d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=91.56252457106085 [0ch,1p], Leaf=False       
+0.6902s: 486796688          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=91.56252457106085 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.6905s: 486796688          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=91.56252457106085 [0ch,1p], Leaf=True is updated
+0.6907s: 486796688          d2NODE[0p,2ch]: adding child node d3Node: pos=[ 78.73076633 -36.72777765  54.80163562] size=25.159089093893606 mass=91.56252457106085 [0ch,1p], Leaf=True to tree's list
+0.6909s: 486796688          d2NODE[0p,2ch]: querying child node for further splitting: d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=574.9758826856136 [0ch,1p], Leaf=False       
+0.6911s: 486796688          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=574.9758826856136 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.6913s: 486796688          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=574.9758826856136 [0ch,1p], Leaf=True is updated
+0.6915s: 486796688          d2NODE[0p,2ch]: adding child node d3Node: pos=[ 78.73076633 -87.04595583  54.80163562] size=25.159089093893606 mass=574.9758826856136 [0ch,1p], Leaf=True to tree's list
+0.6917s: 486796688          d2NODE[0p,2ch]: node split end
+0.6919s: 486658064          d1NODE[0p,1ch]: child node d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=666.5384072566744 [2ch,0p], Leaf=False finished splitting
+0.6922s: 486658064          d1NODE[0p,1ch]: adding child node d2Node: pos=[ 53.57167724 -61.88686674  79.96072472] size=50.31817818778721 mass=666.5384072566744 [2ch,0p], Leaf=False to tree's list
+0.6925s: 486658064          d1NODE[0p,1ch]: node split end
+0.6929s: 17279952           d0NODE[0p,7ch]: child node d1Node: pos=[ 103.88985543 -112.20504493  130.2789029 ] size=100.63635637557442 mass=666.5384072566744 [1ch,0p], Leaf=False finished splitting
+0.6933s: 17279952           d0NODE[0p,7ch]: adding child node d1Node: pos=[ 103.88985543 -112.20504493  130.2789029 ] size=100.63635637557442 mass=666.5384072566744 [1ch,0p], Leaf=False to tree's list
+0.6936s: 17279952           d0NODE[0p,7ch]: querying child node for further splitting: d1Node: pos=[ 103.88985543 -112.20504493  -70.99380985] size=100.63635637557442 mass=477.4732176380863 [0ch,1p], Leaf=False    
+ 0.694s: 17279952           d0NODE[0p,7ch]: node d1Node: pos=[ 103.88985543 -112.20504493  -70.99380985] size=100.63635637557442 mass=477.4732176380863 [0ch,1p], Leaf=False is a leaf, updating its attributes       
+0.6944s: 17279952           d0NODE[0p,7ch]: node d1Node: pos=[ 103.88985543 -112.20504493  -70.99380985] size=100.63635637557442 mass=477.4732176380863 [0ch,1p], Leaf=True is updated
+0.6947s: 17279952           d0NODE[0p,7ch]: adding child node d1Node: pos=[ 103.88985543 -112.20504493  -70.99380985] size=100.63635637557442 mass=477.4732176380863 [0ch,1p], Leaf=True to tree's list
+ 0.695s: 17279952           d0NODE[0p,7ch]: querying child node for further splitting: d1Node: pos=[-97.38285732  89.06766782 130.2789029 ] size=100.63635637557442 mass=63.58860985562827 [0ch,1p], Leaf=False       
+0.6952s: 17279952           d0NODE[0p,7ch]: node d1Node: pos=[-97.38285732  89.06766782 130.2789029 ] size=100.63635637557442 mass=63.58860985562827 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.6954s: 17279952           d0NODE[0p,7ch]: node d1Node: pos=[-97.38285732  89.06766782 130.2789029 ] size=100.63635637557442 mass=63.58860985562827 [0ch,1p], Leaf=True is updated
+0.6957s: 17279952           d0NODE[0p,7ch]: adding child node d1Node: pos=[-97.38285732  89.06766782 130.2789029 ] size=100.63635637557442 mass=63.58860985562827 [0ch,1p], Leaf=True to tree's list
+0.6959s: 17279952           d0NODE[0p,7ch]: querying child node for further splitting: d1Node: pos=[-97.38285732  89.06766782 -70.99380985] size=100.63635637557442 mass=1327.9977063017946 [0ch,2p], Leaf=False      
+ 0.696s: 17279952           d0NODE[0p,7ch]: child node d1NODE[2p,0ch] has more than one particle, asking it to split
+0.6961s: 486637264          d1NODE[2p,0ch]: node split start
+0.6962s: 486637264          d1NODE[2p,0ch]: splitting node...
+0.6964s: 486637264          d1NODE[2p,0ch]: creating child node at [-47.06467914 139.38584601 -20.67563166] with size 50.31817818778721
+0.6966s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-47.06467914 139.38584601 -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6967s: 486637264          d1NODE[2p,1ch]: child node created.
+0.6969s: 486637264          d1NODE[2p,1ch]: creating child node at [ -47.06467914  139.38584601 -121.31198803] with size 50.31817818778721
+0.6972s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ -47.06467914  139.38584601 -121.31198803] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6973s: 486637264          d1NODE[2p,2ch]: child node created.
+0.6975s: 486637264          d1NODE[2p,2ch]: creating child node at [-47.06467914  38.74948964 -20.67563166] with size 50.31817818778721
+0.6978s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-47.06467914  38.74948964 -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6979s: 486637264          d1NODE[2p,3ch]: child node created.
+0.6982s: 486637264          d1NODE[2p,3ch]: creating child node at [ -47.06467914   38.74948964 -121.31198803] with size 50.31817818778721
+0.6984s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ -47.06467914   38.74948964 -121.31198803] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6986s: 486637264          d1NODE[2p,4ch]: child node created.
+0.6988s: 486637264          d1NODE[2p,4ch]: creating child node at [-147.70103551  139.38584601  -20.67563166] with size 50.31817818778721
+ 0.699s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70103551  139.38584601  -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6992s: 486637264          d1NODE[2p,5ch]: child node created.
+0.6994s: 486637264          d1NODE[2p,5ch]: creating child node at [-147.70103551  139.38584601 -121.31198803] with size 50.31817818778721
+0.6996s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70103551  139.38584601 -121.31198803] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.6998s: 486637264          d1NODE[2p,6ch]: child node created.
+   0.7s: 486637264          d1NODE[2p,6ch]: creating child node at [-147.70103551   38.74948964  -20.67563166] with size 50.31817818778721
+0.7002s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70103551   38.74948964  -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7003s: 486637264          d1NODE[2p,7ch]: child node created.
+0.7005s: 486637264          d1NODE[2p,7ch]: creating child node at [-147.70103551   38.74948964 -121.31198803] with size 50.31817818778721
+0.7007s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70103551   38.74948964 -121.31198803] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7008s: 486637264          d1NODE[2p,8ch]: child node created.
+ 0.701s: 486637264          d1NODE[2p,8ch]: all children created, beginning redistribution...
+0.7012s: 486637264          d1NODE[2p,8ch]: searching for node to insert particle 3 at [-24.89861601  61.45398733  -0.34800071]
+0.7015s: 486637264          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06467914 139.38584601 -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7016s: 486372304          d2NODE[0p,0ch]: checking if particle 3 is within node
+ 0.702s: 486637264          d1NODE[2p,8ch]: testing child node d2Node: pos=[ -47.06467914  139.38584601 -121.31198803] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7023s: 486684240          d2NODE[0p,0ch]: checking if particle 3 is within node
+0.7026s: 486637264          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06467914  38.74948964 -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7027s: 486798352          d2NODE[0p,0ch]: checking if particle 3 is within node
+ 0.703s: 486637264          d1NODE[2p,8ch]: child node found. inserting particle 3 into child node d2Node: pos=[-47.06467914  38.74948964 -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7031s: 486798352          d2NODE[0p,0ch]: inserting particle 3 into this node
+0.7032s: 486798352          d2NODE[1p,0ch]: particle 3 inserted into node
+0.7033s: 486637264          d1NODE[2p,8ch]: inserting particle 3 into node
+0.7035s: 486637264          d1NODE[2p,8ch]: searching for node to insert particle 9 at [-97.38285732  57.08252982  25.37210169]
+0.7037s: 486637264          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06467914 139.38584601 -20.67563166] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7038s: 486372304          d2NODE[0p,0ch]: checking if particle 9 is within node
+ 0.704s: 486637264          d1NODE[2p,8ch]: testing child node d2Node: pos=[ -47.06467914  139.38584601 -121.31198803] size=50.31817818778721 mass=0.0 [0ch,0p], Leaf=False
+0.7042s: 486684240          d2NODE[0p,0ch]: checking if particle 9 is within node
+0.7044s: 486637264          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06467914  38.74948964 -20.67563166] size=50.31817818778721 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.7047s: 486798352          d2NODE[1p,0ch]: checking if particle 9 is within node
+ 0.705s: 486637264          d1NODE[2p,8ch]: child node found. inserting particle 9 into child node d2Node: pos=[-47.06467914  38.74948964 -20.67563166] size=50.31817818778721 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.7053s: 486798352          d2NODE[1p,0ch]: inserting particle 9 into this node
+0.7054s: 486798352          d2NODE[2p,0ch]: particle 9 inserted into node
+0.7055s: 486637264          d1NODE[2p,8ch]: inserting particle 9 into node
+0.7056s: 486637264          d1NODE[2p,8ch]: particles redistributed, clearing lists
+0.7057s: 486637264          d1NODE[0p,1ch]: lists cleared, starting child splits
+0.7059s: 486637264          d1NODE[0p,1ch]: querying child node for further splitting: d2Node: pos=[-47.06467914  38.74948964 -20.67563166] size=50.31817818778721 mass=1327.9977063017946 [0ch,2p], Leaf=False       
+0.7061s: 486637264          d1NODE[0p,1ch]: child node d2NODE[2p,0ch] has more than one particle, asking it to split
+0.7062s: 486798352          d2NODE[2p,0ch]: node split start
+0.7063s: 486798352          d2NODE[2p,0ch]: splitting node...
+0.7066s: 486798352          d2NODE[2p,0ch]: creating child node at [-21.90559004  63.90857873   4.48345743] with size 25.159089093893606
+0.7068s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90559004  63.90857873   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7069s: 486798352          d2NODE[2p,1ch]: child node created.
+0.7071s: 486798352          d2NODE[2p,1ch]: creating child node at [-21.90559004  63.90857873 -45.83472075] with size 25.159089093893606
+0.7073s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90559004  63.90857873 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7074s: 486798352          d2NODE[2p,2ch]: child node created.
+0.7077s: 486798352          d2NODE[2p,2ch]: creating child node at [-21.90559004  13.59040054   4.48345743] with size 25.159089093893606
+0.7079s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90559004  13.59040054   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+ 0.708s: 486798352          d2NODE[2p,3ch]: child node created.
+0.7084s: 486798352          d2NODE[2p,3ch]: creating child node at [-21.90559004  13.59040054 -45.83472075] with size 25.159089093893606
+0.7087s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90559004  13.59040054 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7088s: 486798352          d2NODE[2p,4ch]: child node created.
+0.7091s: 486798352          d2NODE[2p,4ch]: creating child node at [-72.22376823  63.90857873   4.48345743] with size 25.159089093893606
+0.7096s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22376823  63.90857873   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7098s: 486798352          d2NODE[2p,5ch]: child node created.
+0.7101s: 486798352          d2NODE[2p,5ch]: creating child node at [-72.22376823  63.90857873 -45.83472075] with size 25.159089093893606
+0.7104s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22376823  63.90857873 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7106s: 486798352          d2NODE[2p,6ch]: child node created.
+0.7108s: 486798352          d2NODE[2p,6ch]: creating child node at [-72.22376823  13.59040054   4.48345743] with size 25.159089093893606
+0.7111s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22376823  13.59040054   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7112s: 486798352          d2NODE[2p,7ch]: child node created.
+0.7115s: 486798352          d2NODE[2p,7ch]: creating child node at [-72.22376823  13.59040054 -45.83472075] with size 25.159089093893606
+0.7118s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22376823  13.59040054 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7119s: 486798352          d2NODE[2p,8ch]: child node created.
+ 0.712s: 486798352          d2NODE[2p,8ch]: all children created, beginning redistribution...
+0.7123s: 486798352          d2NODE[2p,8ch]: searching for node to insert particle 3 at [-24.89861601  61.45398733  -0.34800071]
+0.7125s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90559004  63.90857873   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7126s: 486717008          d3NODE[0p,0ch]: checking if particle 3 is within node
+0.7129s: 486798352          d2NODE[2p,8ch]: child node found. inserting particle 3 into child node d3Node: pos=[-21.90559004  63.90857873   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7131s: 486717008          d3NODE[0p,0ch]: inserting particle 3 into this node
+0.7132s: 486717008          d3NODE[1p,0ch]: particle 3 inserted into node
+0.7134s: 486798352          d2NODE[2p,8ch]: inserting particle 3 into node
+0.7136s: 486798352          d2NODE[2p,8ch]: searching for node to insert particle 9 at [-97.38285732  57.08252982  25.37210169]
+0.7139s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90559004  63.90857873   4.48345743] size=25.159089093893606 mass=733.2796155903328 [0ch,1p], Leaf=False
+ 0.714s: 486717008          d3NODE[1p,0ch]: checking if particle 9 is within node
+0.7142s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90559004  63.90857873 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7144s: 486668368          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.7146s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90559004  13.59040054   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7147s: 486767056          d3NODE[0p,0ch]: checking if particle 9 is within node
+ 0.715s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90559004  13.59040054 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7151s: 486799568          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.7153s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-72.22376823  63.90857873   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7154s: 486802192          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.7157s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-72.22376823  63.90857873 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7158s: 486805392          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.7161s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-72.22376823  13.59040054   4.48345743] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7162s: 486805264          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.7164s: 486798352          d2NODE[2p,8ch]: testing child node d3Node: pos=[-72.22376823  13.59040054 -45.83472075] size=25.159089093893606 mass=0.0 [0ch,0p], Leaf=False
+0.7165s: 486805904          d3NODE[0p,0ch]: checking if particle 9 is within node
+PS E:\Repositories\nbody> ^C
+PS E:\Repositories\nbody>
+PS E:\Repositories\nbody>  e:; cd 'e:\Repositories\nbody'; & 'e:\Repositories\nbody\.venv\Scripts\python.exe' 'c:\Users\willr\.vscode\extensions\ms-python.debugpy-2024.6.0-win32-x64\bundled\libs\debugpy\adapter/../..\debugpy\launcher' '8682' '--' 'e:\Repositories\nbody\v3.0\base.py' 
+         229 function calls (222 primitive calls) in 0.001 seconds
+
+   Ordered by: standard name
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.001    0.001 <string>:1(<module>)
+        1    0.000    0.000    0.001    0.001 __init__.py:225(compile)
+        1    0.000    0.000    0.001    0.001 __init__.py:272(_compile)
+        1    0.000    0.000    0.000    0.000 _compiler.py:216(_compile_charset)
+        1    0.000    0.000    0.000    0.000 _compiler.py:243(_optimize_charset)
+      3/1    0.000    0.000    0.000    0.000 _compiler.py:37(_compile)
+        2    0.000    0.000    0.000    0.000 _compiler.py:428(_get_iscased)
+        1    0.000    0.000    0.000    0.000 _compiler.py:436(_get_literal_prefix)
+        1    0.000    0.000    0.000    0.000 _compiler.py:467(_get_charset_prefix)
+        1    0.000    0.000    0.000    0.000 _compiler.py:511(_compile_info)
+        2    0.000    0.000    0.000    0.000 _compiler.py:570(isstring)
+        1    0.000    0.000    0.000    0.000 _compiler.py:573(_code)
+        1    0.000    0.000    0.001    0.001 _compiler.py:740(compile)
+        3    0.000    0.000    0.000    0.000 _parser.py:113(__init__)
+        7    0.000    0.000    0.000    0.000 _parser.py:164(__len__)
+       18    0.000    0.000    0.000    0.000 _parser.py:168(__getitem__)
+        7    0.000    0.000    0.000    0.000 _parser.py:176(append)
+      3/1    0.000    0.000    0.000    0.000 _parser.py:178(getwidth)
+        1    0.000    0.000    0.000    0.000 _parser.py:231(__init__)
+        8    0.000    0.000    0.000    0.000 _parser.py:240(__next)
+        2    0.000    0.000    0.000    0.000 _parser.py:256(match)
+        6    0.000    0.000    0.000    0.000 _parser.py:261(get)
+        1    0.000    0.000    0.000    0.000 _parser.py:293(tell)
+        1    0.000    0.000    0.000    0.000 _parser.py:456(_parse_sub)
+        2    0.000    0.000    0.000    0.000 _parser.py:516(_parse)
+        1    0.000    0.000    0.000    0.000 _parser.py:77(__init__)
+        2    0.000    0.000    0.000    0.000 _parser.py:83(groups)
+        1    0.000    0.000    0.000    0.000 _parser.py:963(fix_flags)
+        1    0.000    0.000    0.000    0.000 _parser.py:979(parse)
+        2    0.000    0.000    0.000    0.000 enum.py:1095(__new__)
+        6    0.000    0.000    0.000    0.000 enum.py:1507(_get_value)
+        2    0.000    0.000    0.000    0.000 enum.py:1525(__and__)
+        2    0.000    0.000    0.000    0.000 enum.py:688(__call__)
+        1    0.000    0.000    0.000    0.000 {built-in method _sre.compile}
+        1    0.000    0.000    0.001    0.001 {built-in method builtins.exec}
+       34    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+    29/26    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+        2    0.000    0.000    0.000    0.000 {built-in method builtins.max}
+        8    0.000    0.000    0.000    0.000 {built-in method builtins.min}
+        6    0.000    0.000    0.000    0.000 {built-in method builtins.ord}
+       48    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        5    0.000    0.000    0.000    0.000 {method 'find' of 'bytearray' objects}
+        1    0.000    0.000    0.000    0.000 {method 'items' of 'dict' objects}
+
+
+0.0003s: 140718331587848    initializing particles
+0.0015s: 140718331587848    particles initialized
+0.0018s: 140718331587848    initializing engine
+ 0.002s: 486954128          ENG: init start
+0.0023s: 486954320          BHT: init start
+0.0024s: 486954320          BHT: tree update start
+0.0036s: 140718331587848    d0NODE[0p,0ch]: created with depth 0: d0Node: pos=[  3.25403626 -11.56912318  29.64290078] size=201.2768570787846 mass=0.0 [0ch,0p], Leaf=False
+0.0039s: 486954320          BHT: root node created:
+
+d0Node: pos=[  3.25403626 -11.56912318  29.64290078] size=201.2768570787846 mass=0.0
+children(0): []
+particles(0): []
+0.0044s: 486954320          BHT: inserting particle [0] into root node
+0.0046s: 486954768          d0NODE[0p,0ch]: checking if particle 0 is within node
+ 0.005s: 486954768          d0NODE[0p,0ch]: inserting particle 0 into this node
+0.0052s: 486954768          d0NODE[1p,0ch]: particle 0 inserted into node
+0.0053s: 486954320          BHT: inserting particle [1] into root node
+0.0055s: 486954768          d0NODE[1p,0ch]: checking if particle 1 is within node
+0.0056s: 486954768          d0NODE[1p,0ch]: inserting particle 1 into this node
+0.0058s: 486954768          d0NODE[2p,0ch]: particle 1 inserted into node
+0.0059s: 486954320          BHT: inserting particle [2] into root node
+ 0.006s: 486954768          d0NODE[2p,0ch]: checking if particle 2 is within node
+0.0062s: 486954768          d0NODE[2p,0ch]: inserting particle 2 into this node
+0.0064s: 486954768          d0NODE[3p,0ch]: particle 2 inserted into node
+0.0065s: 486954320          BHT: inserting particle [3] into root node
+0.0066s: 486954768          d0NODE[3p,0ch]: checking if particle 3 is within node
+0.0068s: 486954768          d0NODE[3p,0ch]: inserting particle 3 into this node
+0.0069s: 486954768          d0NODE[4p,0ch]: particle 3 inserted into node
+ 0.007s: 486954320          BHT: inserting particle [4] into root node
+0.0072s: 486954768          d0NODE[4p,0ch]: checking if particle 4 is within node
+0.0073s: 486954768          d0NODE[4p,0ch]: inserting particle 4 into this node
+0.0074s: 486954768          d0NODE[5p,0ch]: particle 4 inserted into node
+0.0075s: 486954320          BHT: inserting particle [5] into root node
+0.0076s: 486954768          d0NODE[5p,0ch]: checking if particle 5 is within node
+0.0078s: 486954768          d0NODE[5p,0ch]: inserting particle 5 into this node
+0.0079s: 486954768          d0NODE[6p,0ch]: particle 5 inserted into node
+ 0.008s: 486954320          BHT: inserting particle [6] into root node
+0.0081s: 486954768          d0NODE[6p,0ch]: checking if particle 6 is within node
+0.0082s: 486954768          d0NODE[6p,0ch]: inserting particle 6 into this node
+0.0083s: 486954768          d0NODE[7p,0ch]: particle 6 inserted into node
+0.0084s: 486954320          BHT: inserting particle [7] into root node
+0.0086s: 486954768          d0NODE[7p,0ch]: checking if particle 7 is within node
+0.0087s: 486954768          d0NODE[7p,0ch]: inserting particle 7 into this node
+0.0089s: 486954768          d0NODE[8p,0ch]: particle 7 inserted into node
+ 0.009s: 486954320          BHT: inserting particle [8] into root node
+0.0091s: 486954768          d0NODE[8p,0ch]: checking if particle 8 is within node
+0.0093s: 486954768          d0NODE[8p,0ch]: inserting particle 8 into this node
+0.0095s: 486954768          d0NODE[9p,0ch]: particle 8 inserted into node
+0.0096s: 486954320          BHT: inserting particle [9] into root node
+0.0097s: 486954768          d0NODE[9p,0ch]: checking if particle 9 is within node
+0.0099s: 486954768          d0NODE[9p,0ch]: inserting particle 9 into this node
+  0.01s: 486954768          d0NODE[10p,0ch]: particle 9 inserted into node
+0.0102s: 486954768          d0NODE[10p,0ch]: node split start
+0.0103s: 486954768          d0NODE[10p,0ch]: splitting node...
+0.0106s: 486954768          d0NODE[10p,0ch]: creating child node at [103.8924648   89.06930536 130.28132932] with size 100.6384285393923
+0.0109s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+ 0.011s: 486954768          d0NODE[10p,1ch]: child node created.
+0.0113s: 486954768          d0NODE[10p,1ch]: creating child node at [103.8924648   89.06930536 -70.99552776] with size 100.6384285393923
+0.0118s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0119s: 486954768          d0NODE[10p,2ch]: child node created.
+0.0123s: 486954768          d0NODE[10p,2ch]: creating child node at [ 103.8924648  -112.20755172  130.28132932] with size 100.6384285393923
+0.0127s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0129s: 486954768          d0NODE[10p,3ch]: child node created.
+0.0134s: 486954768          d0NODE[10p,3ch]: creating child node at [ 103.8924648  -112.20755172  -70.99552776] with size 100.6384285393923
+0.0136s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0137s: 486954768          d0NODE[10p,4ch]: child node created.
+0.0139s: 486954768          d0NODE[10p,4ch]: creating child node at [-97.38439228  89.06930536 130.28132932] with size 100.6384285393923
+0.0142s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0143s: 486954768          d0NODE[10p,5ch]: child node created.
+0.0145s: 486954768          d0NODE[10p,5ch]: creating child node at [-97.38439228  89.06930536 -70.99552776] with size 100.6384285393923
+0.0148s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0149s: 486954768          d0NODE[10p,6ch]: child node created.
+0.0151s: 486954768          d0NODE[10p,6ch]: creating child node at [ -97.38439228 -112.20755172  130.28132932] with size 100.6384285393923
+0.0153s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0154s: 486954768          d0NODE[10p,7ch]: child node created.
+ 0.016s: 486954768          d0NODE[10p,7ch]: creating child node at [ -97.38439228 -112.20755172  -70.99552776] with size 100.6384285393923
+0.0165s: 140718331587848    d1NODE[0p,0ch]: created with depth 1: d1Node: pos=[ -97.38439228 -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0167s: 486954768          d0NODE[10p,8ch]: child node created.
+0.0169s: 486954768          d0NODE[10p,8ch]: all children created, beginning redistribution...
+0.0172s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 0 at [15.58316336 52.42560848 93.01971948]
+0.0176s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0178s: 486963088          d1NODE[0p,0ch]: checking if particle 0 is within node
+0.0183s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 0 into child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0185s: 486963088          d1NODE[0p,0ch]: inserting particle 0 into this node
+0.0186s: 486963088          d1NODE[1p,0ch]: particle 0 inserted into node
+0.0187s: 486954768          d0NODE[10p,8ch]: inserting particle 0 into node
+ 0.019s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 1 at [ 94.28513028 -79.06062055  69.32756241]
+0.0192s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=628.3496236167598 [0ch,1p], Leaf=False
+0.0195s: 486963088          d1NODE[1p,0ch]: checking if particle 1 is within node
+  0.02s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0202s: 486963408          d1NODE[0p,0ch]: checking if particle 1 is within node
+0.0205s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0207s: 486963920          d1NODE[0p,0ch]: checking if particle 1 is within node
+0.0211s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 1 into child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False      
+0.0213s: 486963920          d1NODE[0p,0ch]: inserting particle 1 into this node
+0.0214s: 486963920          d1NODE[1p,0ch]: particle 1 inserted into node
+0.0216s: 486954768          d0NODE[10p,8ch]: inserting particle 1 into node
+0.0219s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 2 at [ 4.74396819 43.34514904 37.45362325]
+0.0223s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=628.3496236167598 [0ch,1p], Leaf=False
+0.0224s: 486963088          d1NODE[1p,0ch]: checking if particle 2 is within node
+0.0227s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 2 into child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=628.3496236167598 [0ch,1p], Leaf=False
+0.0229s: 486963088          d1NODE[1p,0ch]: inserting particle 2 into this node
+0.0231s: 486963088          d1NODE[2p,0ch]: particle 2 inserted into node
+0.0232s: 486954768          d0NODE[10p,8ch]: inserting particle 2 into node
+0.0235s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 3 at [-24.89952963  61.45243772  -0.34692051]
+0.0237s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+0.0238s: 486963088          d1NODE[2p,0ch]: checking if particle 3 is within node
+0.0241s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0243s: 486963408          d1NODE[0p,0ch]: checking if particle 3 is within node
+0.0245s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0246s: 486963920          d1NODE[1p,0ch]: checking if particle 3 is within node
+0.0249s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+ 0.025s: 486964240          d1NODE[0p,0ch]: checking if particle 3 is within node
+0.0254s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0255s: 486964624          d1NODE[0p,0ch]: checking if particle 3 is within node
+0.0257s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+ 0.026s: 486965136          d1NODE[0p,0ch]: checking if particle 3 is within node
+0.0264s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 3 into child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0265s: 486965136          d1NODE[0p,0ch]: inserting particle 3 into this node
+0.0266s: 486965136          d1NODE[1p,0ch]: particle 3 inserted into node
+0.0268s: 486954768          d0NODE[10p,8ch]: inserting particle 3 into node
+ 0.027s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 4 at [-13.57443803 -84.46552696 -57.95485009]
+0.0273s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+0.0274s: 486963088          d1NODE[2p,0ch]: checking if particle 4 is within node
+0.0276s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0277s: 486963408          d1NODE[0p,0ch]: checking if particle 4 is within node
+0.0279s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+ 0.028s: 486963920          d1NODE[1p,0ch]: checking if particle 4 is within node
+0.0282s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0283s: 486964240          d1NODE[0p,0ch]: checking if particle 4 is within node
+0.0285s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0287s: 486964624          d1NODE[0p,0ch]: checking if particle 4 is within node
+ 0.029s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.0292s: 486965136          d1NODE[1p,0ch]: checking if particle 4 is within node
+0.0295s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0296s: 486964752          d1NODE[0p,0ch]: checking if particle 4 is within node
+0.0298s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ -97.38439228 -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0299s: 486982480          d1NODE[0p,0ch]: checking if particle 4 is within node
+0.0302s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 4 into child node d1Node: pos=[ -97.38439228 -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False      
+0.0303s: 486982480          d1NODE[0p,0ch]: inserting particle 4 into this node
+0.0304s: 486982480          d1NODE[1p,0ch]: particle 4 inserted into node
+0.0305s: 486954768          d0NODE[10p,8ch]: inserting particle 4 into node
+0.0307s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 5 at [ 30.89983242 -93.50981179  20.97559852]
+0.0309s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+ 0.031s: 486963088          d1NODE[2p,0ch]: checking if particle 5 is within node
+0.0312s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0314s: 486963408          d1NODE[0p,0ch]: checking if particle 5 is within node
+0.0316s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0317s: 486963920          d1NODE[1p,0ch]: checking if particle 5 is within node
+ 0.032s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0322s: 486964240          d1NODE[0p,0ch]: checking if particle 5 is within node
+0.0325s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 5 into child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False      
+0.0327s: 486964240          d1NODE[0p,0ch]: inserting particle 5 into this node
+0.0329s: 486964240          d1NODE[1p,0ch]: particle 5 inserted into node
+0.0331s: 486954768          d0NODE[10p,8ch]: inserting particle 5 into node
+0.0335s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 6 at [ 1.43469323  5.86154043 32.01476903]
+ 0.034s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+0.0342s: 486963088          d1NODE[2p,0ch]: checking if particle 6 is within node
+0.0345s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0346s: 486963408          d1NODE[0p,0ch]: checking if particle 6 is within node
+ 0.035s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0353s: 486963920          d1NODE[1p,0ch]: checking if particle 6 is within node
+0.0356s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=477.4732176380863 [0ch,1p], Leaf=False
+0.0358s: 486964240          d1NODE[1p,0ch]: checking if particle 6 is within node
+0.0364s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0365s: 486964624          d1NODE[0p,0ch]: checking if particle 6 is within node
+0.0368s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 6 into child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0369s: 486964624          d1NODE[0p,0ch]: inserting particle 6 into this node
+0.0371s: 486964624          d1NODE[1p,0ch]: particle 6 inserted into node
+0.0372s: 486954768          d0NODE[10p,8ch]: inserting particle 6 into node
+0.0374s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 7 at [-71.02195312 -45.05560666  34.61283502]
+0.0376s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+0.0377s: 486963088          d1NODE[2p,0ch]: checking if particle 7 is within node
+ 0.038s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0381s: 486963408          d1NODE[0p,0ch]: checking if particle 7 is within node
+0.0384s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0385s: 486963920          d1NODE[1p,0ch]: checking if particle 7 is within node
+0.0387s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=477.4732176380863 [0ch,1p], Leaf=False
+0.0389s: 486964240          d1NODE[1p,0ch]: checking if particle 7 is within node
+0.0391s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=63.58860985562827 [0ch,1p], Leaf=False
+0.0392s: 486964624          d1NODE[1p,0ch]: checking if particle 7 is within node
+0.0394s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.0395s: 486965136          d1NODE[1p,0ch]: checking if particle 7 is within node
+0.0397s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0398s: 486964752          d1NODE[0p,0ch]: checking if particle 7 is within node
+0.0401s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 7 into child node d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False      
+0.0402s: 486964752          d1NODE[0p,0ch]: inserting particle 7 into this node
+0.0403s: 486964752          d1NODE[1p,0ch]: particle 7 inserted into node
+0.0404s: 486954768          d0NODE[10p,8ch]: inserting particle 7 into node
+0.0406s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 8 at [ 92.47388815 -33.76699413  41.95284682]
+0.0409s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+0.0411s: 486963088          d1NODE[2p,0ch]: checking if particle 8 is within node
+0.0414s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0415s: 486963408          d1NODE[0p,0ch]: checking if particle 8 is within node
+0.0417s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0419s: 486963920          d1NODE[1p,0ch]: checking if particle 8 is within node
+0.0421s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 8 into child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0423s: 486963920          d1NODE[1p,0ch]: inserting particle 8 into this node
+0.0424s: 486963920          d1NODE[2p,0ch]: particle 8 inserted into node
+0.0425s: 486954768          d0NODE[10p,8ch]: inserting particle 8 into node
+0.0427s: 486954768          d0NODE[10p,8ch]: searching for node to insert particle 9 at [-97.38439228  57.08259264  25.37382385]
+0.0429s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [0ch,2p], Leaf=False
+ 0.043s: 486963088          d1NODE[2p,0ch]: checking if particle 9 is within node
+0.0432s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[103.8924648   89.06930536 -70.99552776] size=100.6384285393923 mass=0.0 [0ch,0p], Leaf=False
+0.0433s: 486963408          d1NODE[0p,0ch]: checking if particle 9 is within node
+0.0435s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=666.5384072566744 [0ch,2p], Leaf=False
+0.0436s: 486963920          d1NODE[2p,0ch]: checking if particle 9 is within node
+0.0439s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=477.4732176380863 [0ch,1p], Leaf=False
+ 0.044s: 486964240          d1NODE[1p,0ch]: checking if particle 9 is within node
+0.0442s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=63.58860985562827 [0ch,1p], Leaf=False
+0.0443s: 486964624          d1NODE[1p,0ch]: checking if particle 9 is within node
+0.0445s: 486954768          d0NODE[10p,8ch]: testing child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.0446s: 486965136          d1NODE[1p,0ch]: checking if particle 9 is within node
+0.0448s: 486954768          d0NODE[10p,8ch]: child node found. inserting particle 9 into child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=733.2796155903328 [0ch,1p], Leaf=False
+ 0.045s: 486965136          d1NODE[1p,0ch]: inserting particle 9 into this node
+0.0451s: 486965136          d1NODE[2p,0ch]: particle 9 inserted into node
+0.0452s: 486954768          d0NODE[10p,8ch]: inserting particle 9 into node
+0.0453s: 486954768          d0NODE[10p,8ch]: particles redistributed, clearing lists
+0.0454s: 486954768          d0NODE[0p,7ch]: lists cleared, starting child splits
+0.0455s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[2p,0ch] or further splitting:
+0.0456s: 486954768          d0NODE[0p,7ch]: child node d1NODE[2p,0ch] has more than one particle, asking it to split
+0.0457s: 486963088          d1NODE[2p,0ch]: node split start
+0.0458s: 486963088          d1NODE[2p,0ch]: splitting node...
+0.0461s: 486963088          d1NODE[2p,0ch]: creating child node at [154.21167907 139.38851963 180.60054359] with size 50.31921426969615
+0.0464s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.21167907 139.38851963 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0465s: 486963088          d1NODE[2p,1ch]: child node created.
+0.0467s: 486963088          d1NODE[2p,1ch]: creating child node at [154.21167907 139.38851963  79.96211505] with size 50.31921426969615
+0.0469s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.21167907 139.38851963  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.047s: 486963088          d1NODE[2p,2ch]: child node created.
+0.0473s: 486963088          d1NODE[2p,2ch]: creating child node at [154.21167907  38.75009109 180.60054359] with size 50.31921426969615
+0.0475s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.21167907  38.75009109 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0476s: 486963088          d1NODE[2p,3ch]: child node created.
+0.0478s: 486963088          d1NODE[2p,3ch]: creating child node at [154.21167907  38.75009109  79.96211505] with size 50.31921426969615
+ 0.048s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.21167907  38.75009109  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0481s: 486963088          d1NODE[2p,4ch]: child node created.
+0.0483s: 486963088          d1NODE[2p,4ch]: creating child node at [ 53.57325053 139.38851963 180.60054359] with size 50.31921426969615
+0.0485s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57325053 139.38851963 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0486s: 486963088          d1NODE[2p,5ch]: child node created.
+0.0488s: 486963088          d1NODE[2p,5ch]: creating child node at [ 53.57325053 139.38851963  79.96211505] with size 50.31921426969615
+0.0492s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57325053 139.38851963  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0494s: 486963088          d1NODE[2p,6ch]: child node created.
+0.0497s: 486963088          d1NODE[2p,6ch]: creating child node at [ 53.57325053  38.75009109 180.60054359] with size 50.31921426969615
+0.0501s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57325053  38.75009109 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0503s: 486963088          d1NODE[2p,7ch]: child node created.
+0.0507s: 486963088          d1NODE[2p,7ch]: creating child node at [53.57325053 38.75009109 79.96211505] with size 50.31921426969615
+ 0.051s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0512s: 486963088          d1NODE[2p,8ch]: child node created.
+0.0513s: 486963088          d1NODE[2p,8ch]: all children created, beginning redistribution...
+0.0516s: 486963088          d1NODE[2p,8ch]: searching for node to insert particle 0 at [15.58316336 52.42560848 93.01971948]
+0.0519s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 139.38851963 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.052s: 484004752          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0523s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 139.38851963  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0524s: 486992464          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0526s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907  38.75009109 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0529s: 486994832          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0532s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907  38.75009109  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0534s: 486995280          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0536s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 139.38851963 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0537s: 486995728          d2NODE[0p,0ch]: checking if particle 0 is within node
+ 0.054s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 139.38851963  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0541s: 486996304          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0543s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053  38.75009109 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0544s: 486996688          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0547s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0549s: 486997136          d2NODE[0p,0ch]: checking if particle 0 is within node
+0.0551s: 486963088          d1NODE[2p,8ch]: child node found. inserting particle 0 into child node d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0552s: 486997136          d2NODE[0p,0ch]: inserting particle 0 into this node
+0.0553s: 486997136          d2NODE[1p,0ch]: particle 0 inserted into node
+0.0554s: 486963088          d1NODE[2p,8ch]: inserting particle 0 into node
+0.0556s: 486963088          d1NODE[2p,8ch]: searching for node to insert particle 2 at [ 4.74396819 43.34514904 37.45362325]
+0.0559s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 139.38851963 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0561s: 484004752          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0563s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 139.38851963  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0564s: 486992464          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0567s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907  38.75009109 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0569s: 486994832          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0571s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907  38.75009109  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0572s: 486995280          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0574s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 139.38851963 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0576s: 486995728          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0578s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 139.38851963  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0579s: 486996304          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0582s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053  38.75009109 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0583s: 486996688          d2NODE[0p,0ch]: checking if particle 2 is within node
+0.0585s: 486963088          d1NODE[2p,8ch]: testing child node d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=628.3496236167598 [0ch,1p], Leaf=False
+0.0586s: 486997136          d2NODE[1p,0ch]: checking if particle 2 is within node
+ 0.059s: 486963088          d1NODE[2p,8ch]: child node found. inserting particle 2 into child node d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=628.3496236167598 [0ch,1p], Leaf=False
+0.0591s: 486997136          d2NODE[1p,0ch]: inserting particle 2 into this node
+0.0592s: 486997136          d2NODE[2p,0ch]: particle 2 inserted into node
+0.0593s: 486963088          d1NODE[2p,8ch]: inserting particle 2 into node
+0.0595s: 486963088          d1NODE[2p,8ch]: particles redistributed, clearing lists
+0.0596s: 486963088          d1NODE[0p,1ch]: lists cleared, starting child splits
+0.0597s: 486963088          d1NODE[0p,1ch]: querying child node d2NODE[2p,0ch] or further splitting:
+0.0598s: 486963088          d1NODE[0p,1ch]: child node d2NODE[2p,0ch] has more than one particle, asking it to split
+0.0599s: 486997136          d2NODE[2p,0ch]: node split start
+  0.06s: 486997136          d2NODE[2p,0ch]: splitting node...
+0.0602s: 486997136          d2NODE[2p,0ch]: creating child node at [ 78.73285766  63.90969823 105.12172218] with size 25.159607134848073
+0.0605s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73285766  63.90969823 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0606s: 486997136          d2NODE[2p,1ch]: child node created.
+0.0609s: 486997136          d2NODE[2p,1ch]: creating child node at [78.73285766 63.90969823 54.80250791] with size 25.159607134848073
+0.0611s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[78.73285766 63.90969823 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0612s: 486997136          d2NODE[2p,2ch]: child node created.
+0.0615s: 486997136          d2NODE[2p,2ch]: creating child node at [ 78.73285766  13.59048396 105.12172218] with size 25.159607134848073
+0.0617s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73285766  13.59048396 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0618s: 486997136          d2NODE[2p,3ch]: child node created.
+ 0.062s: 486997136          d2NODE[2p,3ch]: creating child node at [78.73285766 13.59048396 54.80250791] with size 25.159607134848073
+0.0623s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[78.73285766 13.59048396 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0624s: 486997136          d2NODE[2p,4ch]: child node created.
+0.0626s: 486997136          d2NODE[2p,4ch]: creating child node at [ 28.41364339  63.90969823 105.12172218] with size 25.159607134848073
+0.0628s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0629s: 486997136          d2NODE[2p,5ch]: child node created.
+0.0631s: 486997136          d2NODE[2p,5ch]: creating child node at [28.41364339 63.90969823 54.80250791] with size 25.159607134848073
+0.0633s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[28.41364339 63.90969823 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0634s: 486997136          d2NODE[2p,6ch]: child node created.
+0.0636s: 486997136          d2NODE[2p,6ch]: creating child node at [ 28.41364339  13.59048396 105.12172218] with size 25.159607134848073
+0.0638s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41364339  13.59048396 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0639s: 486997136          d2NODE[2p,7ch]: child node created.
+0.0641s: 486997136          d2NODE[2p,7ch]: creating child node at [28.41364339 13.59048396 54.80250791] with size 25.159607134848073
+0.0644s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[28.41364339 13.59048396 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0645s: 486997136          d2NODE[2p,8ch]: child node created.
+0.0646s: 486997136          d2NODE[2p,8ch]: all children created, beginning redistribution...
+0.0648s: 486997136          d2NODE[2p,8ch]: searching for node to insert particle 0 at [15.58316336 52.42560848 93.01971948]
+0.0652s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766  63.90969823 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0653s: 486700560          d3NODE[0p,0ch]: checking if particle 0 is within node
+0.0657s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[78.73285766 63.90969823 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0659s: 486995152          d3NODE[0p,0ch]: checking if particle 0 is within node
+0.0663s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766  13.59048396 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0665s: 486996368          d3NODE[0p,0ch]: checking if particle 0 is within node
+0.0668s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[78.73285766 13.59048396 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+ 0.067s: 486996048          d3NODE[0p,0ch]: checking if particle 0 is within node
+0.0673s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0675s: 486992528          d3NODE[0p,0ch]: checking if particle 0 is within node
+0.0678s: 486997136          d2NODE[2p,8ch]: child node found. inserting particle 0 into child node d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0679s: 486992528          d3NODE[0p,0ch]: inserting particle 0 into this node
+0.0681s: 486992528          d3NODE[1p,0ch]: particle 0 inserted into node
+0.0682s: 486997136          d2NODE[2p,8ch]: inserting particle 0 into node
+0.0684s: 486997136          d2NODE[2p,8ch]: searching for node to insert particle 2 at [ 4.74396819 43.34514904 37.45362325]
+0.0687s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766  63.90969823 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0688s: 486700560          d3NODE[0p,0ch]: checking if particle 2 is within node
+ 0.069s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[78.73285766 63.90969823 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0691s: 486995152          d3NODE[0p,0ch]: checking if particle 2 is within node
+0.0694s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766  13.59048396 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0696s: 486996368          d3NODE[0p,0ch]: checking if particle 2 is within node
+0.0698s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[78.73285766 13.59048396 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0699s: 486996048          d3NODE[0p,0ch]: checking if particle 2 is within node
+0.0702s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=628.3496236167598 [0ch,1p], Leaf=False
+0.0703s: 486992528          d3NODE[1p,0ch]: checking if particle 2 is within node
+0.0706s: 486997136          d2NODE[2p,8ch]: testing child node d3Node: pos=[28.41364339 63.90969823 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0707s: 486965072          d3NODE[0p,0ch]: checking if particle 2 is within node
+0.0709s: 486997136          d2NODE[2p,8ch]: child node found. inserting particle 2 into child node d3Node: pos=[28.41364339 63.90969823 54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+ 0.071s: 486965072          d3NODE[0p,0ch]: inserting particle 2 into this node
+0.0711s: 486965072          d3NODE[1p,0ch]: particle 2 inserted into node
+0.0712s: 486997136          d2NODE[2p,8ch]: inserting particle 2 into node
+0.0713s: 486997136          d2NODE[2p,8ch]: particles redistributed, clearing lists
+0.0714s: 486997136          d2NODE[0p,2ch]: lists cleared, starting child splits
+0.0715s: 486997136          d2NODE[0p,2ch]: querying child node d3NODE[1p,0ch] or further splitting:
+0.0718s: 486997136          d2NODE[0p,2ch]: node d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=628.3496236167598 [0ch,1p], Leaf=False is a leaf, updating its attributes
+ 0.072s: 486997136          d2NODE[0p,2ch]: node d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=628.3496236167598 [0ch,1p], Leaf=True is updated
+0.0724s: 486997136          d2NODE[0p,2ch]: adding child node d3Node: pos=[ 28.41364339  63.90969823 105.12172218] size=25.159607134848073 mass=628.3496236167598 [0ch,1p], Leaf=True to tree's list
+0.0725s: 486997136          d2NODE[0p,2ch]: querying child node d3NODE[1p,0ch] or further splitting:
+0.0728s: 486997136          d2NODE[0p,2ch]: node d3Node: pos=[28.41364339 63.90969823 54.80250791] size=25.159607134848073 mass=156.714106171315 [0ch,1p], Leaf=False is a leaf, updating its attributes
+ 0.073s: 486997136          d2NODE[0p,2ch]: node d3Node: pos=[28.41364339 63.90969823 54.80250791] size=25.159607134848073 mass=156.714106171315 [0ch,1p], Leaf=True is updated
+0.0733s: 486997136          d2NODE[0p,2ch]: adding child node d3Node: pos=[28.41364339 63.90969823 54.80250791] size=25.159607134848073 mass=156.714106171315 [0ch,1p], Leaf=True to tree's list
+0.0736s: 486997136          d2NODE[0p,2ch]: node split end
+0.0738s: 486963088          d1NODE[0p,1ch]: child node d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=785.0637297880749 [2ch,0p], Leaf=False finished splitting
+0.0741s: 486963088          d1NODE[0p,1ch]: adding child node d2Node: pos=[53.57325053 38.75009109 79.96211505] size=50.31921426969615 mass=785.0637297880749 [2ch,0p], Leaf=False to tree's list
+0.0742s: 486963088          d1NODE[0p,1ch]: node split end
+0.0745s: 486954768          d0NODE[0p,7ch]: child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [1ch,0p], Leaf=False finished splitting
+0.0747s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[103.8924648   89.06930536 130.28132932] size=100.6384285393923 mass=785.0637297880749 [1ch,0p], Leaf=False to tree's list
+0.0748s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[2p,0ch] or further splitting:
+0.0749s: 486954768          d0NODE[0p,7ch]: child node d1NODE[2p,0ch] has more than one particle, asking it to split
+ 0.075s: 486963920          d1NODE[2p,0ch]: node split start
+0.0751s: 486963920          d1NODE[2p,0ch]: splitting node...
+0.0753s: 486963920          d1NODE[2p,0ch]: creating child node at [154.21167907 -61.88833745 180.60054359] with size 50.31921426969615
+0.0756s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.21167907 -61.88833745 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0757s: 486963920          d1NODE[2p,1ch]: child node created.
+0.0759s: 486963920          d1NODE[2p,1ch]: creating child node at [154.21167907 -61.88833745  79.96211505] with size 50.31921426969615
+0.0761s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[154.21167907 -61.88833745  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0762s: 486963920          d1NODE[2p,2ch]: child node created.
+0.0765s: 486963920          d1NODE[2p,2ch]: creating child node at [ 154.21167907 -162.52676599  180.60054359] with size 50.31921426969615
+0.0768s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 154.21167907 -162.52676599  180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0769s: 486963920          d1NODE[2p,3ch]: child node created.
+0.0771s: 486963920          d1NODE[2p,3ch]: creating child node at [ 154.21167907 -162.52676599   79.96211505] with size 50.31921426969615
+0.0774s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 154.21167907 -162.52676599   79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0774s: 486963920          d1NODE[2p,4ch]: child node created.
+0.0777s: 486963920          d1NODE[2p,4ch]: creating child node at [ 53.57325053 -61.88833745 180.60054359] with size 50.31921426969615
+0.0779s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57325053 -61.88833745 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.078s: 486963920          d1NODE[2p,5ch]: child node created.
+0.0782s: 486963920          d1NODE[2p,5ch]: creating child node at [ 53.57325053 -61.88833745  79.96211505] with size 50.31921426969615
+0.0784s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0785s: 486963920          d1NODE[2p,6ch]: child node created.
+0.0786s: 486963920          d1NODE[2p,6ch]: creating child node at [  53.57325053 -162.52676599  180.60054359] with size 50.31921426969615
+0.0789s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[  53.57325053 -162.52676599  180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.079s: 486963920          d1NODE[2p,7ch]: child node created.
+0.0792s: 486963920          d1NODE[2p,7ch]: creating child node at [  53.57325053 -162.52676599   79.96211505] with size 50.31921426969615
+0.0794s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[  53.57325053 -162.52676599   79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0795s: 486963920          d1NODE[2p,8ch]: child node created.
+0.0795s: 486963920          d1NODE[2p,8ch]: all children created, beginning redistribution...
+0.0798s: 486963920          d1NODE[2p,8ch]: searching for node to insert particle 1 at [ 94.28513028 -79.06062055  69.32756241] 
+0.0802s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 -61.88833745 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0803s: 486995280          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.0806s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 -61.88833745  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0808s: 486995024          d2NODE[0p,0ch]: checking if particle 1 is within node
+ 0.081s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.21167907 -162.52676599  180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0811s: 487003536          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.0814s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.21167907 -162.52676599   79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0815s: 487003984          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.0818s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 -61.88833745 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.082s: 487004432          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.0822s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0824s: 487005008          d2NODE[0p,0ch]: checking if particle 1 is within node
+0.0827s: 486963920          d1NODE[2p,8ch]: child node found. inserting particle 1 into child node d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0828s: 487005008          d2NODE[0p,0ch]: inserting particle 1 into this node
+ 0.083s: 487005008          d2NODE[1p,0ch]: particle 1 inserted into node
+0.0831s: 486963920          d1NODE[2p,8ch]: inserting particle 1 into node
+0.0834s: 486963920          d1NODE[2p,8ch]: searching for node to insert particle 8 at [ 92.47388815 -33.76699413  41.95284682]
+0.0837s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 -61.88833745 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0839s: 486995280          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.0841s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[154.21167907 -61.88833745  79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0843s: 486995024          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.0846s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.21167907 -162.52676599  180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0847s: 487003536          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.0849s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 154.21167907 -162.52676599   79.96211505] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.085s: 487003984          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.0853s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 -61.88833745 180.60054359] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.0854s: 487004432          d2NODE[0p,0ch]: checking if particle 8 is within node
+0.0856s: 486963920          d1NODE[2p,8ch]: testing child node d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0858s: 487005008          d2NODE[1p,0ch]: checking if particle 8 is within node
+0.0862s: 486963920          d1NODE[2p,8ch]: child node found. inserting particle 8 into child node d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=574.9758826856136 [0ch,1p], Leaf=False
+0.0863s: 487005008          d2NODE[1p,0ch]: inserting particle 8 into this node
+0.0864s: 487005008          d2NODE[2p,0ch]: particle 8 inserted into node
+0.0865s: 486963920          d1NODE[2p,8ch]: inserting particle 8 into node
+0.0866s: 486963920          d1NODE[2p,8ch]: particles redistributed, clearing lists
+0.0867s: 486963920          d1NODE[0p,1ch]: lists cleared, starting child splits
+0.0868s: 486963920          d1NODE[0p,1ch]: querying child node d2NODE[2p,0ch] or further splitting:
+0.0869s: 486963920          d1NODE[0p,1ch]: child node d2NODE[2p,0ch] has more than one particle, asking it to split
+ 0.087s: 487005008          d2NODE[2p,0ch]: node split start
+0.0872s: 487005008          d2NODE[2p,0ch]: splitting node...
+0.0874s: 487005008          d2NODE[2p,0ch]: creating child node at [ 78.73285766 -36.72873031 105.12172218] with size 25.159607134848073
+0.0877s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73285766 -36.72873031 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0878s: 487005008          d2NODE[2p,1ch]: child node created.
+ 0.088s: 487005008          d2NODE[2p,1ch]: creating child node at [ 78.73285766 -36.72873031  54.80250791] with size 25.159607134848073
+0.0882s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0883s: 487005008          d2NODE[2p,2ch]: child node created.
+0.0885s: 487005008          d2NODE[2p,2ch]: creating child node at [ 78.73285766 -87.04794458 105.12172218] with size 25.159607134848073
+0.0887s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73285766 -87.04794458 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0888s: 487005008          d2NODE[2p,3ch]: child node created.
+0.0891s: 487005008          d2NODE[2p,3ch]: creating child node at [ 78.73285766 -87.04794458  54.80250791] with size 25.159607134848073
+0.0893s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 78.73285766 -87.04794458  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0893s: 487005008          d2NODE[2p,4ch]: child node created.
+0.0896s: 487005008          d2NODE[2p,4ch]: creating child node at [ 28.41364339 -36.72873031 105.12172218] with size 25.159607134848073
+0.0899s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41364339 -36.72873031 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+  0.09s: 487005008          d2NODE[2p,5ch]: child node created.
+0.0902s: 487005008          d2NODE[2p,5ch]: creating child node at [ 28.41364339 -36.72873031  54.80250791] with size 25.159607134848073
+0.0905s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41364339 -36.72873031  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0906s: 487005008          d2NODE[2p,6ch]: child node created.
+0.0908s: 487005008          d2NODE[2p,6ch]: creating child node at [ 28.41364339 -87.04794458 105.12172218] with size 25.159607134848073
+0.0911s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41364339 -87.04794458 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0912s: 487005008          d2NODE[2p,7ch]: child node created.
+0.0915s: 487005008          d2NODE[2p,7ch]: creating child node at [ 28.41364339 -87.04794458  54.80250791] with size 25.159607134848073
+0.0918s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[ 28.41364339 -87.04794458  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+ 0.092s: 487005008          d2NODE[2p,8ch]: child node created.
+0.0921s: 487005008          d2NODE[2p,8ch]: all children created, beginning redistribution...
+0.0923s: 487005008          d2NODE[2p,8ch]: searching for node to insert particle 1 at [ 94.28513028 -79.06062055  69.32756241]
+0.0926s: 487005008          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766 -36.72873031 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0927s: 476783248          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.0929s: 487005008          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+ 0.093s: 486995280          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.0932s: 487005008          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766 -87.04794458 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0934s: 487004752          d3NODE[0p,0ch]: checking if particle 1 is within node
+0.0936s: 487005008          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766 -87.04794458  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0937s: 487007888          d3NODE[0p,0ch]: checking if particle 1 is within node
+ 0.094s: 487005008          d2NODE[2p,8ch]: child node found. inserting particle 1 into child node d3Node: pos=[ 78.73285766 -87.04794458  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0941s: 487007888          d3NODE[0p,0ch]: inserting particle 1 into this node
+0.0942s: 487007888          d3NODE[1p,0ch]: particle 1 inserted into node
+0.0943s: 487005008          d2NODE[2p,8ch]: inserting particle 1 into node
+0.0945s: 487005008          d2NODE[2p,8ch]: searching for node to insert particle 8 at [ 92.47388815 -33.76699413  41.95284682]
+0.0948s: 487005008          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766 -36.72873031 105.12172218] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0949s: 476783248          d3NODE[0p,0ch]: checking if particle 8 is within node
+0.0953s: 487005008          d2NODE[2p,8ch]: testing child node d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.0955s: 486995280          d3NODE[0p,0ch]: checking if particle 8 is within node
+0.0959s: 487005008          d2NODE[2p,8ch]: child node found. inserting particle 8 into child node d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+ 0.096s: 486995280          d3NODE[0p,0ch]: inserting particle 8 into this node
+0.0962s: 486995280          d3NODE[1p,0ch]: particle 8 inserted into node
+0.0963s: 487005008          d2NODE[2p,8ch]: inserting particle 8 into node
+0.0964s: 487005008          d2NODE[2p,8ch]: particles redistributed, clearing lists
+0.0966s: 487005008          d2NODE[0p,2ch]: lists cleared, starting child splits
+0.0968s: 487005008          d2NODE[0p,2ch]: querying child node d3NODE[1p,0ch] or further splitting:
+ 0.097s: 487005008          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=91.56252457106085 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.0974s: 487005008          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=91.56252457106085 [0ch,1p], Leaf=True is updated
+0.0978s: 487005008          d2NODE[0p,2ch]: adding child node d3Node: pos=[ 78.73285766 -36.72873031  54.80250791] size=25.159607134848073 mass=91.56252457106085 [0ch,1p], Leaf=True to tree's list
+ 0.098s: 487005008          d2NODE[0p,2ch]: querying child node d3NODE[1p,0ch] or further splitting:
+0.0983s: 487005008          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73285766 -87.04794458  54.80250791] size=25.159607134848073 mass=574.9758826856136 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.0987s: 487005008          d2NODE[0p,2ch]: node d3Node: pos=[ 78.73285766 -87.04794458  54.80250791] size=25.159607134848073 mass=574.9758826856136 [0ch,1p], Leaf=True is updated
+ 0.099s: 487005008          d2NODE[0p,2ch]: adding child node d3Node: pos=[ 78.73285766 -87.04794458  54.80250791] size=25.159607134848073 mass=574.9758826856136 [0ch,1p], Leaf=True to tree's list
+0.0993s: 487005008          d2NODE[0p,2ch]: node split end
+0.0998s: 486963920          d1NODE[0p,1ch]: child node d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=666.5384072566744 [2ch,0p], Leaf=False finished splitting
+0.1002s: 486963920          d1NODE[0p,1ch]: adding child node d2Node: pos=[ 53.57325053 -61.88833745  79.96211505] size=50.31921426969615 mass=666.5384072566744 [2ch,0p], Leaf=False to tree's list
+0.1005s: 486963920          d1NODE[0p,1ch]: node split end
+0.1008s: 486954768          d0NODE[0p,7ch]: child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=666.5384072566744 [1ch,0p], Leaf=False finished splitting
+ 0.101s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[ 103.8924648  -112.20755172  130.28132932] size=100.6384285393923 mass=666.5384072566744 [1ch,0p], Leaf=False to tree's list
+0.1012s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[1p,0ch] or further splitting:
+0.1015s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=477.4732176380863 [0ch,1p], Leaf=False is a leaf, updating its attributes        
+0.1017s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=477.4732176380863 [0ch,1p], Leaf=True is updated
+ 0.102s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[ 103.8924648  -112.20755172  -70.99552776] size=100.6384285393923 mass=477.4732176380863 [0ch,1p], Leaf=True to tree's list
+0.1021s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[1p,0ch] or further splitting:
+0.1023s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=63.58860985562827 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.1025s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=63.58860985562827 [0ch,1p], Leaf=True is updated
+0.1029s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[-97.38439228  89.06930536 130.28132932] size=100.6384285393923 mass=63.58860985562827 [0ch,1p], Leaf=True to tree's list
+0.1031s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[2p,0ch] or further splitting:
+0.1032s: 486954768          d0NODE[0p,7ch]: child node d1NODE[2p,0ch] has more than one particle, asking it to split
+0.1034s: 486965136          d1NODE[2p,0ch]: node split start
+0.1035s: 486965136          d1NODE[2p,0ch]: splitting node...
+0.1037s: 486965136          d1NODE[2p,0ch]: creating child node at [-47.06517801 139.38851963 -20.67631349] with size 50.31921426969615
+ 0.104s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-47.06517801 139.38851963 -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1041s: 486965136          d1NODE[2p,1ch]: child node created.
+0.1044s: 486965136          d1NODE[2p,1ch]: creating child node at [ -47.06517801  139.38851963 -121.31474203] with size 50.31921426969615
+0.1047s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ -47.06517801  139.38851963 -121.31474203] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1048s: 486965136          d1NODE[2p,2ch]: child node created.
+ 0.105s: 486965136          d1NODE[2p,2ch]: creating child node at [-47.06517801  38.75009109 -20.67631349] with size 50.31921426969615
+0.1052s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1053s: 486965136          d1NODE[2p,3ch]: child node created.
+0.1055s: 486965136          d1NODE[2p,3ch]: creating child node at [ -47.06517801   38.75009109 -121.31474203] with size 50.31921426969615
+0.1058s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[ -47.06517801   38.75009109 -121.31474203] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1059s: 486965136          d1NODE[2p,4ch]: child node created.
+0.1062s: 486965136          d1NODE[2p,4ch]: creating child node at [-147.70360655  139.38851963  -20.67631349] with size 50.31921426969615
+0.1065s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70360655  139.38851963  -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1066s: 486965136          d1NODE[2p,5ch]: child node created.
+0.1069s: 486965136          d1NODE[2p,5ch]: creating child node at [-147.70360655  139.38851963 -121.31474203] with size 50.31921426969615
+0.1071s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70360655  139.38851963 -121.31474203] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1072s: 486965136          d1NODE[2p,6ch]: child node created.
+0.1074s: 486965136          d1NODE[2p,6ch]: creating child node at [-147.70360655   38.75009109  -20.67631349] with size 50.31921426969615
+0.1077s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70360655   38.75009109  -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1078s: 486965136          d1NODE[2p,7ch]: child node created.
+ 0.108s: 486965136          d1NODE[2p,7ch]: creating child node at [-147.70360655   38.75009109 -121.31474203] with size 50.31921426969615
+0.1082s: 140718331587848    d2NODE[0p,0ch]: created with depth 2: d2Node: pos=[-147.70360655   38.75009109 -121.31474203] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1083s: 486965136          d1NODE[2p,8ch]: child node created.
+0.1084s: 486965136          d1NODE[2p,8ch]: all children created, beginning redistribution...
+0.1086s: 486965136          d1NODE[2p,8ch]: searching for node to insert particle 3 at [-24.89952963  61.45243772  -0.34692051]
+0.1088s: 486965136          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06517801 139.38851963 -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1089s: 486989392          d2NODE[0p,0ch]: checking if particle 3 is within node
+0.1092s: 486965136          d1NODE[2p,8ch]: testing child node d2Node: pos=[ -47.06517801  139.38851963 -121.31474203] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1094s: 486997328          d2NODE[0p,0ch]: checking if particle 3 is within node
+0.1096s: 486965136          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1097s: 487011920          d2NODE[0p,0ch]: checking if particle 3 is within node
+  0.11s: 486965136          d1NODE[2p,8ch]: child node found. inserting particle 3 into child node d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1101s: 487011920          d2NODE[0p,0ch]: inserting particle 3 into this node
+0.1102s: 487011920          d2NODE[1p,0ch]: particle 3 inserted into node
+0.1103s: 486965136          d1NODE[2p,8ch]: inserting particle 3 into node
+0.1106s: 486965136          d1NODE[2p,8ch]: searching for node to insert particle 9 at [-97.38439228  57.08259264  25.37382385] 
+0.1109s: 486965136          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06517801 139.38851963 -20.67631349] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+ 0.111s: 486989392          d2NODE[0p,0ch]: checking if particle 9 is within node
+0.1113s: 486965136          d1NODE[2p,8ch]: testing child node d2Node: pos=[ -47.06517801  139.38851963 -121.31474203] size=50.31921426969615 mass=0.0 [0ch,0p], Leaf=False
+0.1114s: 486997328          d2NODE[0p,0ch]: checking if particle 9 is within node
+0.1117s: 486965136          d1NODE[2p,8ch]: testing child node d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.1119s: 487011920          d2NODE[1p,0ch]: checking if particle 9 is within node
+0.1121s: 486965136          d1NODE[2p,8ch]: child node found. inserting particle 9 into child node d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.1123s: 487011920          d2NODE[1p,0ch]: inserting particle 9 into this node
+0.1124s: 487011920          d2NODE[2p,0ch]: particle 9 inserted into node
+0.1125s: 486965136          d1NODE[2p,8ch]: inserting particle 9 into node
+0.1126s: 486965136          d1NODE[2p,8ch]: particles redistributed, clearing lists
+0.1127s: 486965136          d1NODE[0p,1ch]: lists cleared, starting child splits
+0.1128s: 486965136          d1NODE[0p,1ch]: querying child node d2NODE[2p,0ch] or further splitting:
+0.1129s: 486965136          d1NODE[0p,1ch]: child node d2NODE[2p,0ch] has more than one particle, asking it to split
+ 0.113s: 487011920          d2NODE[2p,0ch]: node split start
+0.1131s: 487011920          d2NODE[2p,0ch]: splitting node...
+0.1133s: 487011920          d2NODE[2p,0ch]: creating child node at [-21.90557088  63.90969823   4.48329364] with size 25.159607134848073
+0.1136s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1137s: 487011920          d2NODE[2p,1ch]: child node created.
+ 0.114s: 487011920          d2NODE[2p,1ch]: creating child node at [-21.90557088  63.90969823 -45.83592063] with size 25.159607134848073
+0.1142s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90557088  63.90969823 -45.83592063] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1143s: 487011920          d2NODE[2p,2ch]: child node created.
+0.1145s: 487011920          d2NODE[2p,2ch]: creating child node at [-21.90557088  13.59048396   4.48329364] with size 25.159607134848073
+0.1147s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90557088  13.59048396   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1148s: 487011920          d2NODE[2p,3ch]: child node created.
+ 0.115s: 487011920          d2NODE[2p,3ch]: creating child node at [-21.90557088  13.59048396 -45.83592063] with size 25.159607134848073
+0.1153s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-21.90557088  13.59048396 -45.83592063] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1154s: 487011920          d2NODE[2p,4ch]: child node created.
+0.1157s: 487011920          d2NODE[2p,4ch]: creating child node at [-72.22478515  63.90969823   4.48329364] with size 25.159607134848073
+ 0.116s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22478515  63.90969823   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1161s: 487011920          d2NODE[2p,5ch]: child node created.
+0.1164s: 487011920          d2NODE[2p,5ch]: creating child node at [-72.22478515  63.90969823 -45.83592063] with size 25.159607134848073
+0.1168s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22478515  63.90969823 -45.83592063] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1169s: 487011920          d2NODE[2p,6ch]: child node created.
+0.1172s: 487011920          d2NODE[2p,6ch]: creating child node at [-72.22478515  13.59048396   4.48329364] with size 25.159607134848073
+0.1175s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22478515  13.59048396   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1177s: 487011920          d2NODE[2p,7ch]: child node created.
+0.1179s: 487011920          d2NODE[2p,7ch]: creating child node at [-72.22478515  13.59048396 -45.83592063] with size 25.159607134848073
+0.1181s: 140718331587848    d3NODE[0p,0ch]: created with depth 3: d3Node: pos=[-72.22478515  13.59048396 -45.83592063] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1182s: 487011920          d2NODE[2p,8ch]: child node created.
+0.1183s: 487011920          d2NODE[2p,8ch]: all children created, beginning redistribution...
+0.1185s: 487011920          d2NODE[2p,8ch]: searching for node to insert particle 3 at [-24.89952963  61.45243772  -0.34692051]
+0.1187s: 487011920          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1188s: 486963152          d3NODE[0p,0ch]: checking if particle 3 is within node
+0.1191s: 487011920          d2NODE[2p,8ch]: child node found. inserting particle 3 into child node d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1192s: 486963152          d3NODE[0p,0ch]: inserting particle 3 into this node
+0.1192s: 486963152          d3NODE[1p,0ch]: particle 3 inserted into node
+0.1193s: 487011920          d2NODE[2p,8ch]: inserting particle 3 into node
+0.1196s: 487011920          d2NODE[2p,8ch]: searching for node to insert particle 9 at [-97.38439228  57.08259264  25.37382385]
+0.1198s: 487011920          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=733.2796155903328 [0ch,1p], Leaf=False
+0.1199s: 486963152          d3NODE[1p,0ch]: checking if particle 9 is within node
+0.1203s: 487011920          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90557088  63.90969823 -45.83592063] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1204s: 486997328          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.1207s: 487011920          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90557088  13.59048396   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1208s: 487004304          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.1211s: 487011920          d2NODE[2p,8ch]: testing child node d3Node: pos=[-21.90557088  13.59048396 -45.83592063] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1212s: 486063376          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.1215s: 487011920          d2NODE[2p,8ch]: testing child node d3Node: pos=[-72.22478515  63.90969823   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+0.1216s: 487011344          d3NODE[0p,0ch]: checking if particle 9 is within node
+0.1219s: 487011920          d2NODE[2p,8ch]: child node found. inserting particle 9 into child node d3Node: pos=[-72.22478515  63.90969823   4.48329364] size=25.159607134848073 mass=0.0 [0ch,0p], Leaf=False
+ 0.122s: 487011344          d3NODE[0p,0ch]: inserting particle 9 into this node
+0.1221s: 487011344          d3NODE[1p,0ch]: particle 9 inserted into node
+0.1222s: 487011920          d2NODE[2p,8ch]: inserting particle 9 into node
+0.1223s: 487011920          d2NODE[2p,8ch]: particles redistributed, clearing lists
+0.1224s: 487011920          d2NODE[0p,2ch]: lists cleared, starting child splits
+0.1225s: 487011920          d2NODE[0p,2ch]: querying child node d3NODE[1p,0ch] or further splitting:
+0.1228s: 487011920          d2NODE[0p,2ch]: node d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=733.2796155903328 [0ch,1p], Leaf=False is a leaf, updating its attributes
+ 0.123s: 487011920          d2NODE[0p,2ch]: node d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=733.2796155903328 [0ch,1p], Leaf=True is updated
+0.1232s: 487011920          d2NODE[0p,2ch]: adding child node d3Node: pos=[-21.90557088  63.90969823   4.48329364] size=25.159607134848073 mass=733.2796155903328 [0ch,1p], Leaf=True to tree's list
+0.1234s: 487011920          d2NODE[0p,2ch]: querying child node d3NODE[1p,0ch] or further splitting:
+0.1236s: 487011920          d2NODE[0p,2ch]: node d3Node: pos=[-72.22478515  63.90969823   4.48329364] size=25.159607134848073 mass=594.7180907114616 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.1239s: 487011920          d2NODE[0p,2ch]: node d3Node: pos=[-72.22478515  63.90969823   4.48329364] size=25.159607134848073 mass=594.7180907114616 [0ch,1p], Leaf=True is updated
+0.1241s: 487011920          d2NODE[0p,2ch]: adding child node d3Node: pos=[-72.22478515  63.90969823   4.48329364] size=25.159607134848073 mass=594.7180907114616 [0ch,1p], Leaf=True to tree's list
+0.1243s: 487011920          d2NODE[0p,2ch]: node split end
+0.1245s: 486965136          d1NODE[0p,1ch]: child node d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=1327.9977063017946 [2ch,0p], Leaf=False finished splitting
+0.1248s: 486965136          d1NODE[0p,1ch]: adding child node d2Node: pos=[-47.06517801  38.75009109 -20.67631349] size=50.31921426969615 mass=1327.9977063017946 [2ch,0p], Leaf=False to tree's list
+ 0.125s: 486965136          d1NODE[0p,1ch]: node split end
+0.1252s: 486954768          d0NODE[0p,7ch]: child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=1327.9977063017946 [1ch,0p], Leaf=False finished splitting
+0.1254s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[-97.38439228  89.06930536 -70.99552776] size=100.6384285393923 mass=1327.9977063017946 [1ch,0p], Leaf=False to tree's list
+0.1255s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[1p,0ch] or further splitting:
+0.1258s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=935.721124521357 [0ch,1p], Leaf=False is a leaf, updating its attributes
+0.1261s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=935.721124521357 [0ch,1p], Leaf=True is updated
+0.1264s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[ -97.38439228 -112.20755172  130.28132932] size=100.6384285393923 mass=935.721124521357 [0ch,1p], Leaf=True to tree's list
+0.1265s: 486954768          d0NODE[0p,7ch]: querying child node d1NODE[1p,0ch] or further splitting:
+0.1268s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[ -97.38439228 -112.20755172  -70.99552776] size=100.6384285393923 mass=737.6443042912094 [0ch,1p], Leaf=False is a leaf, updating its attributes        
+ 0.127s: 486954768          d0NODE[0p,7ch]: node d1Node: pos=[ -97.38439228 -112.20755172  -70.99552776] size=100.6384285393923 mass=737.6443042912094 [0ch,1p], Leaf=True is updated
+0.1273s: 486954768          d0NODE[0p,7ch]: adding child node d1Node: pos=[ -97.38439228 -112.20755172  -70.99552776] size=100.6384285393923 mass=737.6443042912094 [0ch,1p], Leaf=True to tree's list
+0.1278s: 486954768          d0NODE[0p,7ch]: node split end
+0.1279s: 486954320          BHT: tree updated with 17 total nodes
+⟶  d0 Node[7ch,0p], cmass [-12.93253161 -15.72802129  24.9390399 ], Mass:4994.027099652825
+   ⎸⟶  d1 Node[1ch,0p], cmass [13.41944758 50.61297082 81.92763768], Mass:785.0637297880749
+   ⎸   ⎸⟶  d2 Node[2ch,0p], cmass [13.41944758 50.61297082 81.92763768], Mass:785.0637297880749
+   ⎸   ⎸   ⎸⟶  d3 Node[0ch,1p], cmass [15.58316336 52.42560848 93.01971948], Mass:628.3496236167598
+   ⎸   ⎸   ⎸⟶  d3 Node[0ch,1p], cmass [ 4.74396819 43.34514904 37.45362325], Mass:156.714106171315
+   ⎸⟶  d1 Node[1ch,0p], cmass [ 94.03631956 -72.83862533  65.56709183], Mass:666.5384072566744
+   ⎸   ⎸⟶  d2 Node[2ch,0p], cmass [ 94.03631956 -72.83862533  65.56709183], Mass:666.5384072566744
+   ⎸   ⎸   ⎸⟶  d3 Node[0ch,1p], cmass [ 92.47388815 -33.76699413  41.95284682], Mass:91.56252457106085
+   ⎸   ⎸   ⎸⟶  d3 Node[0ch,1p], cmass [ 94.28513028 -79.06062055  69.32756241], Mass:574.9758826856136
+   ⎸⟶  d1 Node[0ch,1p], cmass [ 30.89983242 -93.50981179  20.97559852], Mass:477.4732176380863
+   ⎸⟶  d1 Node[0ch,1p], cmass [ 1.43469323  5.86154043 32.01476903], Mass:63.58860985562827
+   ⎸⟶  d1 Node[1ch,0p], cmass [-57.36047359  59.49548711  11.17161744], Mass:1327.9977063017946
+   ⎸   ⎸⟶  d2 Node[2ch,0p], cmass [-57.36047359  59.49548711  11.17161744], Mass:1327.9977063017946
+   ⎸   ⎸   ⎸⟶  d3 Node[0ch,1p], cmass [-24.89952963  61.45243772  -0.34692051], Mass:733.2796155903328
+   ⎸   ⎸   ⎸⟶  d3 Node[0ch,1p], cmass [-97.38439228  57.08259264  25.37382385], Mass:594.7180907114616
+   ⎸⟶  d1 Node[0ch,1p], cmass [-71.02195312 -45.05560666  34.61283502], Mass:935.721124521357
+   ⎸⟶  d1 Node[0ch,1p], cmass [-13.57443803 -84.46552696 -57.95485009], Mass:737.6443042912094
+0.1315s: 486954320          None...
+0.1316s: 486954320          BHT: init
+0.1317s: 486954128          ENG: init
+0.1319s: 140718331587848    starting update loop
+ 0.132s: 486954128          ENG: update start
+0.1322s: 486954128          ENG: updating particle 0
+0.1327s: 486954128          ENG: updating particle 1
+0.1331s: 486954128          ENG: updating particle 2
+0.1336s: 486954128          ENG: updating particle 3
+ 0.134s: 486954128          ENG: updating particle 4
+0.1343s: 486954128          ENG: updating particle 5
+0.1347s: 486954128          ENG: updating particle 6
+0.1351s: 486954128          ENG: updating particle 7
+0.1354s: 486954128          ENG: updating particle 8
+0.1357s: 486954128          ENG: updating particle 9
+0.1361s: 486954320          BHT: culling nodes start
+0.1408s: 140718331587848    BHT: currently referenced by:[486963264, 486996544, 486999872, 487005184, 487009280, 475578048, 487015936, 486952400, 486952784, 486952912, 486953040, 486953168, 486953424, 486953488, 486953616, 486953744, 486953296, 486954320, 486957312]
