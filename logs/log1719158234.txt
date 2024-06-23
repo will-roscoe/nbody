@@ -1,0 +1,190 @@
+0.0003s: 140718593142024    initializing particles                                                                              
+0.0024s: 140718593142024    particles initialized                                                                               
+ 0.004s: 140718593142024    initializing engine                                                                                 
+0.0056s: 467481936          ENG: init start                                                                                     
+0.0075s: 467481808          BHT: init start                                                                                     
+0.0094s: 467481808          BHT: tree update start                                                                              
+0.0134s: 140718593142024    d0NODE[0p,0ch]: created with depth 0: d0Node: region=[[-97.384 -93.51  -57.955]
+ [ 94.285  61.452  93.02 ]] lengths=[191.67  154.962 150.975] mass=0.0 [0ch,0p], Leaf=False
+0.0162s: 467481808          BHT: root node created: d0Node: region=[[-97.384 -93.51  -57.955]
+ [ 94.285  61.452  93.02 ]] lengths=[191.67  154.962 150.975] mass=0.0 [0ch,0p], Leaf=False, sending to update
+0.0187s: 467481808          BHT: inserting particle [0] into root node                                                          
+ 0.021s: 467482128          d0NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.0232s: 467482128          d0NODE[0p,0ch]: inserting particle 0 into this node                                                 
+0.0253s: 467482128          d0NODE[1p,0ch]: particle 0 inserted into node                                                       
+0.0273s: 467481808          BHT: inserting particle [1] into root node                                                          
+0.0293s: 467482128          d0NODE[1p,0ch]: checking if particle 1 is within node                                               
+0.0313s: 467482128          d0NODE[1p,0ch]: inserting particle 1 into this node                                                 
+0.0333s: 467482128          d0NODE[2p,0ch]: particle 1 inserted into node                                                       
+0.0358s: 467481808          BHT: inserting particle [2] into root node                                                          
+0.0384s: 467482128          d0NODE[2p,0ch]: checking if particle 2 is within node                                               
+0.0406s: 467482128          d0NODE[2p,0ch]: inserting particle 2 into this node                                                 
+0.0426s: 467482128          d0NODE[3p,0ch]: particle 2 inserted into node                                                       
+0.0446s: 467481808          BHT: inserting particle [3] into root node                                                          
+0.0468s: 467482128          d0NODE[3p,0ch]: checking if particle 3 is within node                                               
+0.0489s: 467482128          d0NODE[3p,0ch]: inserting particle 3 into this node                                                 
+0.0511s: 467482128          d0NODE[4p,0ch]: particle 3 inserted into node                                                       
+0.0535s: 467481808          BHT: inserting particle [4] into root node                                                          
+0.0557s: 467482128          d0NODE[4p,0ch]: checking if particle 4 is within node                                               
+0.0579s: 467482128          d0NODE[4p,0ch]: inserting particle 4 into this node                                                 
+0.0601s: 467482128          d0NODE[5p,0ch]: particle 4 inserted into node                                                       
+0.0621s: 467481808          BHT: inserting particle [5] into root node                                                          
+0.0639s: 467482128          d0NODE[5p,0ch]: checking if particle 5 is within node                                               
+ 0.066s: 467482128          d0NODE[5p,0ch]: inserting particle 5 into this node                                                 
+0.0682s: 467482128          d0NODE[6p,0ch]: particle 5 inserted into node                                                       
+0.0705s: 467481808          BHT: inserting particle [6] into root node                                                          
+0.0729s: 467482128          d0NODE[6p,0ch]: checking if particle 6 is within node                                               
+ 0.075s: 467482128          d0NODE[6p,0ch]: inserting particle 6 into this node                                                 
+0.0772s: 467482128          d0NODE[7p,0ch]: particle 6 inserted into node                                                       
+ 0.079s: 467481808          BHT: inserting particle [7] into root node                                                          
+ 0.081s: 467482128          d0NODE[7p,0ch]: checking if particle 7 is within node                                               
+0.0831s: 467482128          d0NODE[7p,0ch]: inserting particle 7 into this node                                                 
+0.0849s: 467482128          d0NODE[8p,0ch]: particle 7 inserted into node                                                       
+0.0871s: 467481808          BHT: inserting particle [8] into root node                                                          
+0.0891s: 467482128          d0NODE[8p,0ch]: checking if particle 8 is within node                                               
+ 0.091s: 467482128          d0NODE[8p,0ch]: inserting particle 8 into this node                                                 
+0.0929s: 467482128          d0NODE[9p,0ch]: particle 8 inserted into node                                                       
+0.0947s: 467481808          BHT: inserting particle [9] into root node                                                          
+0.0965s: 467482128          d0NODE[9p,0ch]: checking if particle 9 is within node                                               
+0.0983s: 467482128          d0NODE[9p,0ch]: inserting particle 9 into this node                                                 
+0.1004s: 467482128          d0NODE[10p,0ch]: particle 9 inserted into node                                                      
+0.1027s: 467482128          d0NODE[10p,0ch]: node split start                                                                   
+0.1049s: 467482128          d0NODE[10p,0ch]: splitting node...                                                                  
+0.1089s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[-49.467 -54.769 -20.211]
+ [-49.467 -54.769  55.276]
+ [-49.467  22.712 -20.211]
+ [-49.467  22.712  55.276]
+ [ 46.368 -54.769 -20.211]
+ [ 46.368 -54.769  55.276]
+ [ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1119s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[-49.467 -54.769  55.276]
+ [-49.467 -54.769 130.763]
+ [-49.467  22.712  55.276]
+ [-49.467  22.712 130.763]
+ [ 46.368 -54.769  55.276]
+ [ 46.368 -54.769 130.763]
+ [ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1146s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[-49.467  22.712 -20.211]
+ [-49.467  22.712  55.276]
+ [-49.467 100.193 -20.211]
+ [-49.467 100.193  55.276]
+ [ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]
+ [ 46.368 100.193 -20.211]
+ [ 46.368 100.193  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1175s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[-49.467  22.712  55.276]
+ [-49.467  22.712 130.763]
+ [-49.467 100.193  55.276]
+ [-49.467 100.193 130.763]
+ [ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]
+ [ 46.368 100.193  55.276]
+ [ 46.368 100.193 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1209s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[ 46.368 -54.769 -20.211]
+ [ 46.368 -54.769  55.276]
+ [ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]
+ [142.203 -54.769 -20.211]
+ [142.203 -54.769  55.276]
+ [142.203  22.712 -20.211]
+ [142.203  22.712  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1241s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[ 46.368 -54.769  55.276]
+ [ 46.368 -54.769 130.763]
+ [ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]
+ [142.203 -54.769  55.276]
+ [142.203 -54.769 130.763]
+ [142.203  22.712  55.276]
+ [142.203  22.712 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+ 0.127s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]
+ [ 46.368 100.193 -20.211]
+ [ 46.368 100.193  55.276]
+ [142.203  22.712 -20.211]
+ [142.203  22.712  55.276]
+ [142.203 100.193 -20.211]
+ [142.203 100.193  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1299s: 140718593142024    d1NODE[0p,0ch]: created with depth 1: d1Node: region=[[ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]
+ [ 46.368 100.193  55.276]
+ [ 46.368 100.193 130.763]
+ [142.203  22.712  55.276]
+ [142.203  22.712 130.763]
+ [142.203 100.193  55.276]
+ [142.203 100.193 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1327s: 467482128          d0NODE[10p,8ch]: all children created, beginning redistribution...                                  
+0.1354s: 467482128          d0NODE[10p,8ch]: searching for node to insert particle 0 at [15.5832 52.4256 93.0197]               
+0.1382s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[-49.467 -54.769 -20.211]
+ [-49.467 -54.769  55.276]
+ [-49.467  22.712 -20.211]
+ [-49.467  22.712  55.276]
+ [ 46.368 -54.769 -20.211]
+ [ 46.368 -54.769  55.276]
+ [ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1412s: 467093776          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1435s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[-49.467 -54.769  55.276]
+ [-49.467 -54.769 130.763]
+ [-49.467  22.712  55.276]
+ [-49.467  22.712 130.763]
+ [ 46.368 -54.769  55.276]
+ [ 46.368 -54.769 130.763]
+ [ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1459s: 467484112          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1479s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[-49.467  22.712 -20.211]
+ [-49.467  22.712  55.276]
+ [-49.467 100.193 -20.211]
+ [-49.467 100.193  55.276]
+ [ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]
+ [ 46.368 100.193 -20.211]
+ [ 46.368 100.193  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1506s: 467484560          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1531s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[-49.467  22.712  55.276]
+ [-49.467  22.712 130.763]
+ [-49.467 100.193  55.276]
+ [-49.467 100.193 130.763]
+ [ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]
+ [ 46.368 100.193  55.276]
+ [ 46.368 100.193 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+ 0.156s: 467484496          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1584s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[ 46.368 -54.769 -20.211]
+ [ 46.368 -54.769  55.276]
+ [ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]
+ [142.203 -54.769 -20.211]
+ [142.203 -54.769  55.276]
+ [142.203  22.712 -20.211]
+ [142.203  22.712  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1608s: 467484048          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1631s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[ 46.368 -54.769  55.276]
+ [ 46.368 -54.769 130.763]
+ [ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]
+ [142.203 -54.769  55.276]
+ [142.203 -54.769 130.763]
+ [142.203  22.712  55.276]
+ [142.203  22.712 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1656s: 467583568          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1682s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[ 46.368  22.712 -20.211]
+ [ 46.368  22.712  55.276]
+ [ 46.368 100.193 -20.211]
+ [ 46.368 100.193  55.276]
+ [142.203  22.712 -20.211]
+ [142.203  22.712  55.276]
+ [142.203 100.193 -20.211]
+ [142.203 100.193  55.276]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1715s: 467583952          d1NODE[0p,0ch]: checking if particle 0 is within node                                               
+0.1741s: 467482128          d0NODE[10p,8ch]: testing child node d1Node: region=[[ 46.368  22.712  55.276]
+ [ 46.368  22.712 130.763]
+ [ 46.368 100.193  55.276]
+ [ 46.368 100.193 130.763]
+ [142.203  22.712  55.276]
+ [142.203  22.712 130.763]
+ [142.203 100.193  55.276]
+ [142.203 100.193 130.763]] lengths=[ 0.     0.    75.487] mass=0.0 [0ch,0p], Leaf=False
+0.1766s: 467586320          d1NODE[0p,0ch]: checking if particle 0 is within node                                               

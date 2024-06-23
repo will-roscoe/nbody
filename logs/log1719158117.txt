@@ -1,0 +1,6 @@
+0.0003s: 140718593142024    initializing particles                                                                              
+0.0024s: 140718593142024    particles initialized                                                                               
+0.0041s: 140718593142024    initializing engine                                                                                 
+0.0057s: 468233360          ENG: init start                                                                                     
+0.0074s: 468233232          BHT: init start                                                                                     
+0.0092s: 468233232          BHT: tree update start                                                                              
