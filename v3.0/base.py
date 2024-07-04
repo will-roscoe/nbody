@@ -156,7 +156,7 @@ class Node:
     
     def dist(self, other: Node) -> np.ndarray: 
         """calculate distance between center of masses of two nodes"""   
-        return np.linalg.vector_norm(self.cmass - other.cmass)
+        return np.linalg.norm(self.cmass - other.cmass)
     
     
     def force_ab(self, trial: Node) -> np.ndarray:
@@ -188,6 +188,7 @@ class Node:
 ##########################################################################################
 
 class BHTree:
+    _off = np.array([0.001,]*3) # adding a small offset to the region to prevent particles from being on the edge of the region, which causes errors in the tree. completely arbitrary value.
     def __init__(self, particles=None) -> None:
         #debug print('BHT: init start')
         self.nodes = self.update(particles)
@@ -196,64 +197,32 @@ class BHTree:
 
 
     def _cull(self) -> None:
-        '''clears all particles from nodes and sets mass to 0'''
-        while self.nodes:
-            node = self.nodes.pop(0)
-            node.mass = 0
-            node.particles = []
-            node.children = []
-            del node
+        '''clears all nodes references'''
+        del self.nodes, self.root
         
         
     def get_new_root(self, particles) -> Node:
         #pos_ = np.array([np.mean(comp) for comp in zip(*[p.pos for p in particles])])
-        _off = np.array([0.1,]*3) # adding a small offset to the region to prevent particles from being on the edge of the region, which causes errors in the tree. completely arbitrary value.
+         
         positions = np.array([p.pos for p in particles])
-        new_region = np.array((np.min(positions, axis=0)-_off,np.max(positions, axis=0)+_off))
+        new_region = np.array((np.min(positions, axis=0)-BHTree._off,np.max(positions, axis=0)+BHTree._off))
         new_root = Node(region=new_region, parent_tree=self) 
-        #debug print(f'BHT: root node created: {str(new_root)}, sending to update')
-        return new_root, new_region
+        return new_root
     
     def insert_particles(self, particles: List[Particle], root_node: Node) -> Node:
         for particle in particles:
-            #debug print(f'BHT: inserting particle [{particle.p_id}] into root node')
             if not root_node.contains(particle):
                raise ValueError("particle is not within root node region before tree initialization.")
             root_node.insert(particle) # insert particles into root node 
         return root_node
     
     
-    def update(self, particles) -> None:
-        #debug print('BHT: tree update start')
-        root, root_region = self.get_new_root(particles)
-        self.root = self.insert_particles(particles, root)
+    def update(self, particles: List[Particle]) -> List[Node]:
+        self.root = self.insert_particles(particles, self.get_new_root(particles))
         self.nodes = [self.root] # nodes list contains list of nodes
         self.root.split() # begin recursive splitting of nodes
-        #debug print(f"BHT: tree updated with {len(self.nodes)} total nodes")
-        #debug #debug print(f"{self.root.treeview()}...")
         return self.nodes
     
-    
-    def vispy_draw(self) -> None:
-        canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
-
-        # Set up a viewbox to display the cube with interactive arcball
-        view = canvas.central_widget.add_view()
-        view.bgcolor = '#efefef'
-        view.camera = 'turntable'
-        view.padding = 100
-
-        color = Color("#3f51b5")
-        queued_nodes = [self.root]
-        while queued_nodes:
-            node = queued_nodes.pop(0)
-            cube = scene.visuals.Box(planes = (0,1,0,1,0,1), color=color, edge_color="black",
-                                parent=view.scene)
-            if not node.is_end:
-                queued_nodes.extend(node.children) 
-        
-        if __name__ == '__main__' and sys.flags.interactive == 0:
-            canvas.app.run()
 
     
 ##########################################################################################
