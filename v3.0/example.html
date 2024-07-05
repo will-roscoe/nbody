@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>example.html</title>
+        <style type="text/css">
+          .end-element { fill : #FFCCFF; }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.17.1/flowchart.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+        <!-- <script src="../release/flowchart.min.js"></script> -->
+        <script>
+
+            window.onload = function () {
+                var btn = document.getElementById("run"),
+                    cd = document.getElementById("code"),
+                    chart;
+                    
+                (btn.onclick = function () {
+                    var code = cd.value;
+
+                    if (chart) {
+                      chart.clean();
+                    }
+
+                    chart = flowchart.parse(code);
+                    chart.drawSVG('canvas', {
+                      'x': 0,
+                      'y': 0,
+                      'line-width': 3,
+                      //'maxWidth': 15,//ensures the flowcharts fits within a certain width
+                      'line-length': 50,
+                      'text-margin': 10,
+                      'font-size': 14,
+                      'font': 'normal',
+                      'font-family': 'Helvetica',
+                      'font-weight': 'normal',
+                      'font-color': 'black',
+                      'line-color': 'black',
+                      'element-color': 'black',
+                      'fill': 'white',
+                      'yes-text': 'yes',
+                      'no-text': 'no',
+                      'arrow-end': 'block',
+                      'scale': 1,
+                      'symbols': {
+                        'start': {
+                          'font-size': 14,
+                          'font-color': 'yellow',
+                          'element-color': 'blue',
+                          'fill': 'green',
+                          'class': 'start-element'
+                        },
+                        'inputoutput': {
+                          'font-color': 'black',
+                          'element-color': 'black',
+                          'fill': 'bisque'
+                        },
+                        'operation': {
+                          'font-color': 'black',
+                          'element-color': 'black',
+                          'fill': 'linen'
+                        },
+                        'subroutine': {
+                          'font-color': 'black',
+                          'element-color': 'blue',
+                          'fill': 'lightgreen'
+                        },
+                        'condition': {
+                          'font-color': 'red',
+                          'element-color': 'black',
+                          'fill': 'yellow'
+                        },
+                        'end':{
+                          'font-size': 20,
+                          'class': 'end-element'
+                        }
+                      },
+                      'flowstate' : {
+                        //'past' : { 'fill' : '#CCCCCC', 'font-size' : 12},
+                        //'current' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold'},
+                        //'future' : { 'fill' : '#FFFF99'},
+                        'request' : { 'fill' : 'blue'},
+                        'invalid': {'fill' : '#444444'},
+                        'approved' : { 'fill' : '#58C4A3', 'font-size' : 12, 'yes-text' : 'APPROVED', 'no-text' : 'n/a' },
+                        'rejected' : { 'fill' : '#C45879', 'font-size' : 12, 'yes-text' : 'n/a', 'no-text' : 'REJECTED' }
+                      }
+                    });
+                    //create base64 encoding of SVG to generate download link for title(without html or htm).SVG
+                    var currentCanvasDIV = document.getElementById('canvas')
+                    var currentDrawSVG = currentCanvasDIV.innerHTML.replaceAll('ë','e');
+
+                    const OUTsvgBASE64 = btoa(currentDrawSVG)
+                    doctitle = document.title.replace('.html','');
+                    doctitle = doctitle.replace('.htm','');
+
+
+                    var currentCanvasDIV = document.getElementById('canvas')
+                    var currentDrawSVG = currentCanvasDIV.innerHTML.replaceAll('ë','e');
+                    svgSource = currentDrawSVG
+                    svgXML = currentDrawSVG;
+                    // Use SVG Height and Width from the SVG XML to set canvas size
+                    svgXMLsubstringHeight = svgXML.substring(svgXML.indexOf('height='), svgXML.indexOf('version='));
+                    svgXMLsubstringWidth = svgXML.substring(svgXML.indexOf('width='), svgXML.indexOf('xmlns='));
+                    HeightValue = svgXMLsubstringHeight.substring(svgXMLsubstringHeight.indexOf('"')+1,svgXMLsubstringHeight.lastIndexOf('"'));
+                    WidthValue = svgXMLsubstringWidth.substring(svgXMLsubstringWidth.indexOf('"')+1,svgXMLsubstringWidth.lastIndexOf('"'));
+                    HeightValueInt = Math.round(HeightValue)
+                    WidthValueInt = Math.round(WidthValue)
+                    // setup input for base64SvgToBase64Png
+                    let svgSrc = "data:image/svg+xml;base64,"+OUTsvgBASE64;
+                    var pngBase
+                    imageUtil.base64SvgToBase64Png(svgSrc, WidthValueInt, HeightValueInt).then(pngSrc => {
+                    pngBase = pngSrc
+                    // output download link for base64 PNG converted on download from base64
+                    var pngOutHtml = `<a href="${pngBase}" download="${doctitle}.png">PNG - Click here to download current rendered flowchart as ${doctitle}.png</a>`
+                    document.getElementById("pngbase64").innerHTML=pngOutHtml;
+                    });    
+                    // output download link for base64 SVG converted on download from base64
+                    var svgOutHtml = `<a href="data:image/svg+xml;base64,${OUTsvgBASE64}" download=${doctitle}.svg>SVG - Click here to download current rendered flowchart as ${doctitle}.svg</a> `
+                        document.getElementById("svgbase64").innerHTML=svgOutHtml;
+                    })();
+
+                            };
+                 
+
+// derived from https://stackoverflow.com/a/64800570
+// we need to use web browser canvas to generate a image. In this case png
+let imageUtil = {};
+/**
+ * converts a base64 encoded data url SVG image to a PNG image
+ * @param originalBase64 data url of svg image
+ * @param width target width in pixel of PNG image
+ * @param secondTry used internally to prevent endless recursion
+ * @return {Promise<unknown>} resolves to png data url of the image
+ */
+imageUtil.base64SvgToBase64Png = function (originalBase64, width, height, secondTry) {
+    return new Promise(resolve => {
+        let img = document.createElement('img');
+        img.onload = function () {
+            if (!secondTry && (img.naturalWidth === 0 || img.naturalHeight === 0)) {
+                let svgDoc = base64ToSvgDocument(originalBase64);
+                let fixedDoc = fixSvgDocumentFF(svgDoc);
+                return imageUtil.base64SvgToBase64Png(svgDocumentToBase64(fixedDoc), width, height, true).then(result => {
+                    resolve(result);
+                });
+            }
+            //document.body.appendChild(img);
+            let canvas2 = document.createElement("canvas");
+            //document.body.removeChild(img);
+            canvas2.width = width;
+            canvas2.height = height;
+            let ctx = canvas2.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas2.width, canvas2.height);
+            try {
+                let data = canvas2.toDataURL('image/png');
+                resolve(data);
+            } catch (e) {
+                resolve(null);
+            }
+        };
+        img.src = originalBase64;
+    });
+}
+
+//needed because Firefox doesn't correctly handle SVG with size = 0, see https://bugzilla.mozilla.org/show_bug.cgi?id=700533
+function fixSvgDocumentFF(svgDocument) {
+    try {
+        let widthInt = parseInt(svgDocument.documentElement.width.baseVal.value) || 500;
+        let heightInt = parseInt(svgDocument.documentElement.height.baseVal.value) || 500;
+        svgDocument.documentElement.width.baseVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX, widthInt);
+        svgDocument.documentElement.height.baseVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX, heightInt);
+        return svgDocument;
+    } catch (e) {
+        return svgDocument;
+    }
+}
+
+function svgDocumentToBase64(svgDocument) {
+    try {
+        let base64EncodedSVG = btoa(new XMLSerializer().serializeToString(svgDocument));
+        return 'data:image/svg+xml;base64,' + base64EncodedSVG;
+    } catch (e) {
+        return null;
+    }
+}
+
+function base64ToSvgDocument(base64) {
+    let svg = atob(base64.substring(base64.indexOf('base64,') + 7));
+    svg = svg.substring(svg.indexOf('<svg'));
+    let parser = new DOMParser();
+    return parser.parseFromString(svg, "image/svg+xml");
+} 
+        </script>
+
+        <script>
+            function HelpText() {
+              var x = document.getElementById("HelpTextBlock");
+              if (x.style.display === "none") {
+                x.style.display = "block";
+              } else {
+                x.style.display = "none";
+              }
+            }
+        </script>
+    </head>
+    <body>
+        <div><textarea id="code" style="width: 100%;" rows="11">op2=>operation: from __future__ import annotations
+op4=>operation: import cProfile
+op6=>operation: import gc
+op8=>operation: import math
+op10=>operation: import itertools
+op12=>operation: import rich.traceback
+sub14=>subroutine: rich.traceback.install()
+op16=>operation: G = 6.6743e-11
+op18=>operation: import sys
+op20=>operation: from typing import Iterable, List, Union, Any
+op22=>operation: import numpy as np
+op24=>operation: import random
+op26=>operation: class Particle():
+
+    def __init__(self, pos: np.ndarray, vel: np.ndarray, mass: float, radius: float, charge: float, color: Union[(str, np.ndarray)]='white'):
+        self.pos = np.array(pos, dtype=float)
+        self.vel = np.array(vel, dtype=float)
+        self.mass = mass
+        self.radius = radius
+        self.charge = charge
+        self.color = color
+        self.node = None
+        self.p_id = 'None'
+        self._pos = np.array(pos, dtype=float)
+        self._vel = np.array(vel, dtype=float)
+        self.has_updates = False
+
+    def update_changes(self, keeprefs=False) -> None:
+        'changes pending values to current values, and resets the flag'
+        if self.has_updates:
+            self.pos = self._pos
+            self.vel = self._vel
+            if (not keeprefs):
+                self.node.particles = []
+                self.node = None
+            self.has_updates = False
+        else:
+            raise ValueError('No updates to apply, but update_changes was called.')
+
+    def __repr__(self) -> str:
+        return f"Particle[{self.p_id}](position={np.round(self.pos, 3)}, velocity={np.round(self.vel, 3)},mass={np.round(self.mass)}), !UP:{int(self.has_updates)}, {f'dR:{int(np.all((self._pos == self.pos)))}, dV:{int(np.all((self._vel == self.vel)))}'}"
+
+    def dist_p2p(self, other: Particle) -> np.ndarray:
+        'calculate distance between center of masses of two nodes'
+        return np.linalg.norm((self.pos - other.pos))
+
+    def force_ab(self, trial: Union[(Particle, Node)]) -> np.ndarray:
+        "calculate force on target node due to trial node using Newton's law of gravitation"
+        return ((((G * self.mass) * trial.mass) / (self.dist(trial) ** 3)) * (self.pos - trial.pos))
+op28=>operation: class Node():
+    iter_map = np.array(list(itertools.product([0, 1], repeat=3)))
+
+    def __init__(self, region: np.ndarray[np.ndarray], mass: float=0.0, depth=0, parent_tree: BHTree=None) -> None:
+        self.particles = []
+        self.is_end = False
+        self.depth = depth
+        self.parent_tree = parent_tree
+        self.children = []
+        self.region = region
+        self.pos = np.mean(self.region, axis=0)
+        self.lengths = (self.region[1] - self.region[0])
+        self.size = np.linalg.norm(self.lengths)
+        self.cmass = self.pos
+        self.mass = mass
+
+    def get_child_regions(self) -> Iterable[np.ndarray]:
+        'generate regions for all 8 children of this node'
+        childlens = ((self.region[1] - self.region[0]) / 2)
+        base_ = np.array((self.region[0], (self.region[0] + childlens)))
+        for n in (childlens * Node.iter_map):
+            (yield (base_ + np.array([n, n])))
+
+    def insert(self, particle: Particle) -> None:
+        "insert particle into node's list of children and update mass of node"
+        self.particles.append(particle)
+        self.mass += particle.mass
+
+    def split(self) -> None:
+        'split node into 8 octants and redistribute particles to children nodes'
+        self.compute_cmass()
+        if (not self.is_end):
+            for region in self.get_child_regions():
+                self.children.append(Node(region=region, depth=(self.depth + 1), parent_tree=self.parent_tree))
+            for particle in self.particles:
+                for child in self.children:
+                    if child.contains(particle):
+                        child.insert(particle)
+                        break
+                else:
+                    raise ValueError(f'particle {particle.p_id} is not within any child node.')
+            self.children = [child for child in self.children if (child.mass > 0)]
+            self.particles = []
+            for child in self.children:
+                if (len(child.particles) > 1):
+                    child.split()
+                else:
+                    child.is_end = True
+                    child.particles[0].node = child
+                    child.cmass = child.particles[0].pos
+                self.parent_tree.nodes.append(child)
+
+    def contains(self, particle: Particle) -> bool:
+        "check if particle is within node's volume"
+        return np.all(np.logical_and((self.region[0] <= particle.pos), (particle.pos <= self.region[1])))
+
+    def compute_cmass(self) -> np.ndarray:
+        'calculate center of mass of node using sum of mass*position / total mass. Does not need to be calculated after intitial particles have been inserted. use self.cmass instead. '
+        self.cmass = (np.sum([*[(p.mass * p.pos) for p in self.particles], *[(p.cmass * p.mass) for p in self.children]], axis=0) / self.mass)
+
+    def dist(self, other: Node) -> np.ndarray:
+        'calculate distance between center of masses of two nodes'
+        return np.linalg.norm((self.cmass - other.cmass))
+
+    def force_ab(self, trial: Node) -> np.ndarray:
+        "calculate force on target node due to trial node using Newton's law of gravitation"
+        return ((((G * self.mass) * trial.mass) / (self.dist(trial) ** 3)) * (self.cmass - trial.cmass))
+
+    def __repr__(self) -> str:
+        return f'{self.desc()}: lengths={np.round(self.lengths, 3)}, mass={np.round(self.mass)}, region={np.round(self.region, 3).tolist()},'
+
+    def __str__(self) -> str:
+        return f'{self.desc()}: region={np.round(self.region, 3).tolist()} lengths={np.round(self.lengths, 3)} mass={round(self.mass, 4)}, Leaf={int(self.is_end)}'
+
+    def desc(self):
+        return f'd{self.depth}NODE[{len(self.particles)}p,{len(self.children)}ch]'
+
+    def treeview(self) -> str:
+        'print tree structure of node and children recursively'
+        bars = ('   ⎸' * self.depth)
+        info = f'⟶  d{self.depth} Node[{len(self.children)}ch,{len(self.particles)}p], Region:{np.round(self.region, 3)}, Mass:{round(self.mass, 4)}'
+        if (not self.is_end):
+            info = (('\x1b[37m\x1b[1m' + info) + '\x1b[37m\x1b[0m')
+        print((bars + info))
+        for c in self.children:
+            c.treeview()
+op30=>operation: class BHTree():
+    _off = np.array(([0.001] * 3))
+
+    def __init__(self, particles=None) -> None:
+        self.nodes = self.update(particles)
+        self.root = self.nodes[0]
+
+    def _cull(self) -> None:
+        'clears all nodes references'
+        del self.nodes, self.root
+
+    def get_new_root(self, particles) -> Node:
+        positions = np.array([p.pos for p in particles])
+        new_region = np.array(((np.min(positions, axis=0) - BHTree._off), (np.max(positions, axis=0) + BHTree._off)))
+        new_root = Node(region=new_region, parent_tree=self)
+        return new_root
+
+    def insert_particles(self, particles: List[Particle], root_node: Node) -> Node:
+        for particle in particles:
+            if (not root_node.contains(particle)):
+                raise ValueError('particle is not within root node region before tree initialization.')
+            root_node.insert(particle)
+        return root_node
+
+    def update(self, particles: List[Particle]) -> List[Node]:
+        self.root = self.insert_particles(particles, self.get_new_root(particles))
+        self.nodes = [self.root]
+        self.root.split()
+        return self.nodes
+op32=>operation: class Engine():
+
+    def __init__(self, particles: List[Particle], dt: float=0.001, theta: float=0.5) -> None:
+        for (i, particle) in enumerate(particles):
+            particle.p_id = i
+        self.particles = particles
+        self.dt = dt
+        self.tree = BHTree(particles)
+        self.theta = theta
+
+    def _compute_update_particle(self, particle: Particle) -> None:
+        particle._pos += (particle.vel * self.dt)
+        particle._vel += ((self.force_on(particle) * self.dt) / particle.mass)
+        particle.has_updates = True
+
+    def update(self) -> None:
+        for particle in self.particles:
+            self._compute_update_particle(particle)
+        self.tree._cull()
+        for particle in self.particles:
+            particle.update_changes()
+        self.tree.update(self.particles)
+
+    def force_on(self, target_particle: Particle) -> np.ndarray:
+        'get the force on a target particle from the tree using the Barnes-Hut algorithm'
+        target = target_particle.node
+        trials = [self.tree.root]
+        candidates = []
+        while trials:
+            trial = trials.pop(0)
+            if (target != trial):
+                if trial.is_end:
+                    candidates.append(trial)
+                elif ((trial.size / trial.dist(target)) < self.theta):
+                    candidates.append(trial)
+                else:
+                    trials.extend(trial.children)
+            else:
+                pass
+        return np.sum([target.force_ab(trial) for trial in candidates], axis=0)
+sub34=>subroutine: print('initializing particles')
+sub36=>subroutine: random.seed(10000)
+op38=>operation: particles_ = [Particle(pos=[random.uniform((- 100), 100) for _ in range(3)], vel=[random.uniform((- 1), 1) for _ in range(3)], mass=random.uniform(1, 1000), radius=random.uniform(0.1, 1), charge=random.uniform((- 1), 1), color=(random.random(), random.random(), random.random())) for _ in range(100)]
+sub40=>subroutine: print('particles initialized')
+cond43=>condition: if (__name__ == '__main__')
+op47=>operation: particles = particles_[:]
+sub49=>subroutine: print('initializing engine')
+op51=>operation: eng = Engine(particles)
+sub53=>subroutine: print('starting update loop')
+cond56=>condition: for _ in range(2)
+sub65=>subroutine: eng.update()
+sub67=>subroutine: print(_)
+
+op2->op4
+op4->op6
+op6->op8
+op8->op10
+op10->op12
+op12->sub14
+sub14->op16
+op16->op18
+op18->op20
+op20->op22
+op22->op24
+op24->op26
+op26->op28
+op28->op30
+op30->op32
+op32->sub34
+sub34->sub36
+sub36->op38
+op38->sub40
+sub40->cond43
+cond43(yes)->op47
+op47->sub49
+sub49->op51
+op51->sub53
+sub53->cond56
+cond56(yes)->sub65
+sub65->sub67
+sub67(left)->cond56
+</textarea></div>
+        <div><button id="run" type="button">Run</button> <button onclick="HelpText()">Format Help</button></div>
+        <div id="HelpTextBlock" style="display:none"><br/>Conditions can also be redirected like cond(yes, bottom) or cond(yes, right)
+... and the other symbols too... like sub1(right)<br/>
+You can also tweak the <b>diagram.drawSVG('diagram', {});</b> script in this file for more changes<br/>
+This is based on <a href="https://github.com/adrai/flowchart.js">flowchart.js on github</a> and <a href="http://flowchart.js.org">http://flowchart.js.org</a> more documentation can be found over there.
+</div><br/><div id="svgbase64"></div>
+        <div id="pngbase64"></div>
+
+        <div id="canvas"></div>
+    </body>
+</html>

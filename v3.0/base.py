@@ -1,5 +1,8 @@
 from __future__ import annotations
 import cProfile
+import re
+
+from numba import jit 
 
 import gc
 import math
@@ -7,8 +10,8 @@ import math
 import itertools
 
 
-import rich.traceback
-rich.traceback.install()
+#import rich.traceback
+#rich.traceback.install()
 
 
 G = 6.67430e-11  # gravitational constant
@@ -18,6 +21,28 @@ from typing import Iterable, List, Union, Any
 import numpy as np
 import random
 
+@jit(nopython=True,cache=True)
+def dist(a: np.ndarray, b: np.ndarray) -> float:
+    """calculate distance between two points"""
+    return np.linalg.norm(a - b)
+
+
+@jit(nopython=True)
+def force_ab(pos1: np.ndarray, pos2: np.ndarray, mass1: np.float64, mass2: np.float64) -> np.ndarray:
+    '''calculate force on target node due to trial node using Newton's law of gravitation'''
+    f = np.clip(G*mass1*mass2/(dist(pos1,pos2)**3)*(pos1-pos2), -10**3, 10**3)
+    return f
+
+@jit(nopython=True)
+def c_o_m(positions:np.ndarray, masses:np.ndarray) -> np.ndarray:
+    total_mass = np.sum(masses, dtype=np.float64)
+    total_pos = np.sum(positions*masses[:,None], axis=0, dtype=np.float64)
+    return total_pos/total_mass
+
+@jit(nopython=True)
+def _contains(pos: np.ndarray, region: np.ndarray) -> bool:
+    '''check if particle is within node's volume by comparing each dimension'''
+    return np.all(np.logical_and(region[0] <= pos, pos <= region[1]))
 
 
 ##########################################################################################
@@ -31,8 +56,8 @@ class Particle:
                  mass: float, radius: float,
                  charge: float, color: Union[str, np.ndarray] = 'white'):
         
-        self.pos = np.array(pos, dtype=float)
-        self.vel = np.array(vel, dtype=float)
+        self.pos = np.array(pos, dtype=np.float64)
+        self.vel = np.array(vel, dtype=np.float64)
         self.mass = mass
         self.radius = radius
         self.charge = charge
@@ -45,9 +70,9 @@ class Particle:
         self.has_updates = False # flag for whether the particles _pos, _vel has been updated by the worker yet. assuming faster than checking if _pos == pos
         #debug print(f'Particle created at {np.round(self.pos,3)}')
         
-
+    
     def update_changes(self,keeprefs=False) -> None:
-        '''changes pending values to current values, and resets the flag'''
+        '''changes pending values to current values, and resets the flag''' 
         if self.has_updates:
             self.pos = self._pos
             self.vel = self._vel
@@ -65,15 +90,14 @@ class Particle:
 
     def dist_p2p(self, other: Particle) -> np.ndarray: 
         """calculate distance between center of masses of two nodes"""
-        return np.linalg.norm(self.pos - other.pos)
+        return dist(self.pos, other.pos)
     
-
-    def force_ab(self, trial: Union[Particle, Node]) -> np.ndarray:
+    def force_ab_p(self, trial: Union[Particle, Node]) -> np.ndarray:
         '''calculate force on target node due to trial node using Newton's law of gravitation'''
-        return G*self.mass*trial.mass/(self.dist(trial)**3)*(self.pos-trial.pos)
+        return force_ab(self.pos, trial.pos, self.mass, trial.mass)
 
-
-
+    def collect_data(self) -> np.ndarray:
+        return self.p_id,self.pos
 
 ##########################################################################################
 #                                       Node class                                       #
@@ -91,12 +115,13 @@ class Node:
         self.children = []
         
         self.region = region # minimum and maximum coordinates of node, defining its volume.
-        self.pos =  np.mean(self.region, axis=0) # center of node
+        self.pos =  np.mean(self.region, axis=0, dtype=np.float64) # center of node
         self.lengths = self.region[1]-self.region[0] # each node is cubic so only need one size value
         self.size = np.linalg.norm(self.lengths) # maximum distance between two vertices of the node
 
         self.cmass = self.pos # center of mass of node (start at center of node for now)
         self.mass = mass # total mass of node, including children
+        
         #debug print(f"{self.desc()}: created with depth {depth}:")
     
     def get_child_regions(self) -> Iterable[np.ndarray]:
@@ -145,23 +170,24 @@ class Node:
 
     def contains(self, particle: Particle) -> bool:
         """check if particle is within node's volume"""
-        return np.all(np.logical_and(self.region[0] <= particle.pos, particle.pos <= self.region[1]))
+        return _contains(particle.pos, self.region)
     # check if particle is within node's volume by comparing each dimension 
     
     
     def compute_cmass(self) -> np.ndarray:
         """calculate center of mass of node using sum of mass*position / total mass. Does not need to be calculated after intitial particles have been inserted. use self.cmass instead. """
-        self.cmass = np.sum([*[p.mass*p.pos for p in self.particles],*[p.cmass*p.mass for p in self.children]], axis=0) / self.mass
+        positions, masses = np.array([p.pos for p in self.particles]), np.array([p.mass for p in self.particles])
+        self.cmass = c_o_m(positions, masses)
     
-    
-    def dist(self, other: Node) -> np.ndarray: 
+
+    def dist_n2n(self, other: Node) -> np.ndarray: 
         """calculate distance between center of masses of two nodes"""   
-        return np.linalg.norm(self.cmass - other.cmass)
+        return dist(self.cmass, other.cmass)
     
     
-    def force_ab(self, trial: Node) -> np.ndarray:
+    def force_ab_n(self, trial: Node) -> np.ndarray:
         '''calculate force on target node due to trial node using Newton's law of gravitation'''
-        return G*self.mass*trial.mass/(self.dist(trial)**3)*(self.cmass-trial.cmass)
+        return force_ab(self.cmass, trial.cmass, self.mass, trial.mass)
 
     
     # ----- Debugging methods -----
@@ -190,9 +216,7 @@ class Node:
 class BHTree:
     _off = np.array([0.001,]*3) # adding a small offset to the region to prevent particles from being on the edge of the region, which causes errors in the tree. completely arbitrary value.
     def __init__(self, particles=None) -> None:
-        #debug print('BHT: init start')
         self.nodes = self.update(particles)
-        #debug print('BHT: init')
         self.root = self.nodes[0]
 
 
@@ -201,9 +225,7 @@ class BHTree:
         del self.nodes, self.root
         
         
-    def get_new_root(self, particles) -> Node:
-        #pos_ = np.array([np.mean(comp) for comp in zip(*[p.pos for p in particles])])
-         
+    def get_new_root(self, particles: List[Particle]) -> Node:
         positions = np.array([p.pos for p in particles])
         new_region = np.array((np.min(positions, axis=0)-BHTree._off,np.max(positions, axis=0)+BHTree._off))
         new_root = Node(region=new_region, parent_tree=self) 
@@ -223,14 +245,30 @@ class BHTree:
         self.root.split() # begin recursive splitting of nodes
         return self.nodes
     
+##########################################################################################
+#                                      ParticleArtist class                              #
+########################################################################################## 
 
+class DataCollector:
+    def __init__(self, engine: Engine) -> None:
+        self.engine = engine
+        self.particles = engine.particles
+        self.data = {p.p_id:np.array(p.pos, ndmin=2) for p in self.particles}
     
+    def collect_data(self) -> None:
+        next_data = [p.collect_data() for p in self.particles]
+        for i,pos in next_data:
+            self.data[i] = np.vstack((self.data[i],pos))
+
+
+
+  
 ##########################################################################################
 #                                      Engine class                                      #
 ########################################################################################## 
 
 class Engine:
-    def __init__(self, particles: List[Particle], dt: float = 1e-3, theta: float=0.5) -> None:
+    def __init__(self, particles: List[Particle], dt: float = 1e-3, theta: float=0.5, recorder=DataCollector) -> None:
         #debug print('ENG: init start')
         for i, particle in enumerate(particles):
             particle.p_id = i
@@ -238,30 +276,25 @@ class Engine:
         self.dt = dt
         self.tree = BHTree(particles)
         self.theta = theta
-        #debug print('ENG: init')
-    
-    def _compute_update_particle(self, particle: Particle) -> None:
-        #debug print(f'ENG: updating particle {particle.p_id}')
-        particle._pos += particle.vel * self.dt
-        particle._vel +=  self.force_on(particle) * self.dt / particle.mass
-        particle.has_updates = True
-
-    def update(self) -> None:
-        #debug print('ENG: update start')
+        self._data = recorder(self)
         
+    def update(self) -> None:
+        self._data.collect_data()
         for particle in self.particles:
-            self._compute_update_particle(particle)
+            particle._pos += particle.vel * self.dt
+            particle._vel +=  self.force_on(particle) * self.dt / particle.mass
+            particle.has_updates = True
+
         self.tree._cull()
         for particle in self.particles:
-            #debug print(f'ENG: updating live values of {particle.p_id}')
             particle.update_changes()
         self.tree.update(self.particles)
-        #debug print('ENG: update success')
+
     
     #?####################################################################################
     #?                               Barnes-Hut algorithm part                          ##
     #?####################################################################################
-    
+    #@jit(forceobj=True)
     def force_on(self, target_particle:Particle) -> np.ndarray:
         '''get the force on a target particle from the tree using the Barnes-Hut algorithm'''
         target = target_particle.node
@@ -273,41 +306,87 @@ class Engine:
                 if trial.is_end: # if it is leaf node, calculate force
                     candidates.append(trial)
                 else:
-                    if  trial.size/trial.dist(target) < self.theta: # if condition is met for branch node, add to list
+                    if  trial.size/trial.dist_n2n(target) < self.theta: # if condition is met for branch node, add to list
                         candidates.append(trial)
                     else: # otherwise add children to trials
                         trials.extend(trial.children)
             else: # throw away if none of the above conditions are met
                 pass       
-        return np.sum([target.force_ab(trial) for trial in candidates], axis=0)
+        return np.sum([target.force_ab_n(trial) for trial in candidates], axis=0)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ##########################################################################################
 #                                           Main                                         #
 ########################################################################################## 
 
+def main():
+    # create some particles
 
-# create some particles
+    print('initializing particles')
+    random.seed(10000)
+    particles_ = [
+        Particle(
+            pos=[random.uniform(-100, 100) for _ in range(3)],  # random position
+            vel=[random.uniform(-100, 100) for _ in range(3)],  # random velocity
+            mass=random.uniform(30, 1000),  # random mass
+            radius=random.uniform(0.1, 1),  # random radius
+            charge=random.uniform(-1, 1),  # random charge
+            color=(random.random(), random.random(), random.random())  # random color
+        ) 
+        for _ in range(10)
+    ]
+    
+    if __name__ == '__main__':
+        particles = [Particle(pos=[1,0,0], vel=[1,0,0], mass=100, radius=1, charge=0, color='red'),
+                     Particle(pos=[-1,0,0], vel=[-1,0,0], mass=100, radius=1, charge=0, color='blue')]
+        eng = Engine(particles, dt=0.1)
+        for _ in range(1000):
+            eng.update()
+            print(_)
+        print(eng._data.data)
+        import matplotlib.pyplot as plt
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        plt.style.use('dark_background')
+        for d in eng._data.data.values():
+            ax.plot(*d.T)
+        plt.show()
+main()
 
-print('initializing particles')
-random.seed(10000)
-particles_ = [
-    Particle(
-        pos=[random.uniform(-100, 100) for _ in range(3)],  # random position
-        vel=[random.uniform(-1, 1) for _ in range(3)],  # random velocity
-        mass=random.uniform(1, 1000),  # random mass
-        radius=random.uniform(0.1, 1),  # random radius
-        charge=random.uniform(-1, 1),  # random charge
-        color=(random.random(), random.random(), random.random())  # random color
-    ) 
-    for _ in range(1000)
-]
-print('particles initialized')
-if __name__ == '__main__':
-    particles = particles_[:]
-    print('initializing engine')
-    eng = Engine(particles)
-    print('starting update loop')
-    for _ in range(100):
-        eng.update()
-        print(_)
+
+
+
